@@ -1,4 +1,3 @@
-// Usando o padrão de segurança do Vite para Cloudflare
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
 const BASE_URL = 'https://api.themoviedb.org/3';
 

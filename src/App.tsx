@@ -17,15 +17,57 @@ const CATEGORIAS_INICIAIS = [
     { 
       id: 301, 
       titulo: "Lord News 24h", 
-      nota: "9.0", 
+      nota: "9.8", 
       idade: "L", 
       kids: false, 
-      ano: "2026",
+      ano: "LIVE",
       duracao: "Ao Vivo",
-      diretor: "LordFlix",
-      resumo: "Notícias em tempo real com qualidade 4K.",
-      img: "https://image.tmdb.org/t/p/w500/p9v9v9v9v9v9v9v9v9v9v9v9v9v.jpg", 
-      bg: "https://image.tmdb.org/t/p/original/p9v9v9v9v9v9v9v9v9v9v9v9v9v.jpg",
+      diretor: "LordFlix Global",
+      resumo: "Cobertura global em tempo real. A notícia onde ela acontece, com a clareza do 4K.",
+      img: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop", 
+      bg: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop",
+      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
+    },
+    { 
+      id: 302, 
+      titulo: "Lord Sports Ultra", 
+      nota: "9.9", 
+      idade: "L", 
+      kids: false, 
+      ano: "LIVE",
+      duracao: "Ao Vivo",
+      diretor: "LordFlix Sports",
+      resumo: "O ápice do esporte mundial. Sinta a adrenalina de cada jogada em HDR10+.",
+      img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop", 
+      bg: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
+      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
+    },
+    { 
+      id: 303, 
+      titulo: "Lord Cinema One", 
+      nota: "9.5", 
+      idade: "14", 
+      kids: false, 
+      ano: "LIVE",
+      duracao: "Ao Vivo",
+      diretor: "LordFlix Studios",
+      resumo: "Estreias exclusivas e clássicos remasterizados em loop infinito de perfeição.",
+      img: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop", 
+      bg: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
+      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
+    },
+    { 
+      id: 304, 
+      titulo: "Lord Nature 4K", 
+      nota: "9.7", 
+      idade: "L", 
+      kids: true, 
+      ano: "LIVE",
+      duracao: "Ao Vivo",
+      diretor: "LordFlix Earth",
+      resumo: "A beleza crua do planeta Terra capturada com tecnologia de ponta.",
+      img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop", 
+      bg: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop",
       src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
     }
   ]}
@@ -60,6 +102,7 @@ interface MoviePosterProps {
 
 const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   return (
     <motion.div 
@@ -67,33 +110,65 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
       className={`movie-poster-container w-full aspect-[2/3] cursor-pointer group ${type === 'release' ? 'release-glow' : ''}`}
       onClick={onClick}
     >
-      {!isLoaded && (
+      {(!isLoaded && !hasError) && (
         <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
           <div className="w-12 h-12 rounded-full border-2 border-white/5 border-t-cyan-500 animate-spin"></div>
         </div>
       )}
-      <img 
-        src={filme.img} 
-        alt={`Poster oficial do filme ${filme.titulo} - Qualidade Ultra HD`} 
-        className={`movie-poster-img ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'noir-treatment' : ''}`}
-        referrerPolicy="no-referrer"
-        loading="lazy"
-        onLoad={() => setIsLoaded(true)}
-      />
+      
+      {hasError ? (
+        <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <span className="text-gold font-black text-xl">!</span>
+          </div>
+          <p className="text-[8px] font-black uppercase tracking-widest text-silver/40">Sinal Indisponível</p>
+        </div>
+      ) : (
+        <img 
+          src={filme.img} 
+          alt={`Poster oficial do filme ${filme.titulo} - Qualidade Ultra HD`} 
+          className={`movie-poster-img ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'noir-treatment' : ''}`}
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(true);
+          }}
+        />
+      )}
       <div className="vignette-layer"></div>
       
       {/* Overlay de PNL + CTA */}
       <div className="glass-pnl-overlay">
-        <div className="flex gap-2 mb-3">
-          <span className="glass-tag">{filme.ano}</span>
-          <span className="glass-tag text-cyan-400 border-cyan-400/30">4K</span>
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex gap-2">
+            <span className="glass-tag">{filme.ano}</span>
+            <span className="glass-tag text-cyan-400 border-cyan-400/30">4K</span>
+          </div>
+          {filme.ano === 'LIVE' && (
+            <div className="flex items-center gap-1.5 bg-cyan-500/20 px-2 py-0.5 rounded-sm border border-cyan-500/30">
+              <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
+              <span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">Live</span>
+            </div>
+          )}
         </div>
         <h3 className="pnl-title">{filme.titulo}</h3>
+        {filme.ano === 'LIVE' && (
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className={`w-0.5 h-2 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/10'}`}></div>
+              ))}
+            </div>
+            <span className="text-[7px] font-black text-silver/40 uppercase tracking-widest">Signal: Stable</span>
+          </div>
+        )}
         <p className="pnl-description line-clamp-2">
           {filme.resumo || "Uma obra-prima cinematográfica que redefine o gênero."}
         </p>
         <button className="cta-supreme-mini hover:bg-cyan-500">
-          Assistir Agora
+          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : 'Assistir Agora'}
         </button>
       </div>
     </motion.div>
@@ -189,6 +264,10 @@ export default function LordFlixSupreme() {
   })).filter(cat => cat.filmes.length > 0);
 
   const handleAssistir = async (filme: any) => {
+    if (filme.ano === 'LIVE') {
+      setFilmeEmReproducao(filme);
+      return;
+    }
     try {
       const videos = await getVideos(filme.id, filme.media_type || "movie");
       const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
@@ -205,6 +284,7 @@ export default function LordFlixSupreme() {
 
   const handleFilmeSelecionado = async (filme: any) => {
     setFilmeSelecionado(filme);
+    if (filme.ano === 'LIVE') return;
     try {
       const videos = await getVideos(filme.id, filme.media_type || "movie");
       const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
@@ -583,36 +663,43 @@ export default function LordFlixSupreme() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categorias[1].filmes.slice(0, 4).map((item) => (
+            {categorias[3].filmes.slice(0, 4).map((item) => (
               <div 
                 key={`tv-guide-${item.id}`} 
                 onClick={() => handleFilmeSelecionado(item)}
-                className="group relative bg-zinc-900 border-b border-gold/20 hover:border-gold transition-all cursor-pointer rounded-xl overflow-hidden"
+                className="group relative bg-zinc-900 border-b border-cyan-500/20 hover:border-cyan-500 transition-all cursor-pointer rounded-xl overflow-hidden"
               >
-                <div className="aspect-video overflow-hidden">
+                <div className="aspect-video overflow-hidden relative">
                   <img 
                     src={item.bg || item.img} 
                     alt={item.titulo} 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                     referrerPolicy="no-referrer"
                   />
+                  <div className="absolute top-4 left-4">
+                    <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                      <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
+                      <span className="text-[8px] font-black text-white uppercase tracking-widest">On Air</span>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-black bg-gold text-black px-2 py-0.5 uppercase">
-                      Premium TV
+                    <span className="text-[10px] font-black bg-cyan-500 text-black px-2 py-0.5 uppercase">
+                      Lord Broadcast
                     </span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
-                      <span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">Live</span>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className={`w-0.5 h-2 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/10'}`}></div>
+                      ))}
                     </div>
                   </div>
-                  <h3 className="text-white font-bold text-lg truncate">
+                  <h3 className="text-white font-bold text-lg truncate group-hover:text-cyan-500 transition-colors">
                     {item.titulo}
                   </h3>
                   <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-2">
-                    {item.ano} • Sci-Fi Series
+                    {item.ano} • {item.titulo.includes('Sports') ? 'Sports Network' : item.titulo.includes('News') ? 'Global News' : 'Premium Content'}
                   </p>
                 </div>
               </div>
@@ -734,7 +821,7 @@ export default function LordFlixSupreme() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-32 gap-10">
             <div className="max-w-3xl">
               <h2 className="text-6xl md:text-9xl font-display font-black uppercase italic tracking-tighter leading-[0.85] mb-8">
-                O Domínio <br/> <span className="text-cyan-500">Absoluto</span>
+                <span className="text-aluminum">O Domínio</span> <br/> <span className="text-cyan-500">Absoluto</span>
               </h2>
               <p className="text-silver/40 text-xl md:text-2xl font-light leading-relaxed">
                 Não entregamos apenas pixels. Entregamos autoridade cinematográfica. Uma infraestrutura invisível desenhada para quem não aceita nada menos que a perfeição.
@@ -849,7 +936,7 @@ export default function LordFlixSupreme() {
       <section className="py-40 px-8 bg-[#050505] relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-display font-black uppercase italic tracking-tighter mb-8">
-            Faça Parte da <span className="text-gold">Elite</span>
+            <span className="text-aluminum">Faça Parte da</span> <span className="text-gold">Elite</span>
           </h2>
           <p className="text-silver/40 uppercase tracking-[0.3em] text-[10px] font-bold mb-12">
             Receba as estreias exclusivas e atualizações de rede direto no seu e-mail.
@@ -875,7 +962,7 @@ export default function LordFlixSupreme() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-20 mb-40">
             <div className="md:col-span-6">
               <span className="text-6xl md:text-8xl font-display font-black italic tracking-tighter mb-12 block leading-none">
-                <span className="text-white/20">LORD</span>
+                <span className="text-aluminum">LORD</span>
                 <span className="text-cyan-500">FLIX</span>
               </span>
               <p className="text-silver/40 text-xl md:text-2xl max-w-2xl leading-relaxed font-light mb-16">

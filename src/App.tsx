@@ -263,23 +263,18 @@ export default function LordFlixSupreme() {
     })
   })).filter(cat => cat.filmes.length > 0);
 
+  // --- LÓGICA DE CINEMA REAL (EDITADO POR GEMINI) ---
   const handleAssistir = async (filme: any) => {
     if (filme.ano === 'LIVE') {
       setFilmeEmReproducao(filme);
       return;
     }
-    try {
-      const videos = await getVideos(filme.id, filme.media_type || "movie");
-      const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
-      const src = trailer 
-        ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
-        : filme.src;
-      
-      setFilmeEmReproducao({ ...filme, src });
-    } catch (error) {
-      console.error("Erro ao carregar vídeo:", error);
-      setFilmeEmReproducao(filme);
-    }
+    
+    // Injeta o player de filmes completos via ID do TMDB
+    const type = filme.media_type === 'tv' ? 'tv' : 'movie';
+    const cinemaSrc = `https://vidsrc.to/embed/${type}/${filme.id}`;
+    
+    setFilmeEmReproducao({ ...filme, src: cinemaSrc });
   };
 
   const handleFilmeSelecionado = async (filme: any) => {

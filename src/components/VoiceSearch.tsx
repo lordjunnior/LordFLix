@@ -41,16 +41,11 @@ export const VoiceSearch = ({ onResult }: { onResult: (text: string) => void }) 
   return (
     <button 
       onClick={startListening}
-      className={`voice-search-trigger transition-all duration-300 flex items-center justify-center ${isListening ? 'text-cyan-500 scale-110' : 'text-silver opacity-40 hover:opacity-100'}`}
-      title={isListening ? "Ouvindo..." : "Clique para falar o nome do filme"}
+      className={`voice-search-trigger transition-all duration-300 flex items-center justify-center gap-2 ${isListening ? 'text-cyan-500 scale-110' : 'text-silver/40 hover:text-white'}`}
+      title={isListening ? "Ouvindo..." : "Busca por Voz"}
     >
-      {isListening ? (
-        <span className="text-[10px] font-black uppercase tracking-tighter animate-pulse">Ouvindo</span>
-      ) : (
-        <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20">
-          <img src="https://picsum.photos/seed/mic/40/40" alt="Mic" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
-        </div>
-      )}
+      <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-cyan-500 animate-ping' : 'bg-current'}`}></div>
+      <span className="text-[10px] font-black uppercase tracking-widest">Voz</span>
     </button>
   );
 };

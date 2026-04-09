@@ -33,60 +33,72 @@ export default function NossaRede({ onBack }: { onBack: () => void }) {
           </h1>
         </motion.div>
         
-        <div className="space-y-16">
+        <div className="space-y-32">
           <motion.section 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="group"
+            className="group relative h-[600px] rounded-[60px] overflow-hidden border border-white/5"
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 group-hover:border-cyan-500/30 transition-all">
-                <img src="https://picsum.photos/seed/network/200/200" alt="Rede" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" referrerPolicy="no-referrer" />
-              </div>
-              <h2 className="text-3xl font-black uppercase italic">Sistema de Mutirão (P2P)</h2>
+            <img 
+              src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop" 
+              alt="Global Infrastructure" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0" 
+              referrerPolicy="no-referrer" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+            <div className="absolute inset-y-0 left-0 p-16 flex flex-col justify-center z-20">
+              <span className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.6em] mb-6 block">Engenharia de Rede</span>
+              <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-8 leading-none">Infraestrutura <br/> Global</h2>
+              <p className="text-silver/50 text-xl leading-relaxed font-light max-w-xl">
+                Nossa rede foi desenhada para alta performance. Utilizamos servidores estrategicamente localizados para garantir que o streaming seja fluido e instantâneo, independente de quantos usuários estejam conectados simultaneamente.
+              </p>
             </div>
-            <p className="text-silver/50 text-xl leading-relaxed font-medium">
-              Diferente de outros sites que ficam lentos quando muita gente usa, o LordFlix funciona como um mutirão. Quanto mais pessoas assistem, mais pontos de entrega criamos, garantindo que o filme nunca trave, mesmo em conexões simples.
-            </p>
           </motion.section>
 
           <motion.section 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/5 p-10 rounded-[40px] border-l-8 border-cyan-500 shadow-2xl"
+            className="group relative h-[600px] rounded-[60px] overflow-hidden border border-white/5"
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10">
-                <img src="https://picsum.photos/seed/shield/200/200" alt="Segurança" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
-              </div>
-              <h2 className="text-3xl font-black uppercase italic">Privacidade Titanium</h2>
+            <img 
+              src="https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop" 
+              alt="Private Experience" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0" 
+              referrerPolicy="no-referrer" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-l from-black via-black/60 to-transparent"></div>
+            <div className="absolute inset-y-0 right-0 p-16 flex flex-col justify-center items-end text-right z-20">
+              <span className="text-gold text-[10px] font-black uppercase tracking-[0.6em] mb-6 block">Privacidade Absoluta</span>
+              <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-8 leading-none">Experiência <br/> Privada</h2>
+              <p className="text-silver/50 text-xl leading-relaxed font-light max-w-xl">
+                Sua navegação é simples e direta. Valorizamos sua liberdade e focamos no que realmente importa: entregar o melhor conteúdo sem interrupções ou rastreamento desnecessário. Assista com tranquilidade.
+              </p>
             </div>
-            <p className="text-silver/50 text-xl leading-relaxed font-medium">
-              Usamos criptografia de ponta (AES-256). Isso significa que nem nós, nem ninguém, consegue ver o que você está assistindo. Seus dados são triturados e protegidos por uma chave digital única.
-            </p>
           </motion.section>
 
           <motion.section 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="grid md:grid-cols-2 gap-8"
           >
-            <div className="glass-panel p-8 rounded-3xl border-white/5">
-              <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 mb-4">
-                <img src="https://picsum.photos/seed/speed/100/100" alt="Velocidade" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+            <div className="relative h-[400px] rounded-[40px] overflow-hidden group border border-white/5">
+              <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop" alt="4K" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" referrerPolicy="no-referrer" />
+              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition-all"></div>
+              <div className="absolute bottom-0 left-0 p-10">
+                <h3 className="text-3xl font-black uppercase italic mb-2">Transmissão 4K</h3>
+                <p className="text-silver/40 text-sm">Otimizado para resoluções extremas sem perda de qualidade.</p>
               </div>
-              <h3 className="text-xl font-black uppercase italic mb-2">Transmissão 4K</h3>
-              <p className="text-silver/40 text-sm">Otimizado para resoluções extremas sem perda de qualidade.</p>
             </div>
-            <div className="glass-panel p-8 rounded-3xl border-white/5">
-              <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 mb-4">
-                <img src="https://picsum.photos/seed/global/100/100" alt="Global" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+            <div className="relative h-[400px] rounded-[40px] overflow-hidden group border border-white/5">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1968&auto=format&fit=crop" alt="Global" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" referrerPolicy="no-referrer" />
+              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition-all"></div>
+              <div className="absolute bottom-0 left-0 p-10">
+                <h3 className="text-3xl font-black uppercase italic mb-2">Rede Global</h3>
+                <p className="text-silver/40 text-sm">Servidores espalhados por todo o Brasil para menor latência.</p>
               </div>
-              <h3 className="text-xl font-black uppercase italic mb-2">Rede Global</h3>
-              <p className="text-silver/40 text-sm">Servidores espalhados por todo o Brasil para menor latência.</p>
             </div>
           </motion.section>
         </div>

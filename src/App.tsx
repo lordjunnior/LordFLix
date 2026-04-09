@@ -426,7 +426,7 @@ export default function LordFlixSupreme() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent z-10"></div>
         </div>
 
-        {/* 3. O CONTEÚDO (Trio da Blindagem: CTA + SEO + PNL) */}
+        {/* 3. O CONTEÚDO (Trio de Experiência: CTA + SEO + PNL) */}
         <div className="relative z-20 h-full w-full flex flex-col justify-center px-8 md:px-20 lg:px-32">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -467,7 +467,7 @@ export default function LordFlixSupreme() {
               </div>
             </div>
 
-            {/* TRIO DA BLINDAGEM: CTA + PNL */}
+            {/* TRIO DE EXPERIÊNCIA: CTA + PNL */}
             <div className="flex flex-wrap gap-6">
               <button 
                 onClick={() => handleAssistir(filmeDestaque)}
@@ -599,9 +599,15 @@ export default function LordFlixSupreme() {
                 </div>
                 
                 <div className="p-6">
-                  <span className="text-[10px] font-black bg-gold text-black px-2 py-0.5 uppercase mb-3 inline-block">
-                    Premium TV
-                  </span>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-[10px] font-black bg-gold text-black px-2 py-0.5 uppercase">
+                      Premium TV
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
+                      <span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">Live</span>
+                    </div>
+                  </div>
                   <h3 className="text-white font-bold text-lg truncate">
                     {item.titulo}
                   </h3>
@@ -722,80 +728,217 @@ export default function LordFlixSupreme() {
         )}
       </AnimatePresence>
 
-      {/* 6. POR QUE AS FAMÍLIAS CONFIAM */}
-      <section id="seguranca" className="py-32 px-10 bg-gradient-to-b from-transparent to-black/50">
-        <h2 className="text-center text-4xl font-display font-black uppercase italic mb-20 tracking-tighter">Por Que as Famílias Confiam no LordFlix</h2>
-        <div className="grid md:grid-cols-4 gap-12 max-w-7xl mx-auto">
-          {[
-            { img: "https://picsum.photos/seed/family/400/400", t: "Controle Parental", d: "PIN de segurança para proteger crianças" },
-            { img: "https://picsum.photos/seed/award/400/400", t: "Ratings IMDb", d: "Avaliações verificadas de confiança" },
-            { img: "https://picsum.photos/seed/gift/400/400", t: "100% Grátis", d: "Sem pagamentos escondidos ou surpresas" },
-            { img: "https://picsum.photos/seed/privacy/400/400", t: "Privado", d: "Ninguém vê o que você assiste" }
-          ].map((item, i) => (
-            <div key={i} className="text-center space-y-6">
-              <div className="w-24 h-24 mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                <img src={item.img} alt={item.t} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" referrerPolicy="no-referrer" />
-              </div>
-              <h3 className="text-lg font-black uppercase italic tracking-tighter">{item.t}</h3>
-              <p className="text-silver/40 text-sm leading-relaxed uppercase tracking-widest text-[10px]">{item.d}</p>
+      {/* 6. A NOVA ORDEM DO ENTRETENIMENTO (CINEMATIC SHOWCASE) */}
+      <section id="experiencia" className="py-40 bg-[#020202] relative overflow-hidden">
+        <div className="max-w-[1800px] mx-auto px-8 md:px-20">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-32 gap-10">
+            <div className="max-w-3xl">
+              <h2 className="text-6xl md:text-9xl font-display font-black uppercase italic tracking-tighter leading-[0.85] mb-8">
+                O Domínio <br/> <span className="text-cyan-500">Absoluto</span>
+              </h2>
+              <p className="text-silver/40 text-xl md:text-2xl font-light leading-relaxed">
+                Não entregamos apenas pixels. Entregamos autoridade cinematográfica. Uma infraestrutura invisível desenhada para quem não aceita nada menos que a perfeição.
+              </p>
             </div>
-          ))}
-        </div>
-        <div className="mt-20 text-center max-w-2xl mx-auto">
-          <p className="text-xl italic text-silver/20 leading-relaxed font-display">
-            "Sua família segura. Cinema com controle total. Capas reais com ratings verificados. É só clicar e assistir."
-          </p>
+            <div className="hidden md:block text-right">
+              <span className="text-[10px] font-black uppercase tracking-[0.6em] text-silver/20 block mb-4">Status da Rede</span>
+              <div className="flex items-center gap-3 justify-end">
+                <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+                <span className="text-white font-black uppercase tracking-widest text-xs">Ultra-High Bitrate Ativo</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Feature 1: Imersão Total */}
+            <motion.div 
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-8 h-[600px] rounded-[60px] relative overflow-hidden group cursor-pointer"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop" 
+                alt="Cinema Experience" 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors duration-500"></div>
+              
+              <div className="absolute bottom-0 left-0 p-16 z-20">
+                <span className="text-cyan-500 text-xs font-black uppercase tracking-[0.4em] mb-6 block">Tecnologia Proprietária</span>
+                <h3 className="text-5xl md:text-7xl font-black uppercase italic mb-6 leading-none">Imersão <br/> Sem Limites</h3>
+                <p className="text-silver/60 text-lg max-w-xl leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                  Bitrate bruto. Sem compressão destrutiva. O LordFlix entrega a fidelidade original do estúdio diretamente na sua tela, sem engasgos, sem esperas.
+                </p>
+                <div className="mt-10 flex gap-4">
+                  <div className="px-6 py-2 border border-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-md">4K Native</div>
+                  <div className="px-6 py-2 border border-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-md">HDR10+</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Feature 2: Curadoria */}
+            <motion.div 
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-4 h-[600px] rounded-[60px] relative overflow-hidden group cursor-pointer"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2070&auto=format&fit=crop" 
+                alt="Curated Content" 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+              
+              <div className="absolute bottom-0 left-0 p-12 z-20">
+                <span className="text-gold text-xs font-black uppercase tracking-[0.4em] mb-4 block">Curadoria Elite</span>
+                <h3 className="text-4xl font-black uppercase italic mb-6">Obras <br/> Atemporais</h3>
+                <p className="text-silver/60 text-sm leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                  Selecionamos apenas o que é relevante. Esqueça o lixo digital. Aqui, cada título é uma obra-prima validada por críticos e entusiastas.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Feature 3: Multi-Device */}
+            <motion.div 
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-4 h-[500px] rounded-[60px] relative overflow-hidden group cursor-pointer"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=1957&auto=format&fit=crop" 
+                alt="Multi Device" 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+              
+              <div className="absolute bottom-0 left-0 p-12 z-20">
+                <h3 className="text-3xl font-black uppercase italic mb-4">Ecossistema <br/> Fluido</h3>
+                <p className="text-silver/60 text-sm leading-relaxed">
+                  Do smartphone à Smart TV de 100 polegadas. A experiência é contínua, implacável e sincronizada.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Feature 4: Performance */}
+            <motion.div 
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-8 h-[500px] rounded-[60px] relative overflow-hidden group cursor-pointer"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop" 
+                alt="Performance" 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+              
+              <div className="absolute inset-y-0 left-0 p-16 flex flex-col justify-center z-20">
+                <span className="text-cyan-500 text-xs font-black uppercase tracking-[0.4em] mb-6 block">Performance Pura</span>
+                <h3 className="text-5xl font-black uppercase italic mb-6">Zero <br/> Atrito</h3>
+                <p className="text-silver/60 text-lg max-w-md leading-relaxed">
+                  Nossa rede global de baixa latência garante que o "Play" seja uma ordem executada instantaneamente. Sem telas de carregamento. Sem interrupções.
+                </p>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* 7. FOOTER TÉCNICO E SEO */}
-      <footer className="bg-[#050505] border-t border-white/5 py-20 px-8">
-        {/* SEO TÉCNICO: SCHEMA MARKUP HÍBRIDO */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            "itemListElement": [
-              ...categorias[0].filmes.map((m, i) => ({ "@type": "ListItem", "position": i + 1, "item": { "@type": "Movie", "name": m.titulo } })),
-              ...categorias[1].filmes.map((m, i) => ({ "@type": "ListItem", "position": categorias[0].filmes.length + i + 1, "item": { "@type": "Movie", "name": m.titulo } }))
-            ]
-          })}
-        </script>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="col-span-1 md:col-span-2">
-            <span className="text-3xl font-display font-black italic tracking-tighter mb-6 block">
-              <span className="text-white/40">LORD</span>
-              <span className="text-cyan-500">FLIX</span>
-            </span>
-            <p className="text-silver/40 text-sm max-w-md leading-relaxed uppercase tracking-widest font-bold">
-              A maior plataforma de streaming de alta performance do mundo. Tecnologia de ponta, curadoria de elite e experiência cinematográfica sem precedentes.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8">Navegação</h4>
-            <ul className="space-y-4 text-silver/40 text-[10px] font-bold uppercase tracking-widest">
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Início</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Filmes</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Séries</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Minha Lista</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8">Suporte</h4>
-            <ul className="space-y-4 text-silver/40 text-[10px] font-bold uppercase tracking-widest">
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Ajuda</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Privacidade</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Termos de Uso</li>
-              <li className="hover:text-cyan-500 cursor-pointer transition-colors">Contato</li>
-            </ul>
+      {/* 7. NEWSLETTER / MEMBERSHIP (CONVERSÃO) */}
+      <section className="py-40 px-8 bg-[#050505] relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-6xl font-display font-black uppercase italic tracking-tighter mb-8">
+            Faça Parte da <span className="text-gold">Elite</span>
+          </h2>
+          <p className="text-silver/40 uppercase tracking-[0.3em] text-[10px] font-bold mb-12">
+            Receba as estreias exclusivas e atualizações de rede direto no seu e-mail.
+          </p>
+          <div className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
+            <input 
+              type="email" 
+              placeholder="SEU MELHOR E-MAIL" 
+              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-8 py-6 text-white font-black uppercase text-[10px] tracking-widest focus:border-gold outline-none transition-all"
+            />
+            <button className="bg-gold text-black px-12 py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-white transition-all shadow-2xl shadow-gold/20">
+              Assinar Agora
+            </button>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <span className="text-silver/20 text-[10px] font-black uppercase tracking-[0.5em]">© 2026 LordFlix Supreme - Elite Digital</span>
-          <div className="flex gap-8 text-silver/20 text-[10px] font-black uppercase tracking-widest">
-            <span>4K HDR</span>
-            <span>Dolby Atmos</span>
-            <span>Studio Grade</span>
+        {/* Decorative background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/5 blur-[150px] rounded-full pointer-events-none"></div>
+      </section>
+
+      {/* 8. FOOTER TÉCNICO E SEO */}
+      <footer className="bg-[#020202] border-t border-white/5 py-40 px-8 md:px-20 selection:bg-cyan-500 selection:text-black">
+        <div className="max-w-[1800px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-20 mb-40">
+            <div className="md:col-span-6">
+              <span className="text-6xl md:text-8xl font-display font-black italic tracking-tighter mb-12 block leading-none">
+                <span className="text-white/20">LORD</span>
+                <span className="text-cyan-500">FLIX</span>
+              </span>
+              <p className="text-silver/40 text-xl md:text-2xl max-w-2xl leading-relaxed font-light mb-16">
+                A experiência definitiva em cinema digital. Tecnologia de bitrate adaptativo, curadoria de elite e uma infraestrutura global desenhada para a perfeição.
+              </p>
+              <div className="flex flex-wrap gap-10">
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black text-silver/20 uppercase tracking-[0.4em] block">Status da Rede</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-white font-black uppercase tracking-widest text-xs">Global Online</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black text-silver/20 uppercase tracking-[0.4em] block">Qualidade</span>
+                  <span className="text-white font-black uppercase tracking-widest text-xs">4K HDR10+ / Dolby Atmos</span>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black text-silver/20 uppercase tracking-[0.4em] block">Região</span>
+                  <span className="text-white font-black uppercase tracking-widest text-xs">América Latina / Global</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <h4 className="text-white font-black uppercase tracking-[0.6em] text-[10px] mb-12">Catálogo</h4>
+              <ul className="space-y-8 text-silver/40 text-xs font-black uppercase tracking-[0.3em]">
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Filmes 4K</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Séries Premium</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Animes HD</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">TV Ao Vivo</li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-2">
+              <h4 className="text-white font-black uppercase tracking-[0.6em] text-[10px] mb-12">Institucional</h4>
+              <ul className="space-y-8 text-silver/40 text-xs font-black uppercase tracking-[0.3em]">
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Sobre Nós</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Nossa Rede</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Carreiras</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Blog Tech</li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-2">
+              <h4 className="text-white font-black uppercase tracking-[0.6em] text-[10px] mb-12">Suporte</h4>
+              <ul className="space-y-8 text-silver/40 text-xs font-black uppercase tracking-[0.3em]">
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Central de Ajuda</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Termos de Uso</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Privacidade</li>
+                <li className="hover:text-cyan-500 cursor-pointer transition-all hover:translate-x-2">Contato Elite</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
+            <p className="text-silver/20 text-[10px] font-black uppercase tracking-[0.5em]">
+              © 2026 LORD-FLIX.TV — A Nova Ordem do Entretenimento.
+            </p>
+            <div className="flex gap-12">
+              <span className="text-silver/10 text-[9px] font-black uppercase tracking-widest">Powered by LordEngine v4.0</span>
+              <span className="text-silver/10 text-[9px] font-black uppercase tracking-widest">Encrypted Connection</span>
+            </div>
           </div>
         </div>
       </footer>

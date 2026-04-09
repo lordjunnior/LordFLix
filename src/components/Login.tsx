@@ -34,7 +34,7 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
 
     if (bloqueadoAte) return;
 
-    // Simulação de Validação Titanium
+    // Simulação de Validação Elite
     if (email === "admin@lordflix.tv" && senha === "123456") {
       setSucesso(true);
       setTimeout(() => {
@@ -48,9 +48,9 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
         // Bloqueio progressivo
         const tempoBloqueio = Date.now() + (novasTentativas * 30000); 
         setBloqueadoAte(tempoBloqueio);
-        setErro("Segurança ativada: Acesso bloqueado temporariamente.");
+        setErro("Acesso suspenso temporariamente por segurança.");
       } else {
-        setErro(`Chave incorreta. Você tem mais ${3 - novasTentativas} tentativas.`);
+        setErro(`Credenciais inválidas. Tentativas restantes: ${3 - novasTentativas}`);
         setTimeout(() => setErro(null), 3000);
       }
     }
@@ -59,24 +59,24 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
   const tempoRestante = bloqueadoAte ? Math.ceil((bloqueadoAte - Date.now()) / 1000) : 0;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-[#020202] relative overflow-hidden">
-      {/* Detalhe de Luxo: Brilho Titanium no fundo */}
+    <div className="min-h-screen flex items-center justify-center px-6 bg-[#020202] relative overflow-hidden selection:bg-gold selection:text-black">
+      {/* Detalhe de Luxo: Brilho atmosférico no fundo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full"></div>
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel w-full max-w-md p-10 rounded-[40px] border-white/5 relative overflow-hidden z-10"
+        className="glass-panel w-full max-w-md p-12 rounded-[50px] border-white/5 relative overflow-hidden z-10"
       >
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           <motion.div 
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
-            className="text-4xl font-black italic tracking-tighter mb-2"
+            className="text-5xl font-black italic tracking-tighter mb-4"
           >
             LORD<span className="text-gold">FLIX</span>
           </motion.div>
-          <p className="text-[10px] uppercase tracking-[0.5em] text-silver/30 font-bold">Acesso Restrito Titanium</p>
+          <p className="text-[10px] uppercase tracking-[0.6em] text-silver/20 font-black">Membro Elite</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -87,11 +87,11 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
               animate={{ opacity: 1, scale: 1 }}
               className="py-10 text-center"
             >
-              <div className="w-24 h-24 mx-auto mb-8 rounded-full overflow-hidden border border-green-500/20 shadow-2xl shadow-green-500/10">
-                <img src="https://picsum.photos/seed/verified/200/200" alt="Sucesso" className="w-full h-full object-cover grayscale opacity-80" referrerPolicy="no-referrer" />
+              <div className="w-32 h-32 mx-auto mb-10 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop" alt="Sucesso" className="w-full h-full object-cover grayscale opacity-80" referrerPolicy="no-referrer" />
               </div>
-              <h2 className="text-2xl font-black uppercase italic mb-2">Acesso Autorizado</h2>
-              <p className="text-silver/40 text-[10px] font-bold uppercase tracking-widest">Bem-vindo ao Cinema de Luxo</p>
+              <h2 className="text-3xl font-black uppercase italic mb-2">Autorizado</h2>
+              <p className="text-silver/40 text-[10px] font-black uppercase tracking-[0.4em]">Iniciando Experiência LordFlix</p>
             </motion.div>
           ) : (
             <motion.form 
@@ -173,8 +173,8 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
 
         <div className="mt-10 text-center">
           <p className="text-[8px] text-silver/20 uppercase tracking-[0.4em] font-bold leading-loose">
-            Proteção AES-256 GCM ativada.<br/>
-            Seu IP está sendo monitorado para sua segurança.
+            Conexão segura e criptografada.<br/>
+            Ambiente otimizado para alta performance.
           </p>
         </div>
       </motion.div>

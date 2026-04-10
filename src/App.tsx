@@ -264,17 +264,16 @@ export default function LordFlixSupreme() {
   })).filter(cat => cat.filmes.length > 0);
 
   // --- LÓGICA DE CINEMA REAL (EDITADO POR GEMINI) ---
-  const handleAssistir = async (filme: any) => {
+  const handleAssistir = (filme: any) => {
     if (filme.ano === 'LIVE') {
       setFilmeEmReproducao(filme);
       return;
     }
-    
-    // Injeta o player de filmes completos via ID do TMDB
+    // Mudança para o servidor Embed.su (Mais seguro para Celular e TV)
     const type = filme.media_type === 'tv' ? 'tv' : 'movie';
-    const cinemaSrc = `https://vidsrc.to/embed/${type}/${filme.id}`;
+    const src = `https://embed.su/embed/${type}/${filme.id}`;
     
-    setFilmeEmReproducao({ ...filme, src: cinemaSrc });
+    setFilmeEmReproducao({ ...filme, src });
   };
 
   const handleFilmeSelecionado = async (filme: any) => {

@@ -8,7 +8,7 @@ interface LordPlayerProps {
 }
 
 export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
-  const isEmbed = src.includes('vidsrc.to') || src.includes('embed.su') || src.includes('youtube.com');
+  const isEmbed = src.includes('embed.su') || src.includes('vidsrc') || src.includes('youtube.com');
 
   return (
     <motion.div 
@@ -17,9 +17,8 @@ export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] bg-black flex flex-col"
     >
-      {/* BARRA SUPERIOR SEMPRE POR CIMA */}
-      <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent absolute top-0 w-full z-[250]">
-        <h2 className="text-white font-black uppercase tracking-widest text-sm">{title}</h2>
+      <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent absolute top-0 w-full z-[250]">
+        <h2 className="text-white font-black uppercase tracking-widest text-sm drop-shadow-lg">{title}</h2>
         <button 
           onClick={onClose}
           className="bg-white/10 hover:bg-cyan-500 hover:text-black px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all text-white border border-white/10"
@@ -33,18 +32,14 @@ export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
           <iframe 
             src={src}
             className="w-full h-full border-none"
-            // REMOVEMOS O SANDBOX PARA VOLTAR O CONTROLE E O VÍDEO
+            // Sandbox equilibrado: impede downloads e popups, mas permite o play e os controlos
+            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
             allowFullScreen
             allow="autoplay; encrypted-media; picture-in-picture"
             title={title}
           />
         ) : (
-          <video 
-            src={src} 
-            controls 
-            autoPlay 
-            className="w-full h-full"
-          />
+          <video src={src} controls autoPlay className="w-full h-full" />
         )}
       </div>
     </motion.div>

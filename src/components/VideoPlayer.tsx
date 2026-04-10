@@ -8,6 +8,7 @@ interface LordPlayerProps {
 }
 
 export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
+  // Verificação para permitir Youtube, vidsrc e embed.su
   const isEmbed = src.includes('embed.su') || src.includes('vidsrc') || src.includes('youtube.com');
 
   return (
@@ -17,6 +18,7 @@ export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] bg-black flex flex-col"
     >
+      {/* Barra de controle superior sempre visível */}
       <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent absolute top-0 w-full z-[250]">
         <h2 className="text-white font-black uppercase tracking-widest text-sm drop-shadow-lg">{title}</h2>
         <button 
@@ -32,8 +34,7 @@ export const LordPlayer = ({ src, title, onClose }: LordPlayerProps) => {
           <iframe 
             src={src}
             className="w-full h-full border-none"
-            // Sandbox equilibrado: impede downloads e popups, mas permite o play e os controlos
-            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+            // LIBERADO: Sem sandbox para garantir que o IP seja encontrado e os controles funcionem
             allowFullScreen
             allow="autoplay; encrypted-media; picture-in-picture"
             title={title}

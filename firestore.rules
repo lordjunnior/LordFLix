@@ -1,0 +1,170 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {uid}
+// Fields:
+//   - uid: string (required) - User ID
+//   - email: string (required) - User email
+//   - role: string (required, enum: ['user', 'vip', 'admin']) - Access level
+//   - status: string (required, enum: ['active', 'shadow_banned', 'banned']) - Account status
+//   - lastActive: timestamp (optional) - Last activity
+//   - currentWatching: string (optional) - Current movie ID
+//   - photoURL: string (optional) - User avatar
+//
+// Collection: users/{uid}/watchlist
+// Document ID: {movieId}
+// Fields:
+//   - id: string - Movie ID
+//   - addedAt: timestamp - Date added
+//   - media_type: string - movie or tv
+//
+// Collection: users/{uid}/history
+// Document ID: {movieId}
+// Fields:
+//   - movieId: string - Movie ID
+//   - progress: number - Current time in seconds
+//   - duration: number - Total duration in seconds
+//   - lastUpdated: timestamp - Last watched date
+//   - media_type: string - movie or tv
+//
+// Collection: config
+// Document ID: admin
+// Fields:
+//   - global_announcement: string - Banner message
+//   - maintenance_mode: bool - Kill switch
+//   - active_streams_limit: number - Max concurrent streams
+//   - current_server_provider: string - Active provider
+//
+// Collection: analytics
+// Document ID: {movieId}
+// Fields:
+//   - movieId: string - Movie ID
+//   - viewCount: number - Current viewers
+//   - lastUpdated: timestamp - Last update
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "LordJunnior@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasOnly(['uid', 'email', 'role', 'status', 'lastActive', 'currentWatching', 'photoURL']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 128 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.role in ['user', 'vip', 'admin'] &&
+             data.status in ['active', 'shadow_banned', 'banned'];
+    }
+
+    function isValidWatchlist(data) {
+      return data.keys().hasOnly(['id', 'addedAt', 'media_type']) &&
+             data.id is string &&
+             data.addedAt is timestamp &&
+             data.media_type in ['movie', 'tv'];
+    }
+
+    function isValidHistory(data) {
+      return data.keys().hasOnly(['movieId', 'progress', 'duration', 'lastUpdated', 'media_type']) &&
+             data.movieId is string &&
+             data.progress is number &&
+             data.duration is number &&
+             data.lastUpdated is timestamp &&
+             data.media_type in ['movie', 'tv'];
+    }
+
+    function isValidConfig(data) {
+      return data.keys().hasOnly(['global_announcement', 'maintenance_mode', 'active_streams_limit', 'current_server_provider']) &&
+             data.global_announcement is string && data.global_announcement.size() < 1000 &&
+             data.maintenance_mode is bool &&
+             data.active_streams_limit is number &&
+             data.current_server_provider is string;
+    }
+
+    function isValidAnalytics(data) {
+      return data.keys().hasOnly(['movieId', 'viewCount', 'lastUpdated']) &&
+             data.movieId is string &&
+             data.viewCount is number &&
+             data.lastUpdated is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // User Profiles
+    match /users/{userId} {
+      // Allow read only for owner or admin (PII protection)
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Allow creation for self (default role 'user', default status 'active')
+      allow create: if isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      request.resource.data.role == 'user' && 
+                      request.resource.data.status == 'active';
+      
+      // Allow updates for self (cannot change role or status)
+      allow update: if isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      request.resource.data.role == resource.data.role && 
+                      request.resource.data.status == resource.data.status;
+      
+      // Admin can do anything
+      allow write: if isAdmin();
+
+      // Watchlist subcollection
+      match /watchlist/{movieId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isValidWatchlist(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      // History subcollection
+      match /history/{movieId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isValidHistory(request.resource.data);
+      }
+    }
+
+    // Global Config
+    match /config/admin {
+      allow read: if true; // Publicly readable for maintenance mode check
+      allow write: if isAdmin();
+    }
+
+    // Analytics
+    match /analytics/{movieId} {
+      allow read: if true;
+      // Users can increment viewCount when watching
+      allow update: if isAuthenticated() && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'lastUpdated']) &&
+                      request.resource.data.viewCount == resource.data.viewCount + 1;
+      allow write: if isAdmin();
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

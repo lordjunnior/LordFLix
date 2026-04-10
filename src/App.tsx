@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { VoiceSearch } from './components/VoiceSearch';
 import GuiaTV from './components/GuiaTV';
@@ -6,7 +6,16 @@ import { LordPlayer } from './components/VideoPlayer';
 import { MediaDashboard } from './components/Dashboard';
 import NossaRede from './components/NossaRede';
 import { LordLogin } from './components/Login';
+import { ScrollControls } from './components/ScrollControls';
+import { AdminPanel } from './components/AdminPanel';
+import { ProfileDashboard } from './components/ProfileDashboard';
+import { NotificationPanel } from './components/NotificationPanel';
+import { AdPlayer } from './components/AdPlayer';
 import { getMovies, searchMovies, getVideos } from './lib/tmdb';
+import { auth, db, handleFirestoreError, OperationType } from './firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown } from 'lucide-react';
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
@@ -107,8 +116,11 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
   return (
     <motion.div 
       whileHover={{ y: -10 }}
-      className={`movie-poster-container w-full aspect-[2/3] cursor-pointer group ${type === 'release' ? 'release-glow' : ''}`}
+      whileFocus={{ y: -10, scale: 1.05 }}
+      tabIndex={0}
+      className={`movie-poster-container w-full aspect-[2/3] cursor-pointer group outline-none focus:ring-4 focus:ring-cyan-500/50 rounded-2xl transition-all ${type === 'release' ? 'release-glow' : ''}`}
       onClick={onClick}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
     >
       {(!isLoaded && !hasError) && (
         <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
@@ -142,9 +154,10 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
       {/* Overlay de PNL + CTA */}
       <div className="glass-pnl-overlay">
         <div className="flex justify-between items-start mb-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <span className="glass-tag">{filme.ano}</span>
             <span className="glass-tag text-cyan-400 border-cyan-400/30">4K</span>
+            <span className="glass-tag text-gold border-gold/30">Dub</span>
           </div>
           {filme.ano === 'LIVE' && (
             <div className="flex items-center gap-1.5 bg-cyan-500/20 px-2 py-0.5 rounded-sm border border-cyan-500/30">
@@ -170,14 +183,37 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
         <button className="cta-supreme-mini hover:bg-cyan-500">
           {filme.ano === 'LIVE' ? 'Sintonizar Agora' : 'Assistir Agora'}
         </button>
+
+        {/* PROGRESS BAR FOR HISTORY */}
+        {filme.isHistory && (
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${filme.progress}%` }}
+              className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   );
 };
 
 export default function LordFlixSupreme() {
+  // --- ESTADOS DE AUTH & CONFIG ---
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userRole, setUserRole] = useState<string>('user');
+  const [userStatus, setUserStatus] = useState<string>('active');
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [adminConfig, setAdminConfig] = useState<any>(null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [adActive, setAdActive] = useState(false);
+  const [pendingMovie, setPendingMovie] = useState<any>(null);
+  const [watchlist, setWatchlist] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
+
   // --- ESTADOS DO SISTEMA ---
-  const [autenticado, setAutenticado] = useState(true);
   const [perfil, setPerfil] = useState('adulto'); 
   const [busca, setBusca] = useState(''); 
   const [mostrarPin, setMostrarPin] = useState(false); 
@@ -189,12 +225,120 @@ export default function LordFlixSupreme() {
   const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
   const [filmeEmReproducao, setFilmeEmReproducao] = useState<any>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([
+    {
+      id: '1',
+      title: 'Upgrade de Sinal',
+      message: 'O filme "Além do Horizonte" agora está disponível com dublagem 4K Ultra HD!',
+      type: 'system',
+      time: 'Agora',
+      read: false
+    },
+    {
+      id: '2',
+      title: 'Status VIP Ativo',
+      message: 'Sua assinatura VIP foi renovada. Aproveite o bitrate absoluto sem anúncios.',
+      type: 'vip',
+      time: '2h atrás',
+      read: true
+    }
+  ]);
   const [categorias, setCategorias] = useState(CATEGORIAS_INICIAIS);
   const [loading, setLoading] = useState(true);
   const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
   const [buscando, setBuscando] = useState(false);
 
+  // --- SEO ENGINE: DYNAMIC METADATA ---
+  useEffect(() => {
+    const title = filmeSelecionado?.titulo 
+      ? `${filmeSelecionado.titulo} | Assistir Online 4K | LordFlix`
+      : filmeEmReproducao?.titulo
+      ? `Assistindo: ${filmeEmReproducao.titulo} | LordFlix`
+      : "LordFlix Supreme | O Cinema de Elite em 4K";
+    
+    document.title = title;
+
+    // Update Meta Description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      const desc = filmeSelecionado?.resumo || filmeDestaque?.resumo || "Assista aos melhores filmes e séries em 4K Ultra HD na LordFlix. O cinema de elite chegou.";
+      metaDescription.setAttribute('content', desc);
+    }
+  }, [filmeSelecionado, filmeEmReproducao, filmeDestaque]);
+
   // --- INTEGRAÇÃO TMDB REAL ---
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const unsubUser = onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            setUserRole(data.role);
+            setUserStatus(data.status);
+          } else {
+            const isDefaultAdmin = firebaseUser.email === "LordJunnior@gmail.com";
+            setDoc(userDocRef, {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              photoURL: firebaseUser.photoURL,
+              role: isDefaultAdmin ? 'admin' : 'user',
+              status: 'active',
+              lastActive: serverTimestamp()
+            }).catch(err => handleFirestoreError(err, OperationType.CREATE, `users/${firebaseUser.uid}`));
+          }
+        }, (err) => handleFirestoreError(err, OperationType.GET, `users/${firebaseUser.uid}`));
+
+        setUser(firebaseUser);
+
+        // Listen to Watchlist
+        const unsubWatchlist = onSnapshot(collection(db, 'users', firebaseUser.uid, 'watchlist'), (snapshot) => {
+          const items = snapshot.docs.map(doc => doc.data());
+          setWatchlist(items);
+        });
+
+        // Listen to History
+        const unsubHistory = onSnapshot(
+          query(collection(db, 'users', firebaseUser.uid, 'history'), orderBy('lastUpdated', 'desc'), limit(20)), 
+          (snapshot) => {
+            const items = snapshot.docs.map(doc => doc.data());
+            setHistory(items);
+          }
+        );
+
+        return () => {
+          unsubUser();
+          unsubWatchlist();
+          unsubHistory();
+        };
+      } else {
+        setUser(null);
+        setUserRole('user');
+        setUserStatus('active');
+      }
+      setIsAuthReady(true);
+    });
+
+    const unsubConfig = onSnapshot(doc(db, 'config', 'admin'), (snapshot) => {
+      if (snapshot.exists()) {
+        setAdminConfig(snapshot.data());
+      } else {
+        setDoc(doc(db, 'config', 'admin'), {
+          global_announcement: "Bem-vindo à Nova Era da LordFlix!",
+          maintenance_mode: false,
+          active_streams_limit: 500,
+          current_server_provider: "vidsrc-premium"
+        }).catch(err => handleFirestoreError(err, OperationType.CREATE, 'config/admin'));
+      }
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'config/admin'));
+
+    return () => {
+      unsubAuth();
+      unsubConfig();
+    };
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -252,28 +396,132 @@ export default function LordFlixSupreme() {
     return () => clearTimeout(delayDebounceFn);
   }, [busca]);
 
-  // --- LÓGICA DE FILTRO ---
-  const categoriasFiltradas = categorias.map(cat => ({
-    ...cat,
-    filmes: cat.filmes.filter(filme => {
-      const termo = busca.toLowerCase();
-      const bateBusca = filme.titulo.toLowerCase().includes(termo);
-      if (perfil === 'kids') return filme.kids && bateBusca;
-      return bateBusca;
-    })
-  })).filter(cat => cat.filmes.length > 0);
+  const toggleWatchlist = async (filme: any) => {
+    if (!user) return;
+    const itemRef = doc(db, 'users', user.uid, 'watchlist', String(filme.id));
+    const isSaved = watchlist.some(item => String(item.id) === String(filme.id));
 
-  // --- LÓGICA DE CINEMA REAL (EDITADO POR GEMINI) ---
-  const handleAssistir = (filme: any) => {
+    try {
+      if (isSaved) {
+        await deleteDoc(itemRef);
+      } else {
+        await setDoc(itemRef, {
+          id: String(filme.id),
+          titulo: filme.titulo,
+          img: filme.img,
+          bg: filme.bg,
+          ano: filme.ano,
+          media_type: filme.media_type || 'movie',
+          addedAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/watchlist/${filme.id}`);
+    }
+  };
+
+  // --- LÓGICA DE FILTRO ---
+  const categoriasFiltradas = useMemo(() => {
+    let base = categorias.map(cat => ({
+      ...cat,
+      filmes: cat.filmes.filter(filme => {
+        const termo = busca.toLowerCase();
+        const bateBusca = filme.titulo.toLowerCase().includes(termo);
+        if (perfil === 'kids') return filme.kids && bateBusca;
+        return bateBusca;
+      })
+    })).filter(cat => cat.filmes.length > 0);
+
+    // Injetar Continuar Assistindo
+    if (history.length > 0) {
+      const historyMovies = history.map(h => {
+        // Encontrar o filme completo nas categorias ou buscar se necessário
+        // Por simplicidade, vamos usar os dados salvos no histórico
+        return {
+          ...h,
+          id: h.movieId,
+          titulo: h.titulo || "Filme em Progresso",
+          img: h.img,
+          bg: h.bg,
+          isHistory: true,
+          progress: (h.progress / h.duration) * 100
+        };
+      });
+      base.unshift({ nome: "Continuar Assistindo", type: "history", filmes: historyMovies });
+    }
+
+    // Injetar Minha Lista
+    if (watchlist.length > 0) {
+      base.unshift({ nome: "Minha Lista", type: "watchlist", filmes: watchlist });
+    }
+
+    // Injetar Recomendações (Simples: Baseado no que assistiu por último)
+    if (history.length > 0) {
+      const lastWatched = history[0];
+      const recommended = categorias
+        .flatMap(c => c.filmes)
+        .filter(f => (f as any).media_type === lastWatched.media_type && String(f.id) !== String(lastWatched.movieId))
+        .slice(0, 6);
+      
+      if (recommended.length > 0) {
+        base.push({ nome: "Recomendado para Você", type: "recommendation", filmes: recommended });
+      }
+    }
+
+    return base;
+  }, [categorias, busca, perfil, watchlist, history]);
+
+  const handleAssistir = async (filme: any) => {
+    const isVIP = userRole === 'vip' || userRole === 'admin';
+    
+    // Se não for VIP, injetar anúncio antes
+    if (!isVIP && filme.ano !== 'LIVE') {
+      setPendingMovie(filme);
+      setAdActive(true);
+      return;
+    }
+
     if (filme.ano === 'LIVE') {
       setFilmeEmReproducao(filme);
       return;
     }
-    const type = filme.media_type === 'tv' ? 'tv' : 'movie';
-    // Voltando para o vidsrc, mas usando o subdomínio .pm que é mais rápido
-    const src = `https://vidsrc.to/embed/${type}/${filme.id}`;
-    
-    setFilmeEmReproducao({ ...filme, src });
+    try {
+      const videos = await getVideos(filme.id, filme.media_type || "movie");
+      const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
+      const src = trailer 
+        ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
+        : filme.src;
+      
+      setFilmeEmReproducao({ ...filme, src });
+    } catch (error) {
+      console.error("Erro ao carregar vídeo:", error);
+      setFilmeEmReproducao(filme);
+    }
+  };
+
+  const handleAdComplete = async () => {
+    setAdActive(false);
+    if (pendingMovie) {
+      const filme = pendingMovie;
+      setPendingMovie(null);
+      
+      if (filme.ano === 'LIVE') {
+        setFilmeEmReproducao(filme);
+        return;
+      }
+      try {
+        const videos = await getVideos(filme.id, filme.media_type || "movie");
+        const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
+        const src = trailer 
+          ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
+          : filme.src;
+        
+        setFilmeEmReproducao({ ...filme, src });
+      } catch (error) {
+        console.error("Erro ao carregar vídeo:", error);
+        setFilmeEmReproducao(filme);
+      }
+    }
   };
 
   const handleFilmeSelecionado = async (filme: any) => {
@@ -329,7 +577,7 @@ export default function LordFlixSupreme() {
   }
 
   // --- TELA DE CARREGAMENTO ---
-  if (!carregado) {
+  if (!isAuthReady || !carregado) {
     return (
       <div className="bg-black h-screen flex flex-col items-center justify-center text-white gap-8">
         <div className="w-16 h-16 rounded-full border-t-2 border-cyan-500 animate-spin"></div>
@@ -339,8 +587,25 @@ export default function LordFlixSupreme() {
   }
 
   // --- TELA DE LOGIN ---
-  if (!autenticado) {
-    return <LordLogin onLogin={() => setAutenticado(true)} />;
+  if (!user) {
+    return <LordLogin onLogin={() => {}} />;
+  }
+
+  // --- KILL SWITCH (MAINTENANCE MODE) ---
+  if (adminConfig?.maintenance_mode && userRole !== 'admin') {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-10 text-center">
+        <div className="max-w-md space-y-8">
+          <div className="w-24 h-24 bg-cyan-500/10 border border-cyan-500/20 rounded-[40px] flex items-center justify-center mx-auto animate-pulse">
+            <AlertCircle className="w-10 h-10 text-cyan-500" />
+          </div>
+          <h1 className="text-4xl font-black uppercase italic tracking-tighter text-aluminum">Upgrade de Sistema</h1>
+          <p className="text-silver/40 text-xs font-black uppercase tracking-[0.3em] leading-relaxed">
+            Estamos otimizando nossos servidores para garantir o bitrate absoluto. Voltamos em instantes.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // --- VIEW: GUIA TV ---
@@ -355,6 +620,21 @@ export default function LordFlixSupreme() {
 
   return (
     <div className="min-h-screen bg-[#020202] selection:bg-cyan-500 selection:text-black">
+      
+      {/* GLOBAL ANNOUNCEMENT */}
+      <AnimatePresence>
+        {adminConfig?.global_announcement && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-cyan-500 text-black py-2 px-6 flex items-center justify-center gap-4 relative z-[150]"
+          >
+            <Bell className="w-4 h-4 animate-bounce" />
+            <span className="text-[10px] font-black uppercase tracking-widest">{adminConfig.global_announcement}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* 1. BARRA DE NAVEGAÇÃO (NAVBAR) */}
       <nav className="fixed top-0 w-full z-[60] px-8 py-6 flex justify-between items-center glass-nav">
@@ -375,6 +655,16 @@ export default function LordFlixSupreme() {
 
         {/* SELETOR DE PERFIL (CONTROLE PARENTAL) */}
         <div className="flex gap-4 items-center">
+          {/* ADMIN TRIGGER */}
+          {userRole === 'admin' && (
+            <button 
+              onClick={() => setShowAdminPanel(true)}
+              className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:scale-110 transition-transform mr-4"
+            >
+              <Shield className="w-5 h-5 text-black" />
+            </button>
+          )}
+
           <button 
             onClick={() => setPerfil('kids')}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'kids' ? 'bg-white text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
@@ -388,12 +678,63 @@ export default function LordFlixSupreme() {
             Adultos
           </button>
           <button 
-            onClick={() => setAutenticado(false)}
+            onClick={() => auth.signOut()}
             className="px-4 py-2 text-silver/20 hover:text-gold transition-colors text-[10px] font-black uppercase tracking-widest"
             title="Sair"
           >
             Sair
           </button>
+
+          <div className="flex items-center gap-4 pl-8 border-l border-white/10">
+            {/* NOTIFICATION BELL */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors relative"
+              >
+                <Bell className={`w-5 h-5 ${notifications.some(n => !n.read) ? 'text-cyan-500 animate-pulse' : 'text-silver/40'}`} />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                )}
+              </button>
+              <AnimatePresence>
+                {showNotifications && (
+                  <NotificationPanel 
+                    onClose={() => setShowNotifications(false)} 
+                    notifications={notifications}
+                    onMarkAsRead={(id) => {
+                      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="text-right hidden sm:block">
+              <p className="text-[9px] font-black text-white uppercase tracking-widest">{user?.displayName || user?.email?.split('@')[0]}</p>
+              <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest flex items-center justify-end gap-1">
+                {userRole === 'admin' ? 'Supreme Admin' : userRole === 'vip' ? 'Membro VIP' : 'Membro Comum'}
+                {(userRole === 'vip' || userRole === 'admin') && (
+                  <motion.div
+                    animate={{ filter: ['drop-shadow(0 0 2px #d4af37)', 'drop-shadow(0 0 8px #d4af37)', 'drop-shadow(0 0 2px #d4af37)'] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Crown className="w-3 h-3 text-gold" />
+                  </motion.div>
+                )}
+              </p>
+            </div>
+            <div 
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
+              onClick={() => setShowProfile(true)}
+            >
+              <img 
+                src={user?.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"} 
+                className="w-full h-full object-cover rounded-xl" 
+                referrerPolicy="no-referrer" 
+              />
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -468,6 +809,9 @@ export default function LordFlixSupreme() {
           <LordPlayer 
             src={filmeEmReproducao.src} 
             title={filmeEmReproducao.titulo} 
+            movieId={String(filmeEmReproducao.id)}
+            media_type={filmeEmReproducao.media_type || 'movie'}
+            movieData={filmeEmReproducao}
             onClose={() => setFilmeEmReproducao(null)} 
           />
         )}
@@ -509,9 +853,14 @@ export default function LordFlixSupreme() {
             className="max-w-6xl"
           >
             {/* Tag de Autoridade (SEO + PNL) */}
-            <span className="text-cyan-400 font-black tracking-[0.5em] mb-4 text-xs md:text-sm uppercase drop-shadow-neon block">
-              LORDFLIX EXCLUSIVE • SCI-FI DESTINY
-            </span>
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-cyan-400 font-black tracking-[0.5em] text-xs md:text-sm uppercase drop-shadow-neon">
+                LORDFLIX EXCLUSIVE • SCI-FI DESTINY
+              </span>
+              <span className="bg-gold text-black px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-sm">
+                Dublado
+              </span>
+            </div>
 
             <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.8] tracking-tighter uppercase mb-6">
               ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">HORIZONTE</span>
@@ -542,36 +891,38 @@ export default function LordFlixSupreme() {
             </div>
 
             {/* TRIO DE EXPERIÊNCIA: CTA + PNL */}
-            <div className="flex flex-wrap gap-6">
-              <button 
-                onClick={() => handleAssistir(filmeDestaque)}
-                className="bg-cyan-500 text-black px-12 py-5 font-black text-xl hover:bg-white transition-all transform hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.5)]"
-              >
-                ASSISTIR AGORA
-              </button>
-              <button 
-                onClick={() => handleFilmeSelecionado(filmeDestaque)}
-                className="border-2 border-white/20 px-12 py-5 font-black text-xl text-white backdrop-blur-md hover:bg-white/10 transition-all"
-              >
-                DETALHES
-              </button>
-            </div>
+            {/* Botões removidos a pedido do usuário */}
           </motion.div>
         </div>
 
         {/* 4. SEO TÉCNICO: SCHEMA MARKUP JSON-LD */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Movie",
-            "name": "ALÉM DO HORIZONTE - LORDFLIX",
-            "image": filmeDestaque?.img,
-            "description": "Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX.",
-            "genre": "Ficção Científica",
-            "contentRating": "14+",
-            "isFamilyFriendly": "false"
-          })}
-        </script>
+        <script 
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Movie",
+              "name": filmeSelecionado?.titulo || filmeDestaque?.titulo || "LordFlix Supreme",
+              "image": filmeSelecionado?.img || filmeDestaque?.img,
+              "description": (filmeSelecionado?.resumo || filmeDestaque?.resumo || "O cinema de elite em 4K.").slice(0, 160),
+              "genre": "Cinema de Elite",
+              "contentRating": "14+",
+              "isFamilyFriendly": "false",
+              "potentialAction": {
+                "@type": "WatchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `https://lord-flix.tv/watch/${filmeSelecionado?.id || filmeDestaque?.id || 'home'}`,
+                  "actionPlatform": [
+                    "http://schema.org/DesktopWebPlatform",
+                    "http://schema.org/MobileWebPlatform",
+                    "http://schema.org/AndroidTVPlatform"
+                  ]
+                }
+              }
+            })
+          }}
+        />
       </section>
 
       {/* 4. CONTEÚDO PRINCIPAL (TRILHOS SUPREMOS) */}
@@ -759,10 +1110,12 @@ export default function LordFlixSupreme() {
                   <span className="text-cyan-500">Detalhes</span>
                 </div>
 
-                <div className="flex gap-6 mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-silver/40">
+                <div className="flex flex-wrap gap-4 mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-silver/40">
                   <span>{filmeSelecionado.ano}</span>
                   <span>{filmeSelecionado.duracao}</span>
                   <span className="text-cyan-500 border border-cyan-500/30 px-2 py-0.5 rounded">{filmeSelecionado.idade}</span>
+                  <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">Dublado + Legendado</span>
+                  <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">4K Ultra HD</span>
                 </div>
 
                 <p className="text-silver/60 text-lg leading-relaxed mb-10 font-medium">
@@ -790,19 +1143,43 @@ export default function LordFlixSupreme() {
                     Direção: <span className="text-white ml-2">{filmeSelecionado.diretor}</span>
                   </p>
                   <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Qualidade: <span className="text-white ml-2">4K Ultra HD • HDR10</span>
+                    Idiomas: <span className="text-white ml-2">Português (BR), Inglês (Original)</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Legendas: <span className="text-white ml-2">Português, Inglês, Espanhol</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Qualidade: <span className="text-white ml-2">4K Ultra HD • HDR10 • Dolby Atmos</span>
                   </p>
                 </div>
 
-                <button 
-                  onClick={() => {
-                    handleAssistir(filmeSelecionado);
-                    setFilmeSelecionado(null);
-                  }}
-                  className="bg-white text-black w-full md:w-auto px-16 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all shadow-2xl shadow-white/5"
-                >
-                  Assistir Agora
-                </button>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <button 
+                    onClick={() => {
+                      handleAssistir(filmeSelecionado);
+                      setFilmeSelecionado(null);
+                    }}
+                    className="bg-white text-black flex-1 px-16 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all shadow-2xl shadow-white/5"
+                  >
+                    Assistir Agora
+                  </button>
+                  <button 
+                    onClick={() => toggleWatchlist(filmeSelecionado)}
+                    className="bg-white/5 text-white flex-1 px-10 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-white/10 transition-all border border-white/5 flex items-center justify-center gap-3"
+                  >
+                    {watchlist.some(item => String(item.id) === String(filmeSelecionado.id)) ? (
+                      <>
+                        <CheckIcon className="w-5 h-5 text-cyan-500" />
+                        Na Minha Lista
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-5 h-5" />
+                        Minha Lista
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -958,6 +1335,7 @@ export default function LordFlixSupreme() {
               <span className="text-6xl md:text-8xl font-display font-black italic tracking-tighter mb-12 block leading-none">
                 <span className="text-aluminum">LORD</span>
                 <span className="text-cyan-500">FLIX</span>
+                <span className="text-white/10 text-xs ml-2 uppercase tracking-[0.5em]">Supreme</span>
               </span>
               <p className="text-silver/40 text-xl md:text-2xl max-w-2xl leading-relaxed font-light mb-16">
                 A experiência definitiva em cinema digital. Tecnologia de bitrate adaptativo, curadoria de elite e uma infraestrutura global desenhada para a perfeição.
@@ -1018,11 +1396,31 @@ export default function LordFlixSupreme() {
             </p>
             <div className="flex gap-12">
               <span className="text-silver/10 text-[9px] font-black uppercase tracking-widest">Powered by LordEngine v4.0</span>
+              <span className="text-silver/10 text-[9px] font-black uppercase tracking-widest">TV Box & Android Ready</span>
               <span className="text-silver/10 text-[9px] font-black uppercase tracking-widest">Encrypted Connection</span>
             </div>
           </div>
         </div>
       </footer>
+      <ScrollControls />
+      
+      <AnimatePresence>
+        {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
+        {showProfile && (
+          <ProfileDashboard 
+            user={user} 
+            userRole={userRole} 
+            userStatus={userStatus} 
+            onClose={() => setShowProfile(false)} 
+          />
+        )}
+        {adActive && (
+          <AdPlayer 
+            onComplete={handleAdComplete} 
+            onClose={() => setAdActive(false)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

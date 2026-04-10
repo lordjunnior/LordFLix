@@ -3,178 +3,196 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { Shield, Lock, Globe, Zap, ChevronRight } from 'lucide-react';
+
+const ParticleBackground = () => {
+  const particles = useMemo(() => Array.from({ length: 40 }), []);
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-cyan-500/20 rounded-full"
+          initial={{ 
+            x: Math.random() * 100 + '%', 
+            y: Math.random() * 100 + '%',
+            opacity: Math.random() * 0.5
+          }}
+          animate={{ 
+            y: [null, '-100%'],
+            opacity: [0, 0.5, 0]
+          }}
+          transition={{ 
+            duration: Math.random() * 10 + 10, 
+            repeat: Infinity, 
+            ease: "linear",
+            delay: Math.random() * 10
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [lembrar, setLembrar] = useState(true);
-  const [tentativas, setTentativas] = useState(0);
-  const [bloqueadoAte, setBloqueadoAte] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
 
-  // Lógica de Proteção contra Força Bruta
-  useEffect(() => {
-    if (bloqueadoAte) {
-      const interval = setInterval(() => {
-        if (Date.now() > bloqueadoAte) {
-          setBloqueadoAte(null);
-          setTentativas(0);
-          setErro(null);
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [bloqueadoAte]);
-
-  const realizarLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (bloqueadoAte) return;
-
-    // Simulação de Validação Elite
-    if (email === "admin@lordflix.tv" && senha === "123456") {
+  const loginComGoogle = async () => {
+    setLoading(true);
+    setErro(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
       setSucesso(true);
       setTimeout(() => {
         onLogin();
       }, 1500);
-    } else {
-      const novasTentativas = tentativas + 1;
-      setTentativas(novasTentativas);
-      
-      if (novasTentativas >= 3) {
-        // Bloqueio progressivo
-        const tempoBloqueio = Date.now() + (novasTentativas * 30000); 
-        setBloqueadoAte(tempoBloqueio);
-        setErro("Acesso suspenso temporariamente por segurança.");
-      } else {
-        setErro(`Credenciais inválidas. Tentativas restantes: ${3 - novasTentativas}`);
-        setTimeout(() => setErro(null), 3000);
-      }
+    } catch (error: any) {
+      console.error("Erro no login:", error);
+      setErro("Falha na autenticação. Tente novamente.");
+      setLoading(false);
     }
   };
 
-  const tempoRestante = bloqueadoAte ? Math.ceil((bloqueadoAte - Date.now()) / 1000) : 0;
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-[#020202] relative overflow-hidden selection:bg-gold selection:text-black">
-      {/* Detalhe de Luxo: Brilho atmosférico no fundo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full"></div>
+    <div className="min-h-screen flex items-center justify-center px-6 bg-[#020202] relative overflow-hidden selection:bg-cyan-500 selection:text-black">
+      {/* ATMOSPHERIC BACKGROUND */}
+      <ParticleBackground />
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.05),transparent_70%)]" />
+      <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-cyan-500/5 blur-[150px] rounded-full" />
+      <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-blue-600/5 blur-[150px] rounded-full" />
       
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel w-full max-w-md p-12 rounded-[50px] border-white/5 relative overflow-hidden z-10"
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-lg relative z-10"
       >
-        <div className="text-center mb-12">
+        {/* LOGO SECTION */}
+        <div className="text-center mb-16 space-y-4">
           <motion.div 
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            className="text-5xl font-black italic tracking-tighter mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-block"
           >
-            LORD<span className="text-gold">FLIX</span>
+            <div className="text-6xl md:text-7xl font-display font-black italic tracking-tighter leading-none">
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20">LORD</span>
+              <span className="text-cyan-500 drop-shadow-[0_0_25px_rgba(34,211,238,0.5)]">FLIX</span>
+            </div>
           </motion.div>
-          <p className="text-[10px] uppercase tracking-[0.6em] text-silver/20 font-black">Membro Elite</p>
+          <div className="flex items-center justify-center gap-4">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/10" />
+            <p className="text-[10px] uppercase tracking-[0.8em] text-silver/30 font-black">Sovereign Entertainment</p>
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/10" />
+          </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          {sucesso ? (
-            <motion.div 
-              key="sucesso"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="py-10 text-center"
-            >
-              <div className="w-32 h-32 mx-auto mb-10 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop" alt="Sucesso" className="w-full h-full object-cover grayscale opacity-80" referrerPolicy="no-referrer" />
-              </div>
-              <h2 className="text-3xl font-black uppercase italic mb-2">Autorizado</h2>
-              <p className="text-silver/40 text-[10px] font-black uppercase tracking-[0.4em]">Iniciando Experiência LordFlix</p>
-            </motion.div>
-          ) : (
-            <motion.form 
-              key="form"
-              exit={{ opacity: 0, scale: 0.9 }}
-              onSubmit={realizarLogin} 
-              className="space-y-6"
-            >
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-black text-silver/20 ml-4 tracking-widest">
-                  E-mail de Membro
-                </label>
-                <input 
-                  type="email" 
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500 transition-all text-silver placeholder:opacity-10"
-                  placeholder="exemplo@lordflix.tv"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-black text-silver/20 ml-4 tracking-widest">
-                  Chave de Segurança
-                </label>
-                <input 
-                  type="password" 
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500 transition-all text-silver placeholder:opacity-10"
-                  placeholder="••••••••"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between px-2">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input 
-                      type="checkbox" 
-                      checked={lembrar}
-                      onChange={() => setLembrar(!lembrar)}
-                      className="w-5 h-5 rounded-lg bg-white/5 border-white/10 checked:bg-cyan-500 transition-all appearance-none cursor-pointer border"
-                    />
-                    {lembrar && <div className="absolute inset-0 flex items-center justify-center text-[8px] font-black pointer-events-none">OK</div>}
-                  </div>
-                  <span className="text-[10px] text-silver/30 group-hover:text-silver transition-colors font-bold uppercase tracking-widest">Lembrar por 30 dias</span>
-                </label>
-              </div>
-
-              <AnimatePresence>
-                {erro && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-2xl"
-                  >
-                    <p className="text-cyan-500 text-[10px] font-black uppercase tracking-wider leading-tight text-center">{erro}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <button 
-                type="submit"
-                disabled={!!bloqueadoAte}
-                className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all relative overflow-hidden ${bloqueadoAte ? 'bg-zinc-900 text-silver/20 cursor-not-allowed' : 'bg-white text-black hover:bg-cyan-500 hover:text-black shadow-[0_10px_30px_rgba(255,255,255,0.05)]'}`}
+        {/* MAIN PANEL */}
+        <div className="glass-panel p-10 md:p-14 rounded-[60px] border-white/5 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+          
+          <AnimatePresence mode="wait">
+            {sucesso ? (
+              <motion.div 
+                key="sucesso"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-10 text-center space-y-8"
               >
-                {bloqueadoAte ? (
-                  <span className="flex items-center justify-center gap-2">
-                    BLOQUEADO ({tempoRestante}s)
-                  </span>
-                ) : 'ENTRAR NO CINEMA'}
-              </button>
-            </motion.form>
-          )}
-        </AnimatePresence>
+                <div className="w-24 h-24 mx-auto rounded-[35px] bg-cyan-500 flex items-center justify-center shadow-[0_0_50px_rgba(34,211,238,0.4)]">
+                  <Shield className="w-10 h-10 text-black" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">Acesso Concedido</h2>
+                  <p className="text-silver/40 text-[10px] font-black uppercase tracking-[0.4em]">Bem-vindo ao Círculo Interno</p>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="login-content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-10"
+              >
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-white text-center uppercase tracking-widest">Portal de Autenticação</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { icon: <Zap className="w-4 h-4" />, label: "Bitrate" },
+                      { icon: <Globe className="w-4 h-4" />, label: "Global" },
+                      { icon: <Lock className="w-4 h-4" />, label: "Secure" }
+                    ].map((item, i) => (
+                      <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div className="text-cyan-500">{item.icon}</div>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-silver/40">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-[8px] text-silver/20 uppercase tracking-[0.4em] font-bold leading-loose">
-            Conexão segura e criptografada.<br/>
-            Ambiente otimizado para alta performance.
+                <button 
+                  onClick={loginComGoogle}
+                  disabled={loading}
+                  className="w-full relative group/btn"
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-20 group-hover/btn:opacity-60 transition duration-1000 group-hover/btn:duration-200" />
+                  <div className="relative flex items-center justify-center gap-4 w-full py-6 bg-white text-black rounded-2xl font-black uppercase tracking-[0.4em] text-[11px] transition-all active:scale-95">
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+                        Entrar no Império
+                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {erro && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="text-center"
+                    >
+                      <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">{erro}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* FOOTER INFO */}
+        <div className="mt-12 flex flex-col items-center gap-6">
+          <div className="flex gap-10">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] font-black text-white">4K+</span>
+              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Qualidade</span>
+            </div>
+            <div className="w-px h-8 bg-white/5" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] font-black text-white">256-BIT</span>
+              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Encryption</span>
+            </div>
+            <div className="w-px h-8 bg-white/5" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] font-black text-white">ULTRA</span>
+              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Bitrate</span>
+            </div>
+          </div>
+          <p className="text-[9px] text-silver/10 uppercase tracking-[0.5em] font-black text-center max-w-xs leading-loose">
+            Acesso restrito a membros autorizados. Todos os direitos reservados à LordEngine v4.0.
           </p>
         </div>
       </motion.div>

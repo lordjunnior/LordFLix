@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Membro da LordFlix",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["user", "vip", "admin"] },
+        "status": { "type": "string", "enum": ["active", "shadow_banned", "banned"] },
+        "lastActive": { "type": "string", "format": "date-time" },
+        "currentWatching": { "type": "string", "description": "ID do filme sendo assistido" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["uid", "email", "role", "status"]
+    },
+    "WatchlistItem": {
+      "title": "Watchlist Item",
+      "description": "Filme ou série salva pelo usuário",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" },
+        "media_type": { "type": "string" }
+      }
+    },
+    "PlaybackHistory": {
+      "title": "Playback History",
+      "description": "Progresso de reprodução do usuário",
+      "type": "object",
+      "properties": {
+        "movieId": { "type": "string" },
+        "progress": { "type": "number", "description": "Tempo em segundos" },
+        "duration": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "media_type": { "type": "string" }
+      }
+    },
+    "AdminControls": {
+      "title": "Admin Controls",
+      "description": "Configurações globais do sistema",
+      "type": "object",
+      "properties": {
+        "global_announcement": { "type": "string" },
+        "maintenance_mode": { "type": "boolean" },
+        "active_streams_limit": { "type": "number" },
+        "current_server_provider": { "type": "string" }
+      }
+    },
+    "Analytics": {
+      "title": "Analytics",
+      "description": "Dados de engajamento em tempo real",
+      "type": "object",
+      "properties": {
+        "movieId": { "type": "string" },
+        "viewCount": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Perfis de usuários"
+    },
+    "/users/{uid}/watchlist/{movieId}": {
+      "schema": "WatchlistItem",
+      "description": "Lista de desejos do usuário"
+    },
+    "/users/{uid}/history/{movieId}": {
+      "schema": "PlaybackHistory",
+      "description": "Histórico de reprodução e progresso"
+    },
+    "/config/admin": {
+      "schema": "AdminControls",
+      "description": "Configurações de administração"
+    },
+    "/analytics/{movieId}": {
+      "schema": "Analytics",
+      "description": "Métricas de visualização por filme"
+    }
+  }
+}

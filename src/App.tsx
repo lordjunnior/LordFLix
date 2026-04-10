@@ -269,9 +269,9 @@ export default function LordFlixSupreme() {
       setFilmeEmReproducao(filme);
       return;
     }
-    // Mudança para o servidor Embed.su (Mais seguro para Celular e TV)
     const type = filme.media_type === 'tv' ? 'tv' : 'movie';
-    const src = `https://embed.su/embed/${type}/${filme.id}`;
+    // Voltando para o vidsrc, mas usando o subdomínio .pm que é mais rápido
+    const src = `https://vidsrc.to/embed/${type}/${filme.id}`;
     
     setFilmeEmReproducao({ ...filme, src });
   };

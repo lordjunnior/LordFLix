@@ -1204,13 +1204,19 @@ function LordFlixSupreme() {
                   <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
                     País: <span className="text-white ml-2">{filmeSelecionado.paises || 'EUA'}</span>
                   </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    IMDb: <span className="text-cyan-500 ml-2">{filmeSelecionado.nota}/10</span>
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Rotten Tomatoes: <span className="text-red-500 ml-2">{filmeSelecionado.rotten || '85%'}</span>
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                  
+                  <div className="flex items-center gap-6 mt-2">
+                    <div className="flex items-center gap-2 bg-[#f5c518] px-2 py-1 rounded-md">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2012.svg" alt="IMDb" className="h-3" referrerPolicy="no-referrer" />
+                      <span className="text-[10px] font-black text-black">{filmeSelecionado.nota}</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-2 py-1 rounded-md">
+                      <img src="https://www.rottentomatoes.com/assets/casablanca/images/icons/tomatometer/certified_fresh-notext.537a589cf5d.svg" alt="Rotten Tomatoes" className="h-4" referrerPolicy="no-referrer" />
+                      <span className="text-[10px] font-black text-white">{filmeSelecionado.rotten || '85%'}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20 flex items-center">
                     Qualidade: <span className="text-white ml-2">HD • 2K • 4K Ultra HD</span>
                   </p>
                 </div>

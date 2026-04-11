@@ -436,7 +436,7 @@ export const LordPlayer = ({
               {/* CENTER PLAY/PAUSE INDICATOR */}
               <div className="flex items-center justify-center">
                 <AnimatePresence mode="wait">
-                  {!playing && (
+                  {!playing && !isEmbed && (
                     <motion.div 
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}

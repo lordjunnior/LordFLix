@@ -47,16 +47,20 @@ export const ScrollControls = () => {
             whileHover={{ scale: 1.1, y: -5 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="group relative w-14 h-14 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden"
+            className="group relative w-16 h-16 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
             title="Voltar ao Topo"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <ChevronUp className="w-6 h-6 text-aluminum group-hover:text-cyan-400 transition-colors relative z-10" />
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ChevronUp className="w-7 h-7 text-aluminum group-hover:text-cyan-400 transition-all relative z-10" />
             
-            {/* Efeito de brilho metálico interno */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity pointer-events-none">
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            </div>
+            {/* Efeito de brilho metálico rotativo */}
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 opacity-0 group-hover:opacity-10 pointer-events-none"
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-gradient-to-b from-white to-transparent" />
+            </motion.div>
           </motion.button>
 
           {/* Botão Para Baixo */}

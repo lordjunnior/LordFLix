@@ -15,7 +15,7 @@ import { getMovies, searchMovies, getVideos } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
-import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown } from 'lucide-react';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X } from 'lucide-react';
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
@@ -1061,9 +1061,10 @@ export default function LordFlixSupreme() {
             >
               <button 
                 onClick={() => setFilmeSelecionado(null)}
-                className="absolute top-8 right-8 z-50 bg-white/5 hover:bg-cyan-500 hover:text-black px-6 py-3 rounded-full transition-all text-[10px] font-black uppercase tracking-widest text-white"
+                className="absolute top-8 right-8 z-50 group flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-full transition-all hover:bg-cyan-500 hover:border-cyan-500"
               >
-                Fechar
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white group-hover:text-black transition-colors">Fechar</span>
+                <X className="w-4 h-4 text-white group-hover:text-black group-hover:rotate-90 transition-all" />
               </button>
 
               {/* Lado Esquerdo: Capa e Background */}

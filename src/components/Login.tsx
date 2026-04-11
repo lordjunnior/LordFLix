@@ -5,9 +5,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { auth, googleProvider } from '../firebase';
-import { signInWithPopup } from 'firebase/auth';
-import { Shield, Lock, Globe, Zap, ChevronRight } from 'lucide-react';
+import { auth, googleProvider, db } from '../firebase';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { Shield, Lock, Globe, Zap, ChevronRight, Mail, UserPlus, LogIn } from 'lucide-react';
 
 const ParticleBackground = () => {
   const particles = useMemo(() => Array.from({ length: 40 }), []);
@@ -43,19 +44,63 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return setErro("Preencha todos os campos.");
+    
+    setLoading(true);
+    setErro(null);
+    try {
+      if (isRegistering) {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        // Criar documento do usuário no Firestore
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          uid: cred.user.uid,
+          email: cred.user.email,
+          role: cred.user.email === 'lordjunnior@gmail.com' ? 'admin' : 'user',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      setSucesso(true);
+      setTimeout(onLogin, 1500);
+    } catch (error: any) {
+      console.error("Erro na autenticação:", error);
+      setErro(error.code === 'auth/user-not-found' ? "Usuário não encontrado." : "Falha na autenticação.");
+      setLoading(false);
+    }
+  };
 
   const loginComGoogle = async () => {
     setLoading(true);
     setErro(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Verificar se o usuário já existe no Firestore, se não, criar
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          role: user.email === 'lordjunnior@gmail.com' ? 'admin' : 'user',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
+      }
+      
       setSucesso(true);
-      setTimeout(() => {
-        onLogin();
-      }, 1500);
+      setTimeout(onLogin, 1500);
     } catch (error: any) {
-      console.error("Erro no login:", error);
-      setErro("Falha na autenticação. Tente novamente.");
+      console.error("Erro no login Google:", error);
+      setErro("Falha na autenticação via Google.");
       setLoading(false);
     }
   };
@@ -123,39 +168,69 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
                 className="space-y-10"
               >
                 <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-white text-center uppercase tracking-widest">Portal de Autenticação</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { icon: <Zap className="w-4 h-4" />, label: "Bitrate" },
-                      { icon: <Globe className="w-4 h-4" />, label: "Global" },
-                      { icon: <Lock className="w-4 h-4" />, label: "Secure" }
-                    ].map((item, i) => (
-                      <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5">
-                        <div className="text-cyan-500">{item.icon}</div>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-silver/40">{item.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  <h3 className="text-xl font-bold text-white text-center uppercase tracking-widest">
+                    {isRegistering ? 'Criar Nova Identidade' : 'Portal de Autenticação'}
+                  </h3>
+                  
+                  <form onSubmit={handleAuth} className="space-y-4">
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-silver/20" />
+                      <input 
+                        type="email" 
+                        placeholder="E-MAIL DE ELITE"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-12 pr-6 text-white text-xs font-black uppercase tracking-widest focus:border-cyan-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-silver/20" />
+                      <input 
+                        type="password" 
+                        placeholder="CHAVE DE ACESSO"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-12 pr-6 text-white text-xs font-black uppercase tracking-widest focus:border-cyan-500 outline-none transition-all"
+                      />
+                    </div>
+                    
+                    <button 
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-6 bg-cyan-500 text-black rounded-2xl font-black uppercase tracking-[0.4em] text-[11px] hover:bg-white transition-all flex items-center justify-center gap-3"
+                    >
+                      {loading ? (
+                        <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          {isRegistering ? <UserPlus className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+                          {isRegistering ? 'Finalizar Cadastro' : 'Entrar no Sistema'}
+                        </>
+                      )}
+                    </button>
+                  </form>
 
-                <button 
-                  onClick={loginComGoogle}
-                  disabled={loading}
-                  className="w-full relative group/btn"
-                >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-20 group-hover/btn:opacity-60 transition duration-1000 group-hover/btn:duration-200" />
-                  <div className="relative flex items-center justify-center gap-4 w-full py-6 bg-white text-black rounded-2xl font-black uppercase tracking-[0.4em] text-[11px] transition-all active:scale-95">
-                    {loading ? (
-                      <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
-                        Entrar no Império
-                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </>
-                    )}
+                  <div className="relative py-4">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+                    <div className="relative flex justify-center text-[8px] font-black uppercase tracking-[0.5em] text-silver/20"><span className="bg-[#050505] px-4">Ou via Rede Externa</span></div>
                   </div>
-                </button>
+
+                  <button 
+                    onClick={loginComGoogle}
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-4 py-5 bg-white/5 border border-white/5 text-white rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] hover:bg-white/10 transition-all"
+                  >
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-4 h-4" alt="Google" />
+                    Google Sync
+                  </button>
+
+                  <button 
+                    onClick={() => setIsRegistering(!isRegistering)}
+                    className="w-full text-center text-[9px] font-black uppercase tracking-widest text-silver/40 hover:text-cyan-500 transition-colors"
+                  >
+                    {isRegistering ? 'Já possui acesso? Faça Login' : 'Não tem conta? Solicitar Acesso'}
+                  </button>
+                </div>
 
                 <AnimatePresence>
                   {erro && (

@@ -15,7 +15,49 @@ import { getMovies, searchMovies, getVideos } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
-import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X } from 'lucide-react';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw } from 'lucide-react';
+
+// --- ERROR BOUNDARY COMPONENT ---
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center p-10 text-center">
+          <div className="max-w-md space-y-8">
+            <div className="w-24 h-24 bg-red-500/10 border border-red-500/20 rounded-[40px] flex items-center justify-center mx-auto">
+              <AlertCircle className="w-10 h-10 text-red-500" />
+            </div>
+            <h1 className="text-4xl font-black uppercase italic tracking-tighter text-white">Erro de Sistema</h1>
+            <p className="text-silver/40 text-xs font-black uppercase tracking-[0.3em] leading-relaxed">
+              Ocorreu um erro crítico na LordEngine. Nossa equipe técnica já foi notificada.
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-8 py-4 bg-white text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-cyan-500 transition-all flex items-center gap-2 mx-auto"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Reiniciar Sistema
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
@@ -199,7 +241,15 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
   );
 };
 
-export default function LordFlixSupreme() {
+export default function LordFlixSupremeWrapper() {
+  return (
+    <ErrorBoundary>
+      <LordFlixSupreme />
+    </ErrorBoundary>
+  );
+}
+
+function LordFlixSupreme() {
   // --- ESTADOS DE AUTH & CONFIG ---
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userRole, setUserRole] = useState<string>('user');
@@ -267,56 +317,10 @@ export default function LordFlixSupreme() {
     }
   }, [filmeSelecionado, filmeEmReproducao, filmeDestaque]);
 
-  // --- INTEGRAÇÃO TMDB REAL ---
+  // --- 1. AUTH STATE ---
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const unsubUser = onSnapshot(userDocRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.data();
-            setUserRole(data.role);
-            setUserStatus(data.status);
-          } else {
-            const isDefaultAdmin = firebaseUser.email === "LordJunnior@gmail.com";
-            setDoc(userDocRef, {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              photoURL: firebaseUser.photoURL,
-              role: isDefaultAdmin ? 'admin' : 'user',
-              status: 'active',
-              lastActive: serverTimestamp()
-            }).catch(err => handleFirestoreError(err, OperationType.CREATE, `users/${firebaseUser.uid}`));
-          }
-        }, (err) => handleFirestoreError(err, OperationType.GET, `users/${firebaseUser.uid}`));
-
-        setUser(firebaseUser);
-
-        // Listen to Watchlist
-        const unsubWatchlist = onSnapshot(collection(db, 'users', firebaseUser.uid, 'watchlist'), (snapshot) => {
-          const items = snapshot.docs.map(doc => doc.data());
-          setWatchlist(items);
-        });
-
-        // Listen to History
-        const unsubHistory = onSnapshot(
-          query(collection(db, 'users', firebaseUser.uid, 'history'), orderBy('lastUpdated', 'desc'), limit(20)), 
-          (snapshot) => {
-            const items = snapshot.docs.map(doc => doc.data());
-            setHistory(items);
-          }
-        );
-
-        return () => {
-          unsubUser();
-          unsubWatchlist();
-          unsubHistory();
-        };
-      } else {
-        setUser(null);
-        setUserRole('user');
-        setUserStatus('active');
-      }
+    const unsubAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
       setIsAuthReady(true);
     });
 
@@ -339,11 +343,60 @@ export default function LordFlixSupreme() {
     };
   }, []);
 
+  // --- 2. USER DATA LISTENERS ---
+  useEffect(() => {
+    if (!user) {
+      setUserRole('user');
+      setUserStatus('active');
+      setWatchlist([]);
+      setHistory([]);
+      return;
+    }
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const unsubUser = onSnapshot(userDocRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setUserRole(data.role || 'user');
+        setUserStatus(data.status || 'active');
+      } else {
+        const isDefaultAdmin = user.email === "LordJunnior@gmail.com";
+        setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          photoURL: user.photoURL,
+          role: isDefaultAdmin ? 'admin' : 'user',
+          status: 'active',
+          lastActive: serverTimestamp()
+        }).catch(err => handleFirestoreError(err, OperationType.CREATE, `users/${user.uid}`));
+      }
+    }, (err) => handleFirestoreError(err, OperationType.GET, `users/${user.uid}`));
+
+    const unsubWatchlist = onSnapshot(collection(db, 'users', user.uid, 'watchlist'), (snapshot) => {
+      const items = snapshot.docs.map(doc => doc.data());
+      setWatchlist(items);
+    });
+
+    const unsubHistory = onSnapshot(
+      query(collection(db, 'users', user.uid, 'history'), orderBy('lastUpdated', 'desc'), limit(20)), 
+      (snapshot) => {
+        const items = snapshot.docs.map(doc => doc.data());
+        setHistory(items);
+      }
+    );
+
+    return () => {
+      unsubUser();
+      unsubWatchlist();
+      unsubHistory();
+    };
+  }, [user]);
+
+  // --- 3. TMDB DATA LOADING ---
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        console.log("Iniciando carregamento de dados do TMDB...");
         const [movies, tv, trending] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
@@ -354,11 +407,8 @@ export default function LordFlixSupreme() {
         const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
         const formattedTrending = trending.status === 'fulfilled' ? formatTMDBData(trending.value) : [];
 
-        console.log(`Dados carregados: Filmes(${formattedMovies.length}), Séries(${formattedTv.length}), Trending(${formattedTrending.length})`);
-
         setCategorias(prev => {
           const newCats = [...prev];
-          // Mapeamos as categorias iniciais para garantir que os dados do TMDB entrem nos lugares certos
           if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
           if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
           if (formattedTrending.length > 0) newCats[2] = { ...newCats[2], filmes: formattedTrending };
@@ -953,7 +1003,7 @@ export default function LordFlixSupreme() {
             <div className="w-20 h-20 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-          categoriasFiltradas.map((cat, idx) => (
+          (categoriasFiltradas || []).map((cat, idx) => (
             <section key={idx} className="px-8 md:px-20">
               <div className="flex items-center gap-6 mb-10">
                 <h2 className="text-3xl font-sans font-black uppercase tracking-tighter">{cat.nome}</h2>
@@ -965,7 +1015,7 @@ export default function LordFlixSupreme() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 pb-8">
-                {cat.filmes.map((filme) => (
+                {(cat.filmes || []).map((filme: any) => (
                   <MoviePoster 
                     key={filme.id} 
                     filme={filme} 

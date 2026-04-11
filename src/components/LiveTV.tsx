@@ -16,8 +16,11 @@ import {
   Globe,
   Zap,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Shield,
+  Settings
 } from 'lucide-react';
+import { LIVE_CHANNELS } from '../constants/channels';
 
 const CATEGORIES = [
   { id: 'esportes', name: 'Esportes', icon: Dribbble },
@@ -26,66 +29,14 @@ const CATEGORIES = [
   { id: 'documentarios', name: 'Documentários', icon: Globe },
 ];
 
-const LIVE_CHANNELS = [
-  {
-    id: 'lord-sports-1',
-    name: 'Lord Sports Premium',
-    category: 'esportes',
-    logo: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#22d3ee'
-  },
-  {
-    id: 'lord-cinema-1',
-    name: 'Lord Cinema Elite',
-    category: 'cinema',
-    logo: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#f59e0b'
-  },
-  {
-    id: 'lord-news-1',
-    name: 'Lord News 24h',
-    category: 'noticias',
-    logo: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#ef4444'
-  },
-  {
-    id: 'lord-nature-1',
-    name: 'Lord Nature Global',
-    category: 'documentarios',
-    logo: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#10b981'
-  },
-  {
-    id: 'lord-music-1',
-    name: 'Lord Music Live',
-    category: 'cinema',
-    logo: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#a855f7'
-  },
-  {
-    id: 'lord-tech-1',
-    name: 'Lord Tech World',
-    category: 'noticias',
-    logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
-    stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
-    color: '#3b82f6'
-  },
-];
+interface LiveTVProps {
+  onClose: () => void;
+  currentChannel: typeof LIVE_CHANNELS[0];
+  onChannelChange: (channel: typeof LIVE_CHANNELS[0]) => void;
+}
 
-export default function LiveTV({ onClose }: { onClose: () => void }) {
-  const [selectedCategory, setSelectedCategory] = useState('esportes');
-  const [currentChannel, setCurrentChannel] = useState(LIVE_CHANNELS[0]);
+export default function LiveTV({ onClose, currentChannel, onChannelChange }: LiveTVProps) {
+  const [selectedCategory, setSelectedCategory] = useState(currentChannel.category);
   const [playing, setPlaying] = useState(true);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
@@ -97,6 +48,25 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
   const hlsRef = useRef<Hls | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Keyboard Navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const currentIndex = LIVE_CHANNELS.findIndex(c => c.id === currentChannel.id);
+      if (e.key === 'ArrowRight') {
+        const nextIndex = (currentIndex + 1) % LIVE_CHANNELS.length;
+        onChannelChange(LIVE_CHANNELS[nextIndex]);
+      } else if (e.key === 'ArrowLeft') {
+        const prevIndex = (currentIndex - 1 + LIVE_CHANNELS.length) % LIVE_CHANNELS.length;
+        onChannelChange(LIVE_CHANNELS[prevIndex]);
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentChannel, onChannelChange, onClose]);
 
   useEffect(() => {
     const initPlayer = () => {
@@ -189,7 +159,7 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
   const filteredChannels = LIVE_CHANNELS.filter(c => c.category === selectedCategory);
 
   return (
-    <div className="fixed inset-0 z-[300] bg-[#050505] flex overflow-hidden selection:bg-cyan-500 font-sans text-white">
+    <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex overflow-hidden selection:bg-cyan-500 font-sans text-white">
       {/* ATMOSPHERIC BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -203,7 +173,7 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* NAVEGAÇÃO LATERAL MAGNÉTICA */}
-      <aside className="w-24 md:w-28 bg-black/60 backdrop-blur-3xl border-r border-white/5 flex flex-col items-center py-12 gap-12 z-50">
+      <aside className="w-24 md:w-28 bg-black/40 backdrop-blur-2xl border-r border-white/5 flex flex-col items-center py-12 gap-12 z-50">
         <motion.div 
           whileHover={{ scale: 1.1, rotate: 5 }}
           className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(34,211,238,0.4)] cursor-pointer"
@@ -245,7 +215,7 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
       {/* CONTEÚDO PRINCIPAL */}
       <main className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* PLAYER CINEMATIC VIEW */}
-        <section className="flex-[0.65] p-6 md:p-8 flex items-center justify-center">
+        <section className="flex-[0.50] p-6 md:p-8 flex items-center justify-center relative">
           <div 
             ref={containerRef}
             className="relative w-full h-full max-w-7xl group overflow-hidden rounded-[48px] border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.9)] bg-black"
@@ -275,12 +245,21 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
               )}
             </AnimatePresence>
 
-            <video 
-              ref={videoRef}
-              className="w-full h-full object-contain"
-              onClick={() => setPlaying(!playing)}
-              playsInline
-            />
+            <div className="relative w-full h-full">
+              <video 
+                ref={videoRef}
+                className="w-full h-full object-contain"
+                onClick={() => setPlaying(!playing)}
+                playsInline
+                referrerPolicy="no-referrer"
+              />
+              {/* DEBUG VISUAL */}
+              <div className="absolute bottom-4 left-4 z-[100] bg-black/80 px-4 py-2 rounded-lg border border-white/20 pointer-events-none">
+                <p className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest">
+                  URL CARREGADA: <span className="text-white lowercase">{currentChannel.stream}</span>
+                </p>
+              </div>
+            </div>
 
             {/* TOP INFO BAR */}
             <div className={`absolute top-10 left-10 right-10 z-40 flex items-center justify-between transition-all duration-700 ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
@@ -293,13 +272,6 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
                   <span className="font-black text-xs tracking-[0.3em] uppercase text-white/80">{currentChannel.name}</span>
                   <div className="w-px h-4 bg-white/10" />
                   <span className="font-bold text-[10px] tracking-widest uppercase text-cyan-500">{currentChannel.quality}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-3">
-                  <Zap className="w-4 h-4 text-cyan-500" />
-                  <span className="font-black text-[10px] tracking-widest uppercase text-white/60">Latência Zero Ativada</span>
                 </div>
               </div>
             </div>
@@ -353,27 +325,6 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
                         </button>
                       </div>
                     </div>
-
-                    {/* ZAPPING BAR (TROCA RÁPIDA) */}
-                    <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar mask-fade-edges">
-                      {LIVE_CHANNELS.map(ch => (
-                        <button
-                          key={ch.id}
-                          onClick={() => setCurrentChannel(ch)}
-                          className={`flex-shrink-0 group relative w-48 h-24 rounded-[24px] overflow-hidden border-2 transition-all duration-500 ${currentChannel.id === ch.id ? 'border-cyan-500 scale-105 shadow-[0_0_30px_rgba(34,211,238,0.3)]' : 'border-white/5 hover:border-white/20'}`}
-                        >
-                          <img src={ch.logo} alt={ch.name} className="w-full h-full object-cover opacity-40 group-hover:opacity-70 transition-opacity" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                          <div className="absolute bottom-4 left-4 right-4 text-left">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-white truncate">{ch.name}</p>
-                            <span className="text-[7px] font-bold text-cyan-500 uppercase tracking-widest">{ch.quality}</span>
-                          </div>
-                          {currentChannel.id === ch.id && (
-                            <div className="absolute top-3 right-3 w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(34,211,238,1)] animate-pulse" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
                   </div>
                 </motion.div>
               )}
@@ -381,56 +332,109 @@ export default function LiveTV({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
-        {/* GRID DINÂMICO DE ALTO PADRÃO (GLASSMORPHISM) */}
-        <section className="flex-[0.35] px-10 pb-10 overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between mb-8">
+        {/* 3D CAROUSEL DE CANAIS (SUPREME) */}
+        <section className="flex-[0.50] px-10 pb-10 overflow-hidden flex flex-col justify-center relative">
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+             <h1 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[18rem] font-black uppercase italic tracking-tighter text-white/[0.03] whitespace-nowrap select-none">
+               LORD VISION LIVE
+             </h1>
+          </div>
+
+          <div className="flex items-center justify-between mb-16 relative z-10">
             <div className="flex flex-col">
-              <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Grade de Canais</h3>
-              <p className="text-[10px] font-bold text-silver/40 uppercase tracking-[0.4em] mt-1">Lord Vision • Transmissão via Fibra Direct</p>
+              <div className="flex items-center gap-4 mb-2">
+                <span className="text-cyan-500 font-black text-[10px] uppercase tracking-[0.6em]">Premium Broadcast</span>
+                <div className="w-12 h-px bg-cyan-500/30" />
+              </div>
+              <h3 className="text-6xl font-black uppercase italic tracking-tighter text-white leading-none">Canais de Elite</h3>
+              <p className="text-[14px] font-bold text-white/30 uppercase tracking-[0.5em] mt-4">Navegação Mercedes-Benz • Use as Setas do Teclado</p>
             </div>
-            <div className="flex gap-3">
-              <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-cyan-500 transition-all flex items-center justify-center"><ChevronLeft className="w-6 h-6" /></button>
-              <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-cyan-500 transition-all flex items-center justify-center"><ChevronRight className="w-6 h-6" /></button>
+            <div className="flex gap-6">
+              <button 
+                onClick={() => {
+                  const idx = LIVE_CHANNELS.findIndex(c => c.id === currentChannel.id);
+                  onChannelChange(LIVE_CHANNELS[(idx - 1 + LIVE_CHANNELS.length) % LIVE_CHANNELS.length]);
+                }}
+                className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-cyan-500 hover:border-cyan-500 transition-all flex items-center justify-center shadow-2xl group"
+              >
+                <ChevronLeft className="w-10 h-10 group-active:scale-75 transition-transform" />
+              </button>
+              <button 
+                onClick={() => {
+                  const idx = LIVE_CHANNELS.findIndex(c => c.id === currentChannel.id);
+                  onChannelChange(LIVE_CHANNELS[(idx + 1) % LIVE_CHANNELS.length]);
+                }}
+                className="w-20 h-20 rounded-[32px] bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-cyan-500 hover:border-cyan-500 transition-all flex items-center justify-center shadow-2xl group"
+              >
+                <ChevronRight className="w-10 h-10 group-active:scale-75 transition-transform" />
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 overflow-y-auto no-scrollbar pr-2">
-            {filteredChannels.map(ch => (
-              <motion.button
-                key={ch.id}
-                whileHover={{ scale: 1.05, y: -8 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setCurrentChannel(ch)}
-                className={`group relative aspect-video rounded-[32px] overflow-hidden border-2 transition-all duration-700 ${currentChannel.id === ch.id ? 'bg-white/10 border-cyan-500 shadow-[0_0_60px_rgba(34,211,238,0.2)]' : 'bg-white/5 border-white/10 hover:border-white/30'}`}
-              >
-                <img src={ch.logo} alt={ch.name} className="w-full h-full object-cover opacity-40 group-hover:opacity-90 transition-all duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+          <div className="relative h-80 flex items-center justify-center perspective-[3000px] z-10">
+            <div className="flex gap-16 items-center">
+              {LIVE_CHANNELS.map((ch, index) => {
+                const currentIndex = LIVE_CHANNELS.findIndex(c => c.id === currentChannel.id);
+                const offset = index - currentIndex;
+                const isActive = offset === 0;
                 
-                <div className="absolute top-5 right-5">
-                  <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full shadow-xl">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white">Live</span>
-                  </div>
-                </div>
+                return (
+                  <motion.div
+                    key={ch.id}
+                    initial={false}
+                    animate={{
+                      x: offset * 380,
+                      scale: isActive ? 1.3 : 0.75,
+                      z: isActive ? 200 : -400,
+                      rotateY: offset * -25,
+                      opacity: Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.4,
+                    }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                    onClick={() => onChannelChange(ch)}
+                    className={`absolute w-[450px] aspect-video rounded-[56px] overflow-hidden cursor-pointer border-4 transition-all duration-700 ${isActive ? 'border-white shadow-[0_0_100px_rgba(255,255,255,0.4)]' : 'border-white/5 grayscale hover:grayscale-0'}`}
+                  >
+                    <img src={ch.logo} alt={ch.name} className="w-full h-full object-cover" />
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent transition-opacity ${isActive ? 'opacity-90' : 'opacity-40'}`} />
+                    
+                    {/* REFLECTION EFFECT */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                <div className="absolute bottom-6 left-6 right-6 text-left">
-                  <p className="text-sm font-black uppercase italic tracking-tighter text-white mb-1 truncate">{ch.name}</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-cyan-500 rounded-full" />
-                    <span className="text-[9px] font-bold text-silver/40 uppercase tracking-widest">{ch.quality}</span>
-                  </div>
-                </div>
+                    {isActive && (
+                      <div className="absolute inset-0 flex flex-col justify-end p-12">
+                        <motion.div 
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="flex items-center gap-4 mb-6"
+                        >
+                          <div className="flex items-center gap-3 bg-red-600 px-5 py-2 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)]">
+                            <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+                            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">4K ULTRA LIVE</span>
+                          </div>
+                          <span className="text-cyan-400 font-black text-[11px] uppercase tracking-[0.4em]">{ch.category}</span>
+                        </motion.div>
+                        <motion.h4 
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none"
+                        >
+                          {ch.name}
+                        </motion.h4>
+                      </div>
+                    )}
 
-                {/* DYNAMIC SHINE EFFECT */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                  <div 
-                    className="absolute -inset-20 blur-[80px] opacity-20 animate-pulse"
-                    style={{ backgroundColor: ch.color }}
-                  />
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                </div>
-              </motion.button>
-            ))}
+                    {/* DYNAMIC GLOW FOR ACTIVE */}
+                    {isActive && (
+                      <motion.div 
+                        layoutId="active-glow"
+                        className="absolute inset-0 bg-white/5 pointer-events-none"
+                        style={{ boxShadow: `inset 0 0 100px ${ch.color}20` }}
+                      />
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </section>
       </main>

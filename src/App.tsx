@@ -12,6 +12,8 @@ import { ProfileDashboard } from './components/ProfileDashboard';
 import { NotificationPanel } from './components/NotificationPanel';
 import SupportPage from './components/SupportPage';
 import LiveTV from './components/LiveTV';
+import BackgroundStream from './components/BackgroundStream';
+import { LIVE_CHANNELS } from './constants/channels';
 import { AdPlayer } from './components/AdPlayer';
 import { getMovies, searchMovies, getVideos, getMovieDetails } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
@@ -290,6 +292,7 @@ function LordFlixSupreme() {
   const [filmeEmReproducao, setFilmeEmReproducao] = useState<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLiveTV, setShowLiveTV] = useState(false);
+  const [currentLiveChannel, setCurrentLiveChannel] = useState(LIVE_CHANNELS[0]);
   const [notifications, setNotifications] = useState<any[]>([
     {
       id: '1',
@@ -892,10 +895,19 @@ function LordFlixSupreme() {
         )}
       </AnimatePresence>
 
+      <BackgroundStream 
+        streamUrl={currentLiveChannel.stream} 
+        active={true} 
+      />
+
       {/* 3. PLAYER DE VÍDEO */}
       <AnimatePresence>
         {showLiveTV && (
-          <LiveTV onClose={() => setShowLiveTV(false)} />
+          <LiveTV 
+            onClose={() => setShowLiveTV(false)} 
+            currentChannel={currentLiveChannel}
+            onChannelChange={setCurrentLiveChannel}
+          />
         )}
         {filmeEmReproducao && (
           <LordPlayer 

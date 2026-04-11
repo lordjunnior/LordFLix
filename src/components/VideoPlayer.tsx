@@ -286,14 +286,22 @@ export const LordPlayer = ({
     >
       <div className="relative w-full h-full flex items-center justify-center">
         {isEmbed ? (
-          <iframe
-            key={`${currentProvider}-${season}-${episode}`}
-            src={getEmbedUrl()}
-            className="w-full h-full border-none"
-            allowFullScreen
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-            referrerPolicy="no-referrer"
-          />
+          <div className="w-full h-full relative">
+            <iframe
+              key={`${currentProvider}-${season}-${episode}`}
+              src={getEmbedUrl()}
+              className="w-full h-full border-none"
+              allowFullScreen
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              referrerPolicy="no-referrer"
+            />
+            {/* DEBUG VISUAL */}
+            <div className="absolute bottom-4 left-4 z-[100] bg-black/80 px-4 py-2 rounded-lg border border-white/20 pointer-events-none">
+              <p className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest">
+                URL CARREGADA: <span className="text-white lowercase">{getEmbedUrl()}</span>
+              </p>
+            </div>
+          </div>
         ) : (
           <Player
             ref={playerRef}
@@ -322,21 +330,23 @@ export const LordPlayer = ({
           />
         )}
 
-        {/* OVERLAY CLICKABLE */}
-        <div 
-          className="absolute inset-0 z-10 cursor-pointer flex"
-          onClick={() => {
-            if (isLocked) {
-              setShowControls(true);
-              return;
-            }
-            handlePlayPause();
-          }}
-          onDoubleClick={handleToggleFullscreen}
-        >
-          <div className="flex-1 h-full" onDoubleClick={(e) => { e.stopPropagation(); rewind(); }} />
-          <div className="flex-1 h-full" onDoubleClick={(e) => { e.stopPropagation(); fastForward(); }} />
-        </div>
+        {/* OVERLAY CLICKABLE (ONLY FOR NON-EMBED) */}
+        {!isEmbed && (
+          <div 
+            className="absolute inset-0 z-10 cursor-pointer flex"
+            onClick={() => {
+              if (isLocked) {
+                setShowControls(true);
+                return;
+              }
+              handlePlayPause();
+            }}
+            onDoubleClick={handleToggleFullscreen}
+          >
+            <div className="flex-1 h-full" onDoubleClick={(e) => { e.stopPropagation(); rewind(); }} />
+            <div className="flex-1 h-full" onDoubleClick={(e) => { e.stopPropagation(); fastForward(); }} />
+          </div>
+        )}
 
         {/* SEEK INDICATORS */}
         <AnimatePresence>

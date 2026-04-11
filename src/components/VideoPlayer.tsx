@@ -21,7 +21,8 @@ import {
   X,
   FastForward,
   Rewind,
-  Shield
+  Shield,
+  Globe
 } from 'lucide-react';
 
 export const LordPlayer = ({ 
@@ -56,6 +57,23 @@ export const LordPlayer = ({
   const [isLocked, setIsLocked] = useState(false);
   const [isShadowBanned, setIsShadowBanned] = useState(false);
   const [showSeekIndicator, setShowSeekIndicator] = useState<{ type: 'rewind' | 'forward', visible: boolean }>({ type: 'forward', visible: false });
+  const [currentProvider, setCurrentProvider] = useState('vidsrc');
+  const [showProviderSelector, setShowProviderSelector] = useState(false);
+
+  const providers = [
+    { id: 'vidsrc', name: 'Vidsrc (Ultra HD)', url: (id: string, type: string) => `https://vidsrc.to/embed/${type === 'tv' ? 'tv' : 'movie'}/${id}` },
+    { id: 'vidsrcme', name: 'Vidsrc.me (Multi)', url: (id: string, type: string) => `https://vidsrc.me/embed/${type === 'tv' ? 'tv' : 'movie'}?tmdb=${id}` },
+    { id: 'superembed', name: 'SuperEmbed (Global)', url: (id: string, type: string) => `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+    { id: 'embedsu', name: 'Embed.su (Elite)', url: (id: string, type: string) => `https://embed.su/embed/${type === 'tv' ? 'tv' : 'movie'}/${id}` },
+  ];
+
+  const getEmbedUrl = () => {
+    if (src.includes('youtube.com') || src.includes('akamaihd.net')) return src;
+    const provider = providers.find(p => p.id === currentProvider) || providers[0];
+    return provider.url(movieId, media_type);
+  };
+
+  const isEmbed = getEmbedUrl().includes('embed') || getEmbedUrl().includes('multiembed');
 
   // Monitor Shadow Ban Status
   useEffect(() => {
@@ -242,31 +260,41 @@ export const LordPlayer = ({
       onClick={() => setShowControls(true)}
     >
       <div className="relative w-full h-full flex items-center justify-center">
-        <Player
-          ref={playerRef}
-          url={src}
-          width="100%"
-          height="100%"
-          playing={playing && !isShadowBanned}
-          volume={volume}
-          muted={muted}
-          playbackRate={playbackRate}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          onEnded={() => setPlaying(false)}
-          config={{
-            youtube: { 
-              playerVars: { 
-                showinfo: 0, 
-                controls: 0, 
-                disablekb: 1, 
-                rel: 0 
-              }
-            },
-            file: { attributes: { controlsList: 'nodownload' } }
-          } as any}
-          style={{ pointerEvents: 'none' }}
-        />
+        {isEmbed ? (
+          <iframe
+            src={getEmbedUrl()}
+            className="w-full h-full border-none"
+            allowFullScreen
+            allow="autoplay; encrypted-media"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <Player
+            ref={playerRef}
+            url={getEmbedUrl()}
+            width="100%"
+            height="100%"
+            playing={playing && !isShadowBanned}
+            volume={volume}
+            muted={muted}
+            playbackRate={playbackRate}
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+            onEnded={() => setPlaying(false)}
+            config={{
+              youtube: { 
+                playerVars: { 
+                  showinfo: 0, 
+                  controls: 0, 
+                  disablekb: 1, 
+                  rel: 0 
+                }
+              },
+              file: { attributes: { controlsList: 'nodownload' } }
+            } as any}
+            style={{ pointerEvents: 'none' }}
+          />
+        )}
 
         {/* OVERLAY CLICKABLE */}
         <div 
@@ -328,6 +356,13 @@ export const LordPlayer = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setShowProviderSelector(!showProviderSelector)}
+                    className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${showProviderSelector ? 'bg-gold border-gold text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                    title="Trocar Provedor de Sinal"
+                  >
+                    <Globe className="w-5 h-5" />
+                  </button>
                   <button 
                     onClick={() => setIsLocked(!isLocked)}
                     className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${isLocked ? 'bg-cyan-500 border-cyan-500 text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
@@ -467,6 +502,41 @@ export const LordPlayer = ({
                       </AnimatePresence>
                     </div>
 
+                    {/* PROVIDER SELECTOR MODAL */}
+                    <AnimatePresence>
+                      {showProviderSelector && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 min-w-[280px] shadow-[0_0_50px_rgba(0,0,0,0.8)]"
+                        >
+                          <div className="flex items-center gap-3 mb-6">
+                            <Globe className="w-4 h-4 text-gold" />
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Provedores de Sinal</h3>
+                          </div>
+                          <div className="space-y-2">
+                            {providers.map(p => (
+                              <button
+                                key={p.id}
+                                onClick={() => {
+                                  setCurrentProvider(p.id);
+                                  setShowProviderSelector(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${currentProvider === p.id ? 'bg-gold border-gold text-black' : 'bg-white/5 border-white/5 text-silver/60 hover:bg-white/10 hover:border-white/10'}`}
+                              >
+                                {p.name}
+                                {currentProvider === p.id && <Shield className="w-3 h-3" />}
+                              </button>
+                            ))}
+                          </div>
+                          <p className="mt-6 text-[8px] font-bold text-silver/20 uppercase tracking-widest text-center leading-relaxed">
+                            Se o sinal cair ou travar, <br/> alterne entre os provedores de elite.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* FULLSCREEN */}
                     <button onClick={handleToggleFullscreen} className="text-white/60 hover:text-white transition-colors">
                       {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
@@ -481,7 +551,7 @@ export const LordPlayer = ({
         {/* LOADING INDICATOR */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <AnimatePresence>
-            {(!duration || isShadowBanned) && (
+            {(!duration && !isEmbed || isShadowBanned) ? (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -490,6 +560,15 @@ export const LordPlayer = ({
               >
                 <div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 animate-pulse">Buffers de Elite Ativos</span>
+              </motion.div>
+            ) : isEmbed && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 flex items-center gap-3"
+              >
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[9px] font-black text-white uppercase tracking-widest">Sinal de Elite Estabilizado</span>
               </motion.div>
             )}
           </AnimatePresence>

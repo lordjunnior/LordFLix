@@ -138,7 +138,7 @@ const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item
   resumo: item.overview,
   img: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
   bg: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
-  src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+  src: "",
   trailer: "",
   media_type: item.media_type || (item.title ? "movie" : "tv")
 }));
@@ -542,18 +542,10 @@ function LordFlixSupreme() {
       setFilmeEmReproducao(filme);
       return;
     }
-    try {
-      const videos = await getVideos(filme.id, filme.media_type || "movie");
-      const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
-      const src = trailer 
-        ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
-        : filme.src;
-      
-      setFilmeEmReproducao({ ...filme, src });
-    } catch (error) {
-      console.error("Erro ao carregar vídeo:", error);
-      setFilmeEmReproducao(filme);
-    }
+
+    // Para filmes/séries, usamos o ID do TMDB para os provedores de elite
+    // Não forçamos o trailer aqui, deixamos o LordPlayer decidir
+    setFilmeEmReproducao({ ...filme, src: filme.src || '' });
   };
 
   const handleAdComplete = async () => {
@@ -566,18 +558,8 @@ function LordFlixSupreme() {
         setFilmeEmReproducao(filme);
         return;
       }
-      try {
-        const videos = await getVideos(filme.id, filme.media_type || "movie");
-        const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
-        const src = trailer 
-          ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
-          : filme.src;
-        
-        setFilmeEmReproducao({ ...filme, src });
-      } catch (error) {
-        console.error("Erro ao carregar vídeo:", error);
-        setFilmeEmReproducao(filme);
-      }
+      
+      setFilmeEmReproducao({ ...filme, src: filme.src || '' });
     }
   };
 
@@ -1200,6 +1182,17 @@ function LordFlixSupreme() {
                   >
                     Assistir Agora
                   </button>
+                  {filmeSelecionado.src && filmeSelecionado.src.includes('youtube') && (
+                    <button 
+                      onClick={() => {
+                        setFilmeEmReproducao(filmeSelecionado);
+                        setFilmeSelecionado(null);
+                      }}
+                      className="bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 flex-1 px-10 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-cyan-500/20 transition-all flex items-center justify-center gap-3"
+                    >
+                      Ver Trailer
+                    </button>
+                  )}
                   <button 
                     onClick={() => toggleWatchlist(filmeSelecionado)}
                     className="bg-white/5 text-white flex-1 px-10 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-white/10 transition-all border border-white/5 flex items-center justify-center gap-3"

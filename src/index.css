@@ -32,6 +32,10 @@
     animation: zoom 20s infinite alternate linear;
   }
 
+  .animate-gradient-x {
+    animation: gradient-x 15s ease infinite;
+  }
+
   .drop-shadow-neon {
     filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.8));
   }
@@ -40,6 +44,11 @@
 @keyframes zoom {
   from { transform: scale(1); }
   to { transform: scale(1.1); }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 @layer base {

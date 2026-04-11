@@ -159,31 +159,31 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -10 }}
-      whileFocus={{ y: -10, scale: 1.05 }}
+      whileHover={{ y: -12, scale: 1.02 }}
+      whileFocus={{ y: -12, scale: 1.05 }}
       tabIndex={0}
-      className={`movie-poster-container w-full aspect-[2/3] cursor-pointer group outline-none focus:ring-4 focus:ring-cyan-500/50 rounded-2xl transition-all ${type === 'release' ? 'release-glow' : ''}`}
+      className={`relative w-full aspect-[2/3] cursor-pointer group outline-none rounded-[32px] overflow-hidden transition-all duration-700 ${type === 'release' ? 'shadow-[0_0_40px_rgba(34,211,238,0.2)]' : 'shadow-2xl'}`}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
     >
       {(!isLoaded && !hasError) && (
-        <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-2 border-white/5 border-t-cyan-500 animate-spin"></div>
+        <div className="absolute inset-0 bg-zinc-900 animate-pulse flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full border-4 border-white/5 border-t-cyan-500 animate-spin"></div>
         </div>
       )}
       
       {hasError ? (
-        <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-            <span className="text-gold font-black text-xl">!</span>
+        <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center border border-white/5">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+            <X className="text-red-500 w-8 h-8" />
           </div>
-          <p className="text-[8px] font-black uppercase tracking-widest text-silver/40">Sinal Indisponível</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Sinal Indisponível</p>
         </div>
       ) : (
         <img 
           src={filme.img} 
-          alt={`Poster oficial do filme ${filme.titulo} - Qualidade Ultra HD`} 
-          className={`movie-poster-img ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'noir-treatment' : ''}`}
+          alt={filme.titulo} 
+          className={`w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'grayscale-[0.8] contrast-[1.2]' : 'contrast-[1.1] saturate-[1.1]'}`}
           referrerPolicy="no-referrer"
           loading="lazy"
           onLoad={() => setIsLoaded(true)}
@@ -193,52 +193,63 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
           }}
         />
       )}
-      <div className="vignette-layer"></div>
-      
-      {/* Overlay de PNL + CTA */}
-      <div className="glass-pnl-overlay">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex flex-wrap gap-2">
-            <span className="glass-tag">{filme.ano}</span>
-            <span className="glass-tag text-cyan-400 border-cyan-400/30">4K</span>
-            <span className="glass-tag text-gold border-gold/30">Dub</span>
-          </div>
-          {filme.ano === 'LIVE' && (
-            <div className="flex items-center gap-1.5 bg-cyan-500/20 px-2 py-0.5 rounded-sm border border-cyan-500/30">
-              <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
-              <span className="text-[8px] font-black text-cyan-500 uppercase tracking-widest">Live</span>
-            </div>
-          )}
-        </div>
-        <h3 className="pnl-title">{filme.titulo}</h3>
-        {filme.ano === 'LIVE' && (
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`w-0.5 h-2 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/10'}`}></div>
-              ))}
-            </div>
-            <span className="text-[7px] font-black text-silver/40 uppercase tracking-widest">Signal: Stable</span>
-          </div>
-        )}
-        <p className="pnl-description line-clamp-2">
-          {filme.resumo || "Uma obra-prima cinematográfica que redefine o gênero."}
-        </p>
-        <button className="cta-supreme-mini hover:bg-cyan-500">
-          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : 'Assistir Agora'}
-        </button>
 
-        {/* PROGRESS BAR FOR HISTORY */}
-        {filme.isHistory && (
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${filme.progress}%` }}
-              className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)]"
-            />
+      {/* ATMOSPHERIC OVERLAYS */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-transparent to-blue-500/20" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      </div>
+      
+      {/* ELITE BADGES */}
+      <div className="absolute top-5 right-5 flex flex-col gap-3 items-end z-20">
+        <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-3 py-1.5 rounded-full shadow-2xl">
+          <span className="text-[10px] font-black text-white tracking-widest uppercase">{filme.nota}</span>
+        </div>
+        {filme.ano === 'LIVE' && (
+          <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white italic">Live</span>
           </div>
         )}
       </div>
+
+      {/* CONTENT INFO */}
+      <div className="absolute inset-x-0 bottom-0 p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+        <div className="flex flex-wrap gap-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+          <span className="bg-white/10 backdrop-blur-xl border border-white/20 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white">{filme.ano}</span>
+          <span className="bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-cyan-400">4K UHD</span>
+          <span className="bg-gold/20 backdrop-blur-xl border border-gold/30 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-gold-light">Dublado</span>
+        </div>
+
+        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] line-clamp-2">
+          {filme.titulo}
+        </h3>
+
+        <div className="flex items-center gap-3 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className={`w-1 h-1 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/20'}`}></div>
+            ))}
+          </div>
+          <span className="text-[8px] font-bold text-silver/40 uppercase tracking-[0.3em]">Sinal Estabilizado</span>
+        </div>
+
+        <button className="w-full bg-white text-black py-3.5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all active:scale-95 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-300">
+          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : 'Assistir Agora'}
+        </button>
+      </div>
+
+      {/* PROGRESS BAR FOR HISTORY */}
+      {filme.isHistory && (
+        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/5">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${filme.progress}%` }}
+            className="h-full bg-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.6)]"
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -943,12 +954,12 @@ function LordFlixSupreme() {
               </span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.8] tracking-tighter uppercase mb-6">
-              ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">HORIZONTE</span>
+            <h1 className="text-6xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.75] tracking-tighter uppercase mb-8 italic">
+              ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span>
             </h1>
             
-            <p className="max-w-2xl text-zinc-300 text-lg md:text-2xl font-light leading-relaxed mb-10 drop-shadow-md">
-              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX.
+            <p className="max-w-2xl text-zinc-300 text-lg md:text-2xl font-medium leading-relaxed mb-12 drop-shadow-2xl">
+              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da <span className="text-white font-black">LORDFLIX SUPREME</span>.
             </p>
 
             {/* Busca Centralizada Estilo TMDB Elite com Voice Search Integrado */}
@@ -1050,16 +1061,19 @@ function LordFlixSupreme() {
         ) : (
           (categoriasFiltradas || []).map((cat, idx) => (
             <section key={idx} className="px-8 md:px-20">
-              <div className="flex items-center gap-6 mb-10">
-                <h2 className="text-3xl font-sans font-black uppercase tracking-tighter">{cat.nome}</h2>
-                <div className="flex bg-white/5 rounded-full p-1 border border-white/10">
-                  <span className={`px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${cat.type === 'live' ? 'bg-cyan-500 text-black' : 'bg-gold text-black'}`}>
-                    {cat.type === 'live' ? 'Live' : 'Premium'}
+              <div className="flex items-center justify-between mb-12">
+                <div className="flex items-center gap-8">
+                  <h2 className="text-5xl font-black uppercase italic tracking-tighter text-white">{cat.nome}</h2>
+                  <div className="h-px w-32 bg-gradient-to-r from-cyan-500 to-transparent opacity-30" />
+                </div>
+                <div className="flex bg-white/5 backdrop-blur-xl rounded-full p-1.5 border border-white/10">
+                  <span className={`px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] ${cat.type === 'live' ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.5)]' : 'bg-white text-black'}`}>
+                    {cat.type === 'live' ? 'Live Stream' : 'Premium Access'}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 pb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-8 pb-12">
                 {(cat.filmes || []).map((filme: any) => (
                   <MoviePoster 
                     key={filme.id} 
@@ -1073,62 +1087,61 @@ function LordFlixSupreme() {
           ))
         )}
 
-        {/* GRADE DE PROGRAMAÇÃO SUPREME (TV) */}
-        <section className="px-8 md:px-20">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <h2 className="text-4xl font-display font-black uppercase italic tracking-tighter">Grade de Programação Supreme</h2>
-              <p className="text-silver/20 uppercase tracking-[0.3em] text-[10px] font-bold mt-2">A programação que não dorme. Onde as séries de elite encontram seu lar.</p>
+        {/* LORD VISION LIVE (SEÇÃO DE ELITE) */}
+        <section className="px-8 md:px-20 relative overflow-hidden py-24">
+          {/* BACKGROUND GLOW */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
+          
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 relative z-10">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Live Now</span>
+                </div>
+                <span className="text-cyan-500 font-black tracking-[0.4em] text-[10px] uppercase">Lord Vision Broadcast System</span>
+              </div>
+              <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-white leading-none">Lord Vision <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Live TV</span></h2>
+              <p className="text-zinc-400 text-lg md:text-xl font-medium mt-8 leading-relaxed">A revolução da TV ao vivo. Transmissão via satélite com latência zero e qualidade 4K Ultra HD. Sinta a imersão total.</p>
             </div>
             <button 
-              onClick={() => setView('guia')}
-              className="border border-gold text-gold px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-gold hover:text-black transition-all"
+              onClick={() => setShowLiveTV(true)}
+              className="group relative bg-white text-black px-12 py-5 rounded-full font-black text-xs uppercase tracking-[0.4em] hover:bg-cyan-500 transition-all active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] overflow-hidden"
             >
-              Acessar Grade Supreme
+              <span className="relative z-10">Sintonizar Agora</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categorias[3].filmes.slice(0, 4).map((item) => (
-              <div 
-                key={`tv-guide-${item.id}`} 
-                onClick={() => handleFilmeSelecionado(item)}
-                className="group relative bg-zinc-900 border-b border-cyan-500/20 hover:border-cyan-500 transition-all cursor-pointer rounded-xl overflow-hidden"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+            {[
+              { title: 'Lord Sports Premium', category: 'Esportes', img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop' },
+              { title: 'Lord Cinema Elite', category: 'Cinema', img: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop' },
+              { title: 'Lord News 24h', category: 'Notícias', img: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop' }
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -15, scale: 1.02 }}
+                onClick={() => setShowLiveTV(true)}
+                className="group relative aspect-video rounded-[40px] overflow-hidden border-2 border-white/5 hover:border-cyan-500/50 transition-all duration-700 cursor-pointer shadow-2xl bg-zinc-900"
               >
-                <div className="aspect-video overflow-hidden relative">
-                  <img 
-                    src={item.bg || item.img} 
-                    alt={item.titulo} 
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                      <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse"></span>
-                      <span className="text-[8px] font-black text-white uppercase tracking-widest">On Air</span>
-                    </div>
-                  </div>
-                </div>
+                <img src={item.img} alt={item.title} className="w-full h-full object-cover opacity-40 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-black bg-cyan-500 text-black px-2 py-0.5 uppercase">
-                      Lord Broadcast
-                    </span>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className={`w-0.5 h-2 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/10'}`}></div>
-                      ))}
-                    </div>
+                <div className="absolute top-6 right-6">
+                  <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-full">
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">4K Ultra HD</span>
                   </div>
-                  <h3 className="text-white font-bold text-lg truncate group-hover:text-cyan-500 transition-colors">
-                    {item.titulo}
-                  </h3>
-                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-2">
-                    {item.ano} • {item.titulo.includes('Sports') ? 'Sports Network' : item.titulo.includes('News') ? 'Global News' : 'Premium Content'}
-                  </p>
                 </div>
-              </div>
+
+                <div className="absolute bottom-8 left-8 right-8">
+                  <span className="text-cyan-500 font-black text-[9px] uppercase tracking-[0.3em] mb-2 block">{item.category}</span>
+                  <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{item.title}</h3>
+                </div>
+
+                {/* SHINE EFFECT */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </motion.div>
             ))}
           </div>
         </section>

@@ -372,37 +372,44 @@ export const LordPlayer = ({
                   >
                     {title} {media_type === 'tv' && `• S${season} E${episode}`}
                   </motion.h2>
-                  <div className="flex flex-wrap gap-4 mt-4">
-                    {providers.map(p => (
+                  <div className="flex flex-wrap gap-4 mt-6">
+                    {providers.map((p, idx) => (
                       <button
                         key={p.id}
                         onClick={() => setCurrentProvider(p.id)}
-                        className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 ${currentProvider === p.id ? 'bg-cyan-500 border-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                        className={`group relative px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 overflow-hidden ${currentProvider === p.id ? 'bg-white border-white text-black shadow-[0_0_40px_rgba(255,255,255,0.3)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
                       >
-                        <div className={`w-1.5 h-1.5 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500'}`} />
-                        {p.name}
+                        <div className={`w-2 h-2 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,1)]'}`} />
+                        <span className="relative z-10">Sinal {idx + 1}: {p.name}</span>
+                        {currentProvider === p.id && (
+                          <motion.div 
+                            layoutId="active-provider-glow"
+                            className="absolute inset-0 bg-white opacity-10"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       </button>
                     ))}
                     {media_type === 'tv' && (
-                      <div className="flex gap-2">
-                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 gap-3">
-                          <span className="text-[8px] font-black text-silver/40 uppercase tracking-widest">Temporada</span>
+                      <div className="flex gap-3">
+                        <div className="flex items-center bg-black/40 backdrop-blur-2xl border-2 border-white/10 rounded-2xl px-6 py-3 gap-4">
+                          <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Temporada</span>
                           <input 
                             type="number" 
                             min={1} 
                             value={season} 
                             onChange={(e) => setSeason(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[12px] font-black w-8 outline-none border-b border-white/10 focus:border-cyan-500 transition-colors"
+                            className="bg-transparent text-white text-[14px] font-black w-10 outline-none border-b-2 border-white/10 focus:border-cyan-500 transition-colors text-center"
                           />
                         </div>
-                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 gap-3">
-                          <span className="text-[8px] font-black text-silver/40 uppercase tracking-widest">Episódio</span>
+                        <div className="flex items-center bg-black/40 backdrop-blur-2xl border-2 border-white/10 rounded-2xl px-6 py-3 gap-4">
+                          <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Episódio</span>
                           <input 
                             type="number" 
                             min={1} 
                             value={episode} 
                             onChange={(e) => setEpisode(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[12px] font-black w-8 outline-none border-b border-white/10 focus:border-cyan-500 transition-colors"
+                            className="bg-transparent text-white text-[14px] font-black w-10 outline-none border-b-2 border-white/10 focus:border-cyan-500 transition-colors text-center"
                           />
                         </div>
                       </div>

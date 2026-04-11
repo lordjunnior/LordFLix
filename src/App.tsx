@@ -341,19 +341,24 @@ export default function LordFlixSupreme() {
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        const [movies, tv, trending] = await Promise.all([
+        console.log("Iniciando carregamento de dados do TMDB...");
+        const [movies, tv, trending] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
           getMovies("trending")
         ]);
 
-        const formattedMovies = formatTMDBData(movies);
-        const formattedTv = formatTMDBData(tv);
-        const formattedTrending = formatTMDBData(trending);
+        const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
+        const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
+        const formattedTrending = trending.status === 'fulfilled' ? formatTMDBData(trending.value) : [];
+
+        console.log(`Dados carregados: Filmes(${formattedMovies.length}), Séries(${formattedTv.length}), Trending(${formattedTrending.length})`);
 
         setCategorias(prev => {
           const newCats = [...prev];
+          // Mapeamos as categorias iniciais para garantir que os dados do TMDB entrem nos lugares certos
           if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
           if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
           if (formattedTrending.length > 0) newCats[2] = { ...newCats[2], filmes: formattedTrending };
@@ -362,10 +367,11 @@ export default function LordFlixSupreme() {
         
         if (formattedTrending.length > 0) {
           setFilmeDestaque(formattedTrending[0]);
+        } else if (formattedMovies.length > 0) {
+          setFilmeDestaque(formattedMovies[0]);
         }
       } catch (error) {
-        console.error("Erro ao carregar dados do TMDB:", error);
-        // Não travamos o sistema, apenas usamos o que temos (Live TV e placeholders)
+        console.error("Erro crítico ao carregar dados do TMDB:", error);
       } finally {
         setLoading(false);
         setCarregado(true);
@@ -555,27 +561,6 @@ export default function LordFlixSupreme() {
       setTimeout(() => setPinErro(false), 1000);
     }
   };
-
-  // --- TELA DE ERRO (Fallback) ---
-  if (erroSistema) {
-    return (
-      <div className="bg-black h-screen flex flex-col items-center justify-center text-white p-10 text-center">
-        <div className="w-24 h-24 mb-8 rounded-full overflow-hidden border-2 border-cyan-500/30">
-          <img src="https://picsum.photos/seed/error/200/200" alt="Erro" className="w-full h-full object-cover grayscale opacity-50" referrerPolicy="no-referrer" />
-        </div>
-        <h1 className="text-3xl font-black uppercase italic mb-4">O projetor está sendo ajustado</h1>
-        <p className="text-silver/40 text-sm max-w-md uppercase tracking-widest leading-relaxed">
-          Nossos técnicos estão calibrando a lente 4K. Tente novamente em 30 segundos para a melhor experiência.
-        </p>
-        <button 
-          onClick={() => setErroSistema(false)}
-          className="mt-10 bg-white text-black px-10 py-4 rounded-full font-black text-[10px] tracking-widest uppercase hover:bg-cyan-500 hover:text-black transition-all"
-        >
-          Tentar Novamente
-        </button>
-      </div>
-    );
-  }
 
   // --- TELA DE CARREGAMENTO ---
   if (!isAuthReady || !carregado) {

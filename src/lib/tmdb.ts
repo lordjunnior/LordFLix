@@ -1,23 +1,51 @@
+const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
+const BASE_URL = "https://api.themoviedb.org/3";
+
+const headers = {
+  Authorization: `Bearer ${TMDB_TOKEN}`,
+  accept: 'application/json',
+};
+
 export async function getMovies(type: "movie" | "tv" | "trending") {
-  const res = await fetch(`/api/movies?type=${type}`);
+  if (!TMDB_TOKEN) {
+    console.warn("VITE_TMDB_TOKEN não configurado.");
+    return [];
+  }
+
+  const url = type === "trending" 
+    ? `${BASE_URL}/trending/all/week?language=pt-BR`
+    : `${BASE_URL}/${type}/popular?language=pt-BR`;
+
+  const res = await fetch(url, { headers });
   if (!res.ok) {
     throw new Error("Failed to fetch movies");
   }
-  return res.json();
+  const data = await res.json();
+  return data.results;
 }
 
 export async function searchMovies(query: string) {
-  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  if (!TMDB_TOKEN || !query) return [];
+
+  const url = `${BASE_URL}/search/multi?query=${encodeURIComponent(query)}&language=pt-BR`;
+
+  const res = await fetch(url, { headers });
   if (!res.ok) {
     throw new Error("Search failed");
   }
-  return res.json();
+  const data = await res.json();
+  return data.results;
 }
 
 export async function getVideos(id: number, type: "movie" | "tv" = "movie") {
-  const res = await fetch(`/api/videos/${id}?type=${type}`);
+  if (!TMDB_TOKEN) return [];
+
+  const url = `${BASE_URL}/${type}/${id}/videos?language=pt-BR`;
+
+  const res = await fetch(url, { headers });
   if (!res.ok) {
     throw new Error("Failed to fetch videos");
   }
-  return res.json();
+  const data = await res.json();
+  return data.results;
 }

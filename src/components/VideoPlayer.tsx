@@ -291,8 +291,7 @@ export const LordPlayer = ({
             src={getEmbedUrl()}
             className="w-full h-full border-none"
             allowFullScreen
-            allow="autoplay; encrypted-media; fullscreen"
-            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             referrerPolicy="no-referrer"
           />
         ) : (

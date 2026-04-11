@@ -59,21 +59,43 @@ export const LordPlayer = ({
   const [showSeekIndicator, setShowSeekIndicator] = useState<{ type: 'rewind' | 'forward', visible: boolean }>({ type: 'forward', visible: false });
   const [currentProvider, setCurrentProvider] = useState('vidsrc');
   const [showProviderSelector, setShowProviderSelector] = useState(false);
+  const [season, setSeason] = useState(1);
+  const [episode, setEpisode] = useState(1);
 
   const providers = [
-    { id: 'vidsrc', name: 'Vidsrc (Ultra HD)', url: (id: string, type: string) => `https://vidsrc.to/embed/${type === 'tv' ? 'tv' : 'movie'}/${id}` },
-    { id: 'vidsrcme', name: 'Vidsrc.me (Multi)', url: (id: string, type: string) => `https://vidsrc.me/embed/${type === 'tv' ? 'tv' : 'movie'}?tmdb=${id}` },
-    { id: 'superembed', name: 'SuperEmbed (Global)', url: (id: string, type: string) => `https://multiembed.mov/?video_id=${id}&tmdb=1` },
-    { id: 'embedsu', name: 'Embed.su (Elite)', url: (id: string, type: string) => `https://embed.su/embed/${type === 'tv' ? 'tv' : 'movie'}/${id}` },
+    { 
+      id: 'vidsrc', 
+      name: 'Sinal 1: Vidsrc (Elite)', 
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` 
+          : `https://vidsrc.cc/v2/embed/movie/${id}` 
+    },
+    { 
+      id: 'embedsu', 
+      name: 'Sinal 2: Embed.su (Premium)', 
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://embed.su/embed/tv/${id}/${s}/${e}` 
+          : `https://embed.su/embed/movie/${id}` 
+    },
+    { 
+      id: 'superembed', 
+      name: 'Sinal 3: SuperEmbed (Global)', 
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` 
+          : `https://multiembed.mov/?video_id=${id}&tmdb=1` 
+    },
   ];
 
   const getEmbedUrl = () => {
-    if (src.includes('youtube.com') || src.includes('akamaihd.net')) return src;
+    if (src.includes('akamaihd.net')) return src; // Live streams
     const provider = providers.find(p => p.id === currentProvider) || providers[0];
-    return provider.url(movieId, media_type);
+    return provider.url(movieId, media_type, season, episode);
   };
 
-  const isEmbed = getEmbedUrl().includes('embed') || getEmbedUrl().includes('multiembed');
+  const isEmbed = !src.includes('akamaihd.net');
 
   // Monitor Shadow Ban Status
   useEffect(() => {
@@ -344,15 +366,36 @@ export const LordPlayer = ({
                     animate={{ x: 0 }}
                     className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-aluminum"
                   >
-                    {title}
+                    {title} {media_type === 'tv' && `• S${season} E${episode}`}
                   </motion.h2>
                   <div className="flex gap-4 mt-2">
                     <span className="text-[10px] bg-cyan-500/20 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400 font-black tracking-widest uppercase">
-                      4K Ultra HD
+                      {currentProvider.toUpperCase()} ACTIVE
                     </span>
-                    <span className="text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-silver/60 font-black tracking-widest uppercase">
-                      Lord Engine v4.0
-                    </span>
+                    {media_type === 'tv' && (
+                      <div className="flex gap-2">
+                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 gap-2">
+                          <span className="text-[8px] font-black text-silver/40 uppercase">Temporada</span>
+                          <input 
+                            type="number" 
+                            min={1} 
+                            value={season} 
+                            onChange={(e) => setSeason(parseInt(e.target.value) || 1)}
+                            className="bg-transparent text-white text-[10px] font-black w-8 outline-none"
+                          />
+                        </div>
+                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 gap-2">
+                          <span className="text-[8px] font-black text-silver/40 uppercase">Episódio</span>
+                          <input 
+                            type="number" 
+                            min={1} 
+                            value={episode} 
+                            onChange={(e) => setEpisode(parseInt(e.target.value) || 1)}
+                            className="bg-transparent text-white text-[10px] font-black w-8 outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

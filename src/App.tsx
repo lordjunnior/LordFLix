@@ -608,8 +608,7 @@ function LordFlixSupreme() {
           ano: year,
           idade: ageRating,
           nota: details.vote_average?.toFixed(1) || prev.nota,
-          rotten: Math.round(details.vote_average * 10) + "%",
-          src: trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1` : prev.src
+          rotten: Math.round(details.vote_average * 10) + "%"
         }));
       }
     } catch (error) {
@@ -1229,17 +1228,6 @@ function LordFlixSupreme() {
                   >
                     Assistir Agora
                   </button>
-                  {filmeSelecionado.src && filmeSelecionado.src.includes('youtube') && (
-                    <button 
-                      onClick={() => {
-                        setFilmeEmReproducao(filmeSelecionado);
-                        setFilmeSelecionado(null);
-                      }}
-                      className="bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 flex-1 px-10 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-cyan-500/20 transition-all flex items-center justify-center gap-3"
-                    >
-                      Ver Trailer
-                    </button>
-                  )}
                   <button 
                     onClick={() => toggleWatchlist(filmeSelecionado)}
                     className="bg-white/5 text-white flex-1 px-10 py-6 rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-white/10 transition-all border border-white/5 flex items-center justify-center gap-3"

@@ -11,6 +11,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ProfileDashboard } from './components/ProfileDashboard';
 import { NotificationPanel } from './components/NotificationPanel';
 import SupportPage from './components/SupportPage';
+import LiveTV from './components/LiveTV';
 import { AdPlayer } from './components/AdPlayer';
 import { getMovies, searchMovies, getVideos, getMovieDetails } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
@@ -277,6 +278,7 @@ function LordFlixSupreme() {
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
   const [filmeEmReproducao, setFilmeEmReproducao] = useState<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showLiveTV, setShowLiveTV] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([
     {
       id: '1',
@@ -724,6 +726,14 @@ function LordFlixSupreme() {
           )}
 
           <button 
+            onClick={() => setShowLiveTV(true)}
+            className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/20 transition-all mr-2 flex items-center gap-2"
+          >
+            <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping" />
+            Lord Vision Live
+          </button>
+
+          <button 
             onClick={() => setView('suporte')}
             className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all mr-2"
           >
@@ -873,6 +883,9 @@ function LordFlixSupreme() {
 
       {/* 3. PLAYER DE VÍDEO */}
       <AnimatePresence>
+        {showLiveTV && (
+          <LiveTV onClose={() => setShowLiveTV(false)} />
+        )}
         {filmeEmReproducao && (
           <LordPlayer 
             src={filmeEmReproducao.src} 

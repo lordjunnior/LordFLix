@@ -37,6 +37,19 @@ export async function searchMovies(query: string) {
   return data.results;
 }
 
+export async function getMovieDetails(id: number, type: "movie" | "tv" = "movie") {
+  if (!TMDB_TOKEN) return null;
+
+  const url = `${BASE_URL}/${type}/${id}?language=pt-BR&append_to_response=credits,videos,release_dates,content_ratings`;
+
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    throw new Error("Failed to fetch movie details");
+  }
+  const data = await res.json();
+  return data;
+}
+
 export async function getVideos(id: number, type: "movie" | "tv" = "movie") {
   if (!TMDB_TOKEN) return [];
 

@@ -12,7 +12,7 @@ import { ProfileDashboard } from './components/ProfileDashboard';
 import { NotificationPanel } from './components/NotificationPanel';
 import SupportPage from './components/SupportPage';
 import { AdPlayer } from './components/AdPlayer';
-import { getMovies, searchMovies, getVideos } from './lib/tmdb';
+import { getMovies, searchMovies, getVideos, getMovieDetails } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
@@ -575,17 +575,45 @@ function LordFlixSupreme() {
   const handleFilmeSelecionado = async (filme: any) => {
     setFilmeSelecionado(filme);
     if (filme.ano === 'LIVE') return;
+    
     try {
-      const videos = await getVideos(filme.id, filme.media_type || "movie");
-      const trailer = videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
-      if (trailer) {
+      const mediaType = filme.media_type || "movie";
+      const details = await getMovieDetails(filme.id, mediaType);
+      if (details) {
+        const trailer = details.videos?.results?.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
+        const director = details.credits?.crew?.find((c: any) => c.job === "Director")?.name || "Não informado";
+        const actors = details.credits?.cast?.slice(0, 3).map((a: any) => a.name).join(", ") || "Não informado";
+        const genres = details.genres?.map((g: any) => g.name).join(", ") || "Não informado";
+        const countries = details.production_countries?.map((c: any) => c.name).join(", ") || "Não informado";
+        const runtime = details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : (details.episode_run_time?.[0] ? `${details.episode_run_time[0]}m` : "N/A");
+        const year = details.release_date ? details.release_date.split("-")[0] : (details.first_air_date ? details.first_air_date.split("-")[0] : "N/A");
+        
+        let ageRating = "14+";
+        if (mediaType === "movie") {
+          const release = details.release_dates?.results?.find((r: any) => r.iso_3166_1 === "BR") || details.release_dates?.results?.find((r: any) => r.iso_3166_1 === "US");
+          if (release && release.release_dates[0].certification) ageRating = release.release_dates[0].certification;
+        } else {
+          const rating = details.content_ratings?.results?.find((r: any) => r.iso_3166_1 === "BR") || details.content_ratings?.results?.find((r: any) => r.iso_3166_1 === "US");
+          if (rating && rating.rating) ageRating = rating.rating;
+        }
+
         setFilmeSelecionado((prev: any) => ({
           ...prev,
-          src: `https://www.youtube.com/embed/${trailer.key}?autoplay=1`
+          resumo: details.overview || prev.resumo,
+          diretor: director,
+          atores: actors,
+          genero: genres,
+          paises: countries,
+          duracao: runtime,
+          ano: year,
+          idade: ageRating,
+          nota: details.vote_average?.toFixed(1) || prev.nota,
+          rotten: Math.round(details.vote_average * 10) + "%",
+          src: trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1` : prev.src
         }));
       }
     } catch (error) {
-      console.error("Erro ao buscar trailer:", error);
+      console.error("Erro ao buscar detalhes do filme:", error);
     }
   };
 
@@ -1156,7 +1184,7 @@ function LordFlixSupreme() {
                 <div className="flex flex-wrap gap-4 mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-silver/40">
                   <span>{filmeSelecionado.ano}</span>
                   <span>{filmeSelecionado.duracao}</span>
-                  <span className="text-cyan-500 border border-cyan-500/30 px-2 py-0.5 rounded">{filmeSelecionado.idade}</span>
+                  <span className="text-cyan-500 border border-cyan-500/30 px-2 py-0.5 rounded">{filmeSelecionado.idade || '14+'}</span>
                   <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">Dublado + Legendado</span>
                   <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">4K Ultra HD</span>
                 </div>
@@ -1165,36 +1193,31 @@ function LordFlixSupreme() {
                   {filmeSelecionado.resumo}
                 </p>
 
-                {/* Internal Linking (SEO Teia) */}
-                <div className="mb-10">
-                  <h4 className="text-[10px] uppercase tracking-widest font-black text-silver/20 mb-4">Filmes Relacionados</h4>
-                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                    {categorias[0].filmes.slice(0, 3).map(f => (
-                      <div 
-                        key={`rel-${f.id}`}
-                        onClick={() => handleFilmeSelecionado(f)}
-                        className="w-24 aspect-[2/3] rounded-lg overflow-hidden border border-white/5 flex-shrink-0 cursor-pointer hover:border-cyan-500/50 transition-all"
-                      >
-                        <img src={f.img} alt={f.titulo} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      </div>
-                    ))}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-10 mb-12">
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Gênero: <span className="text-white ml-2">{filmeSelecionado.genero || 'Ação, Thriller'}</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Atores: <span className="text-white ml-2">{filmeSelecionado.atores || 'Não informado'}</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Diretor: <span className="text-white ml-2">{filmeSelecionado.diretor || 'Não informado'}</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    País: <span className="text-white ml-2">{filmeSelecionado.paises || 'EUA'}</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    IMDb: <span className="text-cyan-500 ml-2">{filmeSelecionado.nota}/10</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Rotten Tomatoes: <span className="text-red-500 ml-2">{filmeSelecionado.rotten || '85%'}</span>
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
+                    Qualidade: <span className="text-white ml-2">HD • 2K • 4K Ultra HD</span>
+                  </p>
                 </div>
 
-                <div className="space-y-4 mb-12">
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Direção: <span className="text-white ml-2">{filmeSelecionado.diretor}</span>
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Idiomas: <span className="text-white ml-2">Português (BR), Inglês (Original)</span>
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Legendas: <span className="text-white ml-2">Português, Inglês, Espanhol</span>
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-silver/20">
-                    Qualidade: <span className="text-white ml-2">4K Ultra HD • HDR10 • Dolby Atmos</span>
-                  </p>
-                </div>
+                {/* Internal Linking (SEO Teia) */}
 
                 <div className="flex flex-col md:flex-row gap-4">
                   <button 

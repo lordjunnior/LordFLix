@@ -65,7 +65,8 @@ export const LordPlayer = ({
   const providers = [
     { 
       id: 'vidsrc', 
-      name: 'Sinal 1: Vidsrc (Elite)', 
+      name: 'Sinal 1', 
+      fullName: 'Vidsrc (Elite)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
           ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` 
@@ -73,7 +74,8 @@ export const LordPlayer = ({
     },
     { 
       id: 'embedsu', 
-      name: 'Sinal 2: Embed.su (Premium)', 
+      name: 'Sinal 2', 
+      fullName: 'Embed.su (Premium)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
           ? `https://embed.su/embed/tv/${id}/${s}/${e}` 
@@ -81,7 +83,8 @@ export const LordPlayer = ({
     },
     { 
       id: 'superembed', 
-      name: 'Sinal 3: SuperEmbed (Global)', 
+      name: 'Sinal 3', 
+      fullName: 'SuperEmbed (Global)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
           ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` 
@@ -284,10 +287,12 @@ export const LordPlayer = ({
       <div className="relative w-full h-full flex items-center justify-center">
         {isEmbed ? (
           <iframe
+            key={`${currentProvider}-${season}-${episode}`}
             src={getEmbedUrl()}
             className="w-full h-full border-none"
             allowFullScreen
-            allow="autoplay; encrypted-media"
+            allow="autoplay; encrypted-media; fullscreen"
+            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
             referrerPolicy="no-referrer"
           />
         ) : (
@@ -368,30 +373,37 @@ export const LordPlayer = ({
                   >
                     {title} {media_type === 'tv' && `• S${season} E${episode}`}
                   </motion.h2>
-                  <div className="flex gap-4 mt-2">
-                    <span className="text-[10px] bg-cyan-500/20 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400 font-black tracking-widest uppercase">
-                      {currentProvider.toUpperCase()} ACTIVE
-                    </span>
+                  <div className="flex flex-wrap gap-4 mt-4">
+                    {providers.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setCurrentProvider(p.id)}
+                        className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 ${currentProvider === p.id ? 'bg-cyan-500 border-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                      >
+                        <div className={`w-1.5 h-1.5 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500'}`} />
+                        {p.name}
+                      </button>
+                    ))}
                     {media_type === 'tv' && (
                       <div className="flex gap-2">
-                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 gap-2">
-                          <span className="text-[8px] font-black text-silver/40 uppercase">Temporada</span>
+                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 gap-3">
+                          <span className="text-[8px] font-black text-silver/40 uppercase tracking-widest">Temporada</span>
                           <input 
                             type="number" 
                             min={1} 
                             value={season} 
                             onChange={(e) => setSeason(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[10px] font-black w-8 outline-none"
+                            className="bg-transparent text-white text-[12px] font-black w-8 outline-none border-b border-white/10 focus:border-cyan-500 transition-colors"
                           />
                         </div>
-                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 gap-2">
-                          <span className="text-[8px] font-black text-silver/40 uppercase">Episódio</span>
+                        <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 gap-3">
+                          <span className="text-[8px] font-black text-silver/40 uppercase tracking-widest">Episódio</span>
                           <input 
                             type="number" 
                             min={1} 
                             value={episode} 
                             onChange={(e) => setEpisode(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[10px] font-black w-8 outline-none"
+                            className="bg-transparent text-white text-[12px] font-black w-8 outline-none border-b border-white/10 focus:border-cyan-500 transition-colors"
                           />
                         </div>
                       </div>

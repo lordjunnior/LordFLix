@@ -23,6 +23,7 @@ export const NotificationPanel = ({ onClose, notifications, onMarkAsRead }: Noti
       initial={{ opacity: 0, scale: 0.95, y: -20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
+      onClick={(e) => e.stopPropagation()}
       className="absolute top-20 right-8 w-full max-w-sm bg-zinc-950/95 backdrop-blur-3xl border border-white/10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[200] overflow-hidden"
     >
       <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-cyan-500/10 to-transparent">

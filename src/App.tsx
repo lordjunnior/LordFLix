@@ -10,6 +10,7 @@ import { ScrollControls } from './components/ScrollControls';
 import { AdminPanel } from './components/AdminPanel';
 import { ProfileDashboard } from './components/ProfileDashboard';
 import { NotificationPanel } from './components/NotificationPanel';
+import SupportPage from './components/SupportPage';
 import { AdPlayer } from './components/AdPlayer';
 import { getMovies, searchMovies, getVideos } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
@@ -270,7 +271,7 @@ function LordFlixSupreme() {
   const [pinDigitado, setPinDigitado] = useState(''); 
   const [pinErro, setPinErro] = useState(false); 
   const [carregado, setCarregado] = useState(false); 
-  const [view, setView] = useState<'home' | 'guia' | 'rede'>('home');
+  const [view, setView] = useState<'home' | 'guia' | 'rede' | 'suporte'>('home');
   const [erroSistema, setErroSistema] = useState(false);
   const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -452,6 +453,14 @@ function LordFlixSupreme() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [busca]);
+
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      if (showNotifications) setShowNotifications(false);
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, [showNotifications]);
 
   const toggleWatchlist = async (filme: any) => {
     if (!user) return;
@@ -636,6 +645,11 @@ function LordFlixSupreme() {
     return <NossaRede onBack={() => setView('home')} />;
   }
 
+  // --- VIEW: SUPORTE (CENTRO DE PERFORMANCE) ---
+  if (view === 'suporte') {
+    return <SupportPage onBack={() => setView('home')} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#020202] selection:bg-cyan-500 selection:text-black">
       
@@ -684,6 +698,13 @@ function LordFlixSupreme() {
           )}
 
           <button 
+            onClick={() => setView('suporte')}
+            className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all mr-2"
+          >
+            Centro de Performance
+          </button>
+
+          <button 
             onClick={() => setPerfil('kids')}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'kids' ? 'bg-white text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
           >
@@ -707,7 +728,10 @@ function LordFlixSupreme() {
             {/* NOTIFICATION BELL */}
             <div className="relative">
               <button 
-                onClick={() => setShowNotifications(!showNotifications)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowNotifications(!showNotifications);
+                }}
                 className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors relative"
               >
                 <Bell className={`w-5 h-5 ${notifications.some(n => !n.read) ? 'text-cyan-500 animate-pulse' : 'text-silver/40'}`} />

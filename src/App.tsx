@@ -352,19 +352,20 @@ export default function LordFlixSupreme() {
         const formattedTv = formatTMDBData(tv);
         const formattedTrending = formatTMDBData(trending);
 
-        setCategorias(prev => [
-          { ...prev[0], filmes: formattedMovies },
-          { ...prev[1], filmes: formattedTv },
-          { ...prev[2], filmes: formattedTrending },
-          prev[3] // Keep Live TV
-        ]);
+        setCategorias(prev => {
+          const newCats = [...prev];
+          if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
+          if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
+          if (formattedTrending.length > 0) newCats[2] = { ...newCats[2], filmes: formattedTrending };
+          return newCats;
+        });
         
         if (formattedTrending.length > 0) {
           setFilmeDestaque(formattedTrending[0]);
         }
       } catch (error) {
         console.error("Erro ao carregar dados do TMDB:", error);
-        setErroSistema(true);
+        // Não travamos o sistema, apenas usamos o que temos (Live TV e placeholders)
       } finally {
         setLoading(false);
         setCarregado(true);
@@ -426,7 +427,7 @@ export default function LordFlixSupreme() {
       ...cat,
       filmes: cat.filmes.filter(filme => {
         const termo = busca.toLowerCase();
-        const bateBusca = filme.titulo.toLowerCase().includes(termo);
+        const bateBusca = (filme.titulo || "").toLowerCase().includes(termo);
         if (perfil === 'kids') return filme.kids && bateBusca;
         return bateBusca;
       })
@@ -444,7 +445,7 @@ export default function LordFlixSupreme() {
           img: h.img,
           bg: h.bg,
           isHistory: true,
-          progress: (h.progress / h.duration) * 100
+          progress: h.duration ? (h.progress / h.duration) * 100 : 0
         };
       });
       base.unshift({ nome: "Continuar Assistindo", type: "history", filmes: historyMovies });

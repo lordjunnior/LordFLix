@@ -41,19 +41,19 @@ export const AdPlayer = ({ onComplete, onClose }: AdPlayerProps) => {
       </div>
 
       {/* TOP BAR - EXIT & BRANDING */}
-      <div className="absolute top-0 left-0 right-0 p-6 md:p-10 flex justify-between items-center z-[410]">
+      <div className="absolute top-0 left-0 right-0 p-4 md:p-10 flex justify-between items-start z-[450] pointer-events-none">
+        <div className="hidden md:flex items-center gap-3 bg-gold/10 px-4 py-2 rounded-full border border-gold/20 pointer-events-auto">
+          <Crown className="w-4 h-4 text-gold" />
+          <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em]">Membros VIP não veem anúncios</span>
+        </div>
+
         <button 
           onClick={onClose}
-          className="flex items-center gap-3 px-6 py-3 bg-red-500/20 hover:bg-red-500 text-white rounded-2xl border border-red-500/30 transition-all group shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+          className="flex items-center gap-3 px-6 py-3 bg-red-500/20 hover:bg-red-500 text-white rounded-2xl border border-red-500/30 transition-all group shadow-[0_0_20px_rgba(239,68,68,0.2)] pointer-events-auto ml-auto"
         >
           <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
           <span className="text-[10px] font-black uppercase tracking-widest">Sair do Vídeo</span>
         </button>
-
-        <div className="hidden md:flex items-center gap-3 bg-gold/10 px-4 py-2 rounded-full border border-gold/20">
-          <Crown className="w-4 h-4 text-gold" />
-          <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em]">Membros VIP não veem anúncios</span>
-        </div>
       </div>
 
       {/* AD CONTENT */}
@@ -92,9 +92,9 @@ export const AdPlayer = ({ onComplete, onClose }: AdPlayerProps) => {
         </motion.div>
 
         {/* AD OVERLAY CONTROLS */}
-        <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10 flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
-          <div className="flex items-center gap-4 bg-black/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5 w-full md:w-auto">
-            <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+        <div className="absolute bottom-4 md:bottom-10 left-4 md:left-10 right-4 md:right-10 flex flex-col md:flex-row justify-between items-center md:items-end gap-4 z-[460]">
+          <div className="flex items-center gap-4 bg-black/60 backdrop-blur-2xl p-4 rounded-2xl border border-white/10 w-full md:w-auto">
+            <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
               <Info className="w-5 h-5 text-silver" />
             </div>
             <div className="text-left">
@@ -103,17 +103,17 @@ export const AdPlayer = ({ onComplete, onClose }: AdPlayerProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
             <button 
               onClick={() => setMuted(!muted)}
-              className="p-4 md:p-6 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/5 text-silver hover:text-white transition-colors"
+              className="p-4 md:p-6 bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/10 text-silver hover:text-white transition-colors"
             >
               {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
 
             <button 
               onClick={canSkip ? onComplete : undefined}
-              className={`group flex items-center gap-4 px-8 md:px-12 py-5 md:py-7 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all shadow-2xl ${canSkip ? 'bg-white text-black hover:bg-cyan-500 hover:scale-105 active:scale-95' : 'bg-black/40 text-silver/20 cursor-not-allowed border border-white/5'}`}
+              className={`group flex items-center gap-4 px-8 md:px-12 py-5 md:py-7 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all shadow-2xl ${canSkip ? 'bg-white text-black hover:bg-cyan-500 hover:scale-105 active:scale-95' : 'bg-black/60 text-silver/20 cursor-not-allowed border border-white/10'}`}
             >
               {canSkip ? (
                 <>

@@ -18,8 +18,9 @@ async function startServer() {
     const { type = "trending" } = req.query;
     const TMDB_TOKEN = process.env.TMDB_READ_ACCESS_TOKEN;
 
-    if (!TMDB_TOKEN) {
-      return res.status(500).json({ error: "TMDB_READ_ACCESS_TOKEN not configured" });
+    if (!TMDB_TOKEN || TMDB_TOKEN.includes("MY_TMDB_TOKEN") || TMDB_TOKEN.length < 50) {
+      console.warn("TMDB_READ_ACCESS_TOKEN not configured or invalid. Returning empty results.");
+      return res.json([]);
     }
 
     const url = type === "trending" 
@@ -44,6 +45,10 @@ async function startServer() {
     const { q } = req.query;
     const TMDB_TOKEN = process.env.TMDB_READ_ACCESS_TOKEN;
 
+    if (!TMDB_TOKEN || TMDB_TOKEN.includes("MY_TMDB_TOKEN") || TMDB_TOKEN.length < 50) {
+      return res.json([]);
+    }
+
     if (!q) return res.json([]);
 
     const url = `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(q as string)}&language=pt-BR`;
@@ -66,6 +71,10 @@ async function startServer() {
     const { id } = req.params;
     const { type = "movie" } = req.query;
     const TMDB_TOKEN = process.env.TMDB_READ_ACCESS_TOKEN;
+
+    if (!TMDB_TOKEN || TMDB_TOKEN.includes("MY_TMDB_TOKEN") || TMDB_TOKEN.length < 50) {
+      return res.json([]);
+    }
 
     const url = `https://api.themoviedb.org/3/${type}/${id}/videos?language=pt-BR`;
 

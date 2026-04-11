@@ -295,11 +295,10 @@ export const LordPlayer = ({
               allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
               referrerPolicy="no-referrer"
             />
-            {/* DEBUG VISUAL */}
-            <div className="absolute bottom-4 left-4 z-[100] bg-black/80 px-4 py-2 rounded-lg border border-white/20 pointer-events-none">
-              <p className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest">
-                URL CARREGADA: <span className="text-white lowercase">{getEmbedUrl()}</span>
-              </p>
+            {/* LOADING STATE OVERLAY */}
+            <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center gap-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+               <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+               <p className="text-[8px] font-black uppercase tracking-widest text-white/40">Sincronizando sinal reserva...</p>
             </div>
           </div>
         ) : (

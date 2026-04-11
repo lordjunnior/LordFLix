@@ -232,12 +232,20 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
               style={{ backgroundColor: currentChannel.color }}
             />
 
-            {/* DEBUG VISUAL (PROTOCOLO DE CHOQUE) */}
-            <div className="absolute bottom-4 left-4 z-50 bg-black/80 px-3 py-1.5 rounded-lg border border-white/10 pointer-events-none">
-              <p className="text-[8px] font-mono text-orange-500 uppercase tracking-widest">
-                SINAL: <span className="text-white">{currentChannel.stream}</span>
-              </p>
-            </div>
+            {/* LOADING STATE */}
+            <AnimatePresence>
+              {loading && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
+                >
+                  <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white animate-pulse">Sincronizando sinal reserva...</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* PLAYER CONTROLS OVERLAY */}
             <AnimatePresence>
@@ -332,8 +340,8 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
                   className={`flex items-stretch group cursor-pointer transition-all ${isActive ? 'bg-orange-500/10' : 'hover:bg-white/5'}`}
                 >
                   {/* CHANNEL LOGO & NAME */}
-                  <div className="w-64 p-4 flex items-center gap-6 border-r border-white/5">
-                    <div className="w-16 aspect-video rounded-lg overflow-hidden bg-black/40 border border-white/10 p-2 flex items-center justify-center">
+                  <div className="w-64 p-4 flex items-center gap-6 border-r border-white/5 bg-black/40 backdrop-blur-xl">
+                    <div className="w-16 aspect-video rounded-lg overflow-hidden bg-[#121212] border border-white/10 p-1.5 flex items-center justify-center">
                       <img src={channel.logo} alt={channel.name} className="w-full h-full object-contain" />
                     </div>
                     <div className="flex flex-col">
@@ -343,11 +351,11 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
                   </div>
 
                   {/* SHOW TIMELINE */}
-                  <div className="flex-1 flex">
+                  <div className="flex-1 flex bg-white/[0.01] backdrop-blur-md">
                     {epg.map((show, idx) => (
                       <div 
                         key={show.id}
-                        className={`p-4 border-l border-white/5 flex flex-col justify-center transition-all relative overflow-hidden group/show ${idx === 0 && isActive ? 'bg-orange-500/20' : 'hover:bg-white/10'}`}
+                        className={`p-4 border-l border-white/5 flex flex-col justify-center transition-all relative overflow-hidden group/show ${idx === 0 && isActive ? 'bg-orange-500/20 backdrop-blur-lg' : 'hover:bg-white/10'}`}
                         style={{ flex: show.duration / 30 }}
                       >
                         <span className="text-xs font-black uppercase tracking-tight text-white/80 line-clamp-1 group-hover/show:text-orange-500 transition-colors">{show.title}</span>

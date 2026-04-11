@@ -580,7 +580,6 @@ function LordFlixSupreme() {
       const mediaType = filme.media_type || "movie";
       const details = await getMovieDetails(filme.id, mediaType);
       if (details) {
-        const trailer = details.videos?.results?.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
         const director = details.credits?.crew?.find((c: any) => c.job === "Director")?.name || "Não informado";
         const actors = details.credits?.cast?.slice(0, 3).map((a: any) => a.name).join(", ") || "Não informado";
         const genres = details.genres?.map((g: any) => g.name).join(", ") || "Não informado";

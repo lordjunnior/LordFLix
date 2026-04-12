@@ -75,3 +75,16 @@ export async function getSeasonDetails(id: number, seasonNumber: number) {
   const data = await res.json();
   return data;
 }
+
+export async function getMoviesByGenre(type: "movie" | "tv", genreId: number) {
+  if (!TMDB_TOKEN) return [];
+
+  const url = `${BASE_URL}/discover/${type}?with_genres=${genreId}&language=pt-BR&sort_by=popularity.desc`;
+
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    throw new Error("Failed to fetch movies by genre");
+  }
+  const data = await res.json();
+  return data.results;
+}

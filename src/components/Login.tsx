@@ -61,7 +61,7 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
         await setDoc(doc(db, 'users', cred.user.uid), {
           uid: cred.user.uid,
           email: cred.user.email,
-          role: cred.user.email === 'lordjunnior@gmail.com' ? 'admin' : 'user',
+          role: cred.user.email?.toLowerCase() === 'lordjunnior@gmail.com' ? 'admin' : 'user',
           status: 'active',
           createdAt: new Date().toISOString()
         });
@@ -90,7 +90,7 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
         await setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           email: user.email,
-          role: user.email === 'lordjunnior@gmail.com' ? 'admin' : 'user',
+          role: user.email?.toLowerCase() === 'lordjunnior@gmail.com' ? 'admin' : 'user',
           status: 'active',
           createdAt: new Date().toISOString()
         });

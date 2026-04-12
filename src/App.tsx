@@ -15,7 +15,7 @@ import LiveTV from './components/LiveTV';
 import BackgroundStream from './components/BackgroundStream';
 import { LIVE_CHANNELS } from './constants/channels';
 import { AdPlayer } from './components/AdPlayer';
-import { getMovies, searchMovies, getVideos, getMovieDetails } from './lib/tmdb';
+import { getMovies, searchMovies, getVideos, getMovieDetails, getSeasonDetails, getMoviesByGenre } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
@@ -65,10 +65,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
-  { nome: "Filmes em Destaque", type: "movie", filmes: [] },
-  { nome: "Séries Imperdíveis", type: "tv", filmes: [] },
-  { nome: "Tendências Mundiais", type: "trending", filmes: [] },
-  { nome: "TV Ao Vivo", type: "live", filmes: [
+  { nome: "FILMES", type: "movie", filmes: [] },
+  { nome: "SERIES", type: "tv", filmes: [] },
+  { nome: "TVs", type: "live", filmes: [
     { 
       id: 301, 
       titulo: "Lord News 24h", 
@@ -125,7 +124,9 @@ const CATEGORIAS_INICIAIS = [
       bg: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop",
       src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
     }
-  ]}
+  ]},
+  { nome: "ANIMES", type: "anime", filmes: [] },
+  { nome: "KIDS", type: "kids", filmes: [] }
 ];
 
 const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item => ({
@@ -334,6 +335,17 @@ function LordFlixSupreme() {
     }
   }, [filmeSelecionado, filmeEmReproducao, filmeDestaque]);
 
+  // --- URL ROUTING ENGINE ---
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/tv') {
+      setShowLiveTV(true);
+    } else if (path === '/cinema') {
+      setView('home');
+      setShowLiveTV(false);
+    }
+  }, []);
+
   // --- 1. AUTH STATE ---
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (firebaseUser) => {
@@ -372,7 +384,7 @@ function LordFlixSupreme() {
 
     const userDocRef = doc(db, 'users', user.uid);
     const unsubUser = onSnapshot(userDocRef, (snapshot) => {
-      const isDefaultAdmin = user.email === "LordJunnior@gmail.com";
+      const isDefaultAdmin = user.email?.toLowerCase() === "lordjunnior@gmail.com";
       
       if (snapshot.exists()) {
         const data = snapshot.data();
@@ -421,27 +433,29 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, trending] = await Promise.allSettled([
+        const [movies, tv, animes, kids] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
-          getMovies("trending")
+          getMoviesByGenre("tv", 16), // Animes
+          getMoviesByGenre("movie", 10751) // Kids/Family
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
         const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
-        const formattedTrending = trending.status === 'fulfilled' ? formatTMDBData(trending.value) : [];
+        const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
+        const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
 
         setCategorias(prev => {
           const newCats = [...prev];
           if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
           if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
-          if (formattedTrending.length > 0) newCats[2] = { ...newCats[2], filmes: formattedTrending };
+          // Index 2 is TVs (live), which is static
+          if (formattedAnimes.length > 0) newCats[3] = { ...newCats[3], filmes: formattedAnimes };
+          if (formattedKids.length > 0) newCats[4] = { ...newCats[4], filmes: formattedKids };
           return newCats;
         });
         
-        if (formattedTrending.length > 0) {
-          setFilmeDestaque(formattedTrending[0]);
-        } else if (formattedMovies.length > 0) {
+        if (formattedMovies.length > 0) {
           setFilmeDestaque(formattedMovies[0]);
         }
       } catch (error) {

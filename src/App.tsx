@@ -372,12 +372,19 @@ function LordFlixSupreme() {
 
     const userDocRef = doc(db, 'users', user.uid);
     const unsubUser = onSnapshot(userDocRef, (snapshot) => {
+      const isDefaultAdmin = user.email === "LordJunnior@gmail.com";
+      
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setUserRole(data.role || 'user');
+        // Force admin role if email matches, even if document exists
+        if (isDefaultAdmin && data.role !== 'admin') {
+          updateDoc(userDocRef, { role: 'admin' }).catch(err => 
+            handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`)
+          );
+        }
+        setUserRole(data.role || (isDefaultAdmin ? 'admin' : 'user'));
         setUserStatus(data.status || 'active');
       } else {
-        const isDefaultAdmin = user.email === "LordJunnior@gmail.com";
         setDoc(userDocRef, {
           uid: user.uid,
           email: user.email,
@@ -1142,7 +1149,7 @@ function LordFlixSupreme() {
                 
                 <div className="absolute top-6 right-6">
                   <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-full">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">4K Ultra HD</span>
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">1080p / 4K Supreme</span>
                   </div>
                 </div>
 

@@ -77,8 +77,8 @@ export const LordPlayer = ({
       fullName: 'Vidsrc BR (Dublado)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
-          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?lang=pt` 
-          : `https://vidsrc.cc/v2/embed/movie/${id}?lang=pt` 
+          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?lang=pt&autoplay=1&quality=1080` 
+          : `https://vidsrc.cc/v2/embed/movie/${id}?lang=pt&autoplay=1&quality=1080` 
     },
     { 
       id: 'vidsrc', 
@@ -86,8 +86,8 @@ export const LordPlayer = ({
       fullName: 'Vidsrc (Elite)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
-          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` 
-          : `https://vidsrc.cc/v2/embed/movie/${id}` 
+          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?autoplay=1&quality=1080` 
+          : `https://vidsrc.cc/v2/embed/movie/${id}?autoplay=1&quality=1080` 
     },
     { 
       id: 'vidsrc_to', 
@@ -95,8 +95,8 @@ export const LordPlayer = ({
       fullName: 'Vidsrc.to (Premium)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
-          ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}` 
-          : `https://vidsrc.to/embed/movie/${id}` 
+          ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}?autoplay=1&sub_lang=pt` 
+          : `https://vidsrc.to/embed/movie/${id}?autoplay=1&sub_lang=pt` 
     },
     { 
       id: 'embedsu', 
@@ -104,8 +104,17 @@ export const LordPlayer = ({
       fullName: 'Embed.su (Global)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
-          ? `https://embed.su/embed/tv/${id}/${s}/${e}` 
-          : `https://embed.su/embed/movie/${id}` 
+          ? `https://embed.su/embed/tv/${id}/${s}/${e}?autoplay=1` 
+          : `https://embed.su/embed/movie/${id}?autoplay=1` 
+    },
+    { 
+      id: 'superembed', 
+      name: 'Sinal 4', 
+      fullName: 'SuperEmbed (Multi)',
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}&autoplay=1` 
+          : `https://multiembed.mov/?video_id=${id}&tmdb=1&autoplay=1` 
     },
   ];
 
@@ -554,7 +563,7 @@ export const LordPlayer = ({
                     {/* INFO BADGE */}
                     <div className="hidden lg:flex flex-col items-end">
                       <span className="text-[8px] font-black text-cyan-500 uppercase tracking-[0.3em]">Qualidade LordEngine</span>
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest">4K Ultra HD • 60FPS</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">1080p Full HD • 60FPS</span>
                     </div>
 
                     {/* SETTINGS / SPEED */}

@@ -5,7 +5,7 @@ export const LIVE_CHANNELS = [
     category: 'esportes',
     logo: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#22d3ee'
   },
   {
@@ -14,7 +14,7 @@ export const LIVE_CHANNELS = [
     category: 'cinema',
     logo: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#f59e0b'
   },
   {
@@ -23,7 +23,7 @@ export const LIVE_CHANNELS = [
     category: 'noticias',
     logo: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#ef4444'
   },
   {
@@ -32,7 +32,7 @@ export const LIVE_CHANNELS = [
     category: 'documentarios',
     logo: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#10b981'
   },
   {
@@ -41,7 +41,7 @@ export const LIVE_CHANNELS = [
     category: 'cinema',
     logo: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#a855f7'
   },
   {
@@ -50,7 +50,7 @@ export const LIVE_CHANNELS = [
     category: 'noticias',
     logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
     stream: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-    quality: '4K Ultra HD',
+    quality: '1080p / 4K Supreme',
     color: '#3b82f6'
   },
 ];

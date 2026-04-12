@@ -81,7 +81,7 @@ export const MediaDashboard = () => {
       
       <div className="flex justify-between mt-8 pt-6 border-t border-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-silver/30 relative z-10">
         <div className="flex gap-4">
-          <span className="flex items-center gap-1.5"><span className="w-1 h-1 bg-cyan-500 rounded-full"></span> 2160p 4K</span>
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 bg-cyan-500 rounded-full"></span> 1080p / 4K</span>
           <span className="flex items-center gap-1.5"><span className="w-1 h-1 bg-cyan-500 rounded-full"></span> HDR10+</span>
         </div>
         <span className="group-hover:text-cyan-500 transition-colors">Conexão Otimizada Ativa</span>

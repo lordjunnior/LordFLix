@@ -552,7 +552,7 @@ export const LordPlayer = ({
                     </div>
 
                     {/* VOLUME */}
-                    <div className="hidden md:flex items-center gap-4 group/vol">
+                    <div className="flex items-center gap-4 group/vol">
                       <button onClick={handleToggleMuted} className="text-white/60 hover:text-white transition-colors">
                         {muted || volume === 0 ? <VolumeX className="w-5 h-5 md:w-6 md:h-6" /> : <Volume2 className="w-5 h-5 md:w-6 md:h-6" />}
                       </button>
@@ -563,7 +563,7 @@ export const LordPlayer = ({
                         step="any" 
                         value={muted ? 0 : volume}
                         onChange={handleVolumeChange}
-                        className="w-0 group-hover/vol:w-24 transition-all duration-300 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-white"
+                        className="w-24 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-white"
                       />
                     </div>
                   </div>
@@ -659,32 +659,7 @@ export const LordPlayer = ({
         {/* LOADING INDICATOR */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <AnimatePresence>
-            {isPortrait && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="z-[100] bg-black/80 backdrop-blur-2xl p-8 rounded-[40px] border border-white/10 flex flex-col items-center gap-6 text-center max-w-xs pointer-events-auto"
-              >
-                <div className="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center animate-bounce">
-                  <Smartphone className="w-8 h-8 text-cyan-500 rotate-90" />
-                </div>
-                <div>
-                  <h3 className="text-white font-black uppercase italic tracking-tighter text-xl mb-2">Gire o Celular</h3>
-                  <p className="text-silver/40 text-[10px] font-black uppercase tracking-widest leading-relaxed">
-                    Para uma experiência cinematográfica LordFlix, use o modo paisagem.
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setIsPortrait(false)}
-                  className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-widest text-white transition-all"
-                >
-                  Continuar assim
-                </button>
-              </motion.div>
-            )}
-
-            {(!duration && !isEmbed || isShadowBanned) ? (
+            {(!duration && !isEmbed || isShadowBanned) && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -693,15 +668,6 @@ export const LordPlayer = ({
               >
                 <div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 animate-pulse">Buffers de Elite Ativos</span>
-              </motion.div>
-            ) : isEmbed && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 flex items-center gap-3"
-              >
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[9px] font-black text-white uppercase tracking-widest">Sinal de Elite Estabilizado</span>
               </motion.div>
             )}
           </AnimatePresence>

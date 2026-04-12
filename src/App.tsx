@@ -65,20 +65,20 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
-  { nome: "🔥 Continue assistindo", type: "history", filmes: [] },
-  { nome: "🚀 Em alta agora", type: "trending", filmes: [] },
-  { nome: "🏆 Clássicos Obrigatórios", type: "classic", filmes: [] },
-  { nome: "⚔️ Ação Insana", type: "action", filmes: [] },
-  { nome: "🧠 Mente Explodindo", type: "intellectual", filmes: [] },
-  { nome: "💔 Vai te fazer chorar", type: "emotional", filmes: [] },
-  { nome: "🌌 Obras Profundas", type: "philosophical", filmes: [] },
-  { nome: "🎌 Nostalgia Pesada", type: "nostalgia", filmes: [] },
-  { nome: "🎬 Filmes Imperdíveis", type: "movie", filmes: [] },
-  { nome: "🧩 Maratonar no Fim de Semana", type: "binge", filmes: [] },
-  { nome: "💎 Obras-primas", type: "masterpiece", filmes: [] },
-  { nome: "🇧🇷 Dublados que valem muito", type: "dubbed", filmes: [] },
-  { nome: "⚡ Tokusatsu Clássico", type: "tokusatsu", filmes: [] },
-  { nome: "📺 TV ao Vivo", type: "live", filmes: [
+  { nome: "Continue assistindo", type: "history", filmes: [] },
+  { nome: "Em alta agora", type: "trending", filmes: [] },
+  { nome: "Clássicos Obrigatórios", type: "classic", filmes: [] },
+  { nome: "Ação Insana", type: "action", filmes: [] },
+  { nome: "Mente Explodindo", type: "intellectual", filmes: [] },
+  { nome: "Vai te fazer chorar", type: "emotional", filmes: [] },
+  { nome: "Obras Profundas", type: "philosophical", filmes: [] },
+  { nome: "Nostalgia Pesada", type: "nostalgia", filmes: [] },
+  { nome: "Filmes Imperdíveis", type: "movie", filmes: [] },
+  { nome: "Maratonar no Fim de Semana", type: "binge", filmes: [] },
+  { nome: "Obras-primas", type: "masterpiece", filmes: [] },
+  { nome: "Dublados que valem muito", type: "dubbed", filmes: [] },
+  { nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: [] },
+  { nome: "TV ao Vivo", type: "live", filmes: [
     { 
       id: 301, 
       titulo: "Lord News 24h", 
@@ -557,7 +557,7 @@ function LordFlixSupreme() {
             titulo: `Saga ${kw} Completa`,
             isSaga: true,
             sagaItems: items,
-            ctrHook: "🔥 Coleção completa em 4K",
+            ctrHook: "Coleção completa em 4K",
             microCta: "Explorar Saga"
           });
         } else {
@@ -595,7 +595,7 @@ function LordFlixSupreme() {
 
     const intelligentCategories = [
       { 
-        nome: "🔥 Continue assistindo", 
+        nome: "Continue assistindo", 
         type: "history", 
         filmes: history.map(h => {
           const movie = allMovies.find(m => String(m.id) === String(h.movieId));
@@ -603,67 +603,47 @@ function LordFlixSupreme() {
         }).filter(Boolean)
       },
       { 
-        nome: "🚀 Em alta agora", 
+        nome: "Em alta agora", 
         type: "trending", 
         filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5).slice(0, 15)) 
       },
       { 
-        nome: "🏆 Clássicos Obrigatórios", 
+        nome: "Clássicos que todo mundo precisa ver", 
         type: "classic", 
         filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010).slice(0, 15)) 
       },
       { 
-        nome: "⚔️ Ação Insana", 
+        nome: "Ação insana", 
         type: "action", 
         filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura')).slice(0, 15)) 
       },
       { 
-        nome: "🧠 Mente Explodindo", 
+        nome: "Mente explodindo (estratégia & plot twist)", 
         type: "intellectual", 
         filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('mistério') || f.genero?.toLowerCase().includes('ficção')).slice(0, 15)) 
       },
       { 
-        nome: "💔 Vai te fazer chorar", 
-        type: "emotional", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('drama') || f.genero?.toLowerCase().includes('romance')).slice(0, 15)) 
-      },
-      { 
-        nome: "🌌 Obras Profundas", 
-        type: "philosophical", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('psicológico') || f.genero?.toLowerCase().includes('filosófico')).slice(0, 15)) 
-      },
-      { 
-        nome: "🎌 Nostalgia Pesada", 
-        type: "nostalgia", 
-        filmes: groupSagas(allMovies.filter(f => f.type === 'nostalgia' || f.genero?.toLowerCase().includes('clássico')).slice(0, 15)) 
-      },
-      { 
-        nome: "🎬 Filmes Imperdíveis", 
-        type: "movie", 
-        filmes: groupSagas(allMovies.filter(f => f.media_type === 'movie').slice(0, 15)) 
-      },
-      { 
-        nome: "🧩 Maratonar no Fim de Semana", 
-        type: "binge", 
-        filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv' && f.genero?.toLowerCase().includes('viciante')).slice(0, 15)) 
-      },
-      { 
-        nome: "💎 Obras-primas", 
-        type: "masterpiece", 
-        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 9.0).slice(0, 15)) 
-      },
-      { 
-        nome: "🇧🇷 Dublados que valem muito", 
-        type: "dubbed", 
-        filmes: groupSagas(allMovies.filter(f => f.dublado || true).slice(0, 15)) 
-      },
-      { 
-        nome: "⚡ Tokusatsu Clássico", 
+        nome: "Tokusatsu Clássico", 
         type: "tokusatsu", 
         filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu').slice(0, 20)) 
       },
       { 
-        nome: "📺 TV ao Vivo", 
+        nome: "Nostalgia BR anos 90", 
+        type: "nostalgia", 
+        filmes: groupSagas(allMovies.filter(f => f.type === 'nostalgia' || f.genero?.toLowerCase().includes('clássico') || f.type === 'tokusatsu').slice(0, 20)) 
+      },
+      { 
+        nome: "Heróis em Transformação", 
+        type: "heroes", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('fantasia') || f.titulo.toLowerCase().includes('kamen') || f.titulo.toLowerCase().includes('jaspion')).slice(0, 15)) 
+      },
+      { 
+        nome: "Lendas da cultura pop japonesa", 
+        type: "legends", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('culto') || f.titulo.toLowerCase().includes('ultraman') || f.titulo.toLowerCase().includes('evangelion')).slice(0, 15)) 
+      },
+      { 
+        nome: "TV ao Vivo", 
         type: "live", 
         filmes: categorias.find(c => c.type === 'live')?.filmes || [] 
       }
@@ -1067,7 +1047,7 @@ function LordFlixSupreme() {
             </div>
 
             <div className="flex flex-wrap gap-3 mb-8">
-              <span className="bg-cyan-500 text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.4)]">Dublado 🇧🇷</span>
+              <span className="bg-cyan-500 text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.4)]">Dublado</span>
               <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Clássico</span>
               <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Saga Longa</span>
             </div>
@@ -1225,7 +1205,7 @@ function LordFlixSupreme() {
                         {cat.nome}
                       </h2>
                       <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mt-4">
-                        {cat.type === 'tokusatsu' ? '⚡ O Império do Sol Nascente' : '🎯 Seleção de Elite LordFlix'}
+                        {cat.type === 'tokusatsu' ? 'O Império do Sol Nascente' : 'Seleção de Elite LordFlix'}
                       </p>
                     </div>
                   </div>

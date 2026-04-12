@@ -62,3 +62,16 @@ export async function getVideos(id: number, type: "movie" | "tv" = "movie") {
   const data = await res.json();
   return data.results;
 }
+
+export async function getSeasonDetails(id: number, seasonNumber: number) {
+  if (!TMDB_TOKEN) return null;
+
+  const url = `${BASE_URL}/tv/${id}/season/${seasonNumber}?language=pt-BR`;
+
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    throw new Error("Failed to fetch season details");
+  }
+  const data = await res.json();
+  return data;
+}

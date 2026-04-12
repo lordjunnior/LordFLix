@@ -8,6 +8,7 @@ import ReactPlayer from 'react-player';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { getSeasonDetails } from '../lib/tmdb';
 import { 
   Play, 
   Pause, 
@@ -22,7 +23,11 @@ import {
   FastForward,
   Rewind,
   Shield,
-  Globe
+  Globe,
+  List,
+  ChevronRight,
+  ChevronLeft,
+  Star
 } from 'lucide-react';
 
 export const LordPlayer = ({ 
@@ -57,12 +62,24 @@ export const LordPlayer = ({
   const [isLocked, setIsLocked] = useState(false);
   const [isShadowBanned, setIsShadowBanned] = useState(false);
   const [showSeekIndicator, setShowSeekIndicator] = useState<{ type: 'rewind' | 'forward', visible: boolean }>({ type: 'forward', visible: false });
-  const [currentProvider, setCurrentProvider] = useState('vidsrc');
+  const [currentProvider, setCurrentProvider] = useState('vidsrc_br');
   const [showProviderSelector, setShowProviderSelector] = useState(false);
+  const [showEpisodeSelector, setShowEpisodeSelector] = useState(false);
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
+  const [seasonData, setSeasonData] = useState<any>(null);
+  const [loadingSeason, setLoadingSeason] = useState(false);
 
   const providers = [
+    { 
+      id: 'vidsrc_br', 
+      name: 'Sinal Dublado', 
+      fullName: 'Vidsrc BR (Dublado)',
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?lang=pt` 
+          : `https://vidsrc.cc/v2/embed/movie/${id}?lang=pt` 
+    },
     { 
       id: 'vidsrc', 
       name: 'Sinal 1', 
@@ -73,22 +90,22 @@ export const LordPlayer = ({
           : `https://vidsrc.cc/v2/embed/movie/${id}` 
     },
     { 
-      id: 'embedsu', 
+      id: 'vidsrc_to', 
       name: 'Sinal 2', 
-      fullName: 'Embed.su (Premium)',
+      fullName: 'Vidsrc.to (Premium)',
+      url: (id: string, type: string, s: number, e: number) => 
+        type === 'tv' 
+          ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}` 
+          : `https://vidsrc.to/embed/movie/${id}` 
+    },
+    { 
+      id: 'embedsu', 
+      name: 'Sinal 3', 
+      fullName: 'Embed.su (Global)',
       url: (id: string, type: string, s: number, e: number) => 
         type === 'tv' 
           ? `https://embed.su/embed/tv/${id}/${s}/${e}` 
           : `https://embed.su/embed/movie/${id}` 
-    },
-    { 
-      id: 'superembed', 
-      name: 'Sinal 3', 
-      fullName: 'SuperEmbed (Global)',
-      url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
-          ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` 
-          : `https://multiembed.mov/?video_id=${id}&tmdb=1` 
     },
   ];
 
@@ -99,6 +116,24 @@ export const LordPlayer = ({
   };
 
   const isEmbed = !src.includes('akamaihd.net');
+
+  // Fetch Season Details
+  useEffect(() => {
+    const fetchSeason = async () => {
+      if (media_type === 'tv' && movieId) {
+        setLoadingSeason(true);
+        try {
+          const data = await getSeasonDetails(Number(movieId), season);
+          setSeasonData(data);
+        } catch (error) {
+          console.error("Erro ao carregar temporada:", error);
+        } finally {
+          setLoadingSeason(false);
+        }
+      }
+    };
+    fetchSeason();
+  }, [movieId, season, media_type]);
 
   // Monitor Shadow Ban Status
   useEffect(() => {
@@ -389,7 +424,7 @@ export const LordPlayer = ({
                         className={`group relative px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 overflow-hidden ${currentProvider === p.id ? 'bg-white border-white text-black shadow-[0_0_40px_rgba(255,255,255,0.3)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
                       >
                         <div className={`w-2 h-2 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,1)]'}`} />
-                        <span className="relative z-10">Sinal {idx + 1}: {p.name}</span>
+                        <span className="relative z-10">{p.name}</span>
                         {currentProvider === p.id && (
                           <motion.div 
                             layoutId="active-provider-glow"
@@ -400,28 +435,13 @@ export const LordPlayer = ({
                       </button>
                     ))}
                     {media_type === 'tv' && (
-                      <div className="flex gap-3">
-                        <div className="flex items-center bg-black/40 backdrop-blur-2xl border-2 border-white/10 rounded-2xl px-6 py-3 gap-4">
-                          <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Temporada</span>
-                          <input 
-                            type="number" 
-                            min={1} 
-                            value={season} 
-                            onChange={(e) => setSeason(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[14px] font-black w-10 outline-none border-b-2 border-white/10 focus:border-cyan-500 transition-colors text-center"
-                          />
-                        </div>
-                        <div className="flex items-center bg-black/40 backdrop-blur-2xl border-2 border-white/10 rounded-2xl px-6 py-3 gap-4">
-                          <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Episódio</span>
-                          <input 
-                            type="number" 
-                            min={1} 
-                            value={episode} 
-                            onChange={(e) => setEpisode(parseInt(e.target.value) || 1)}
-                            className="bg-transparent text-white text-[14px] font-black w-10 outline-none border-b-2 border-white/10 focus:border-cyan-500 transition-colors text-center"
-                          />
-                        </div>
-                      </div>
+                      <button
+                        onClick={() => setShowEpisodeSelector(true)}
+                        className="bg-cyan-500 hover:bg-cyan-400 text-black px-8 py-3 rounded-2xl flex items-center gap-3 transition-all shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+                      >
+                        <List className="w-5 h-5" />
+                        <span className="text-[11px] font-black uppercase tracking-[0.3em]">Episódios</span>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -644,6 +664,106 @@ export const LordPlayer = ({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* EPISODE SELECTOR MODAL (SUPREME) */}
+      <AnimatePresence>
+        {showEpisodeSelector && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 md:p-12"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-6xl bg-[#0a0a0a] border border-white/10 rounded-[40px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col h-[80vh]"
+            >
+              {/* HEADER */}
+              <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-cyan-500 font-black text-[10px] uppercase tracking-[0.5em] mb-2">Seleção de Elite</span>
+                  <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter">{title}</h3>
+                </div>
+                <button 
+                  onClick={() => setShowEpisodeSelector(false)}
+                  className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* SEASON TABS */}
+              <div className="px-8 py-6 flex items-center gap-4 overflow-x-auto no-scrollbar border-b border-white/5">
+                {Array.from({ length: movieData.number_of_seasons || 10 }, (_, i) => i + 1).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSeason(s)}
+                    className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${season === s ? 'bg-white text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                  >
+                    Temporada {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* EPISODES GRID */}
+              <div className="flex-1 overflow-y-auto p-8 no-scrollbar">
+                {loadingSeason ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-6">
+                    <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-500 animate-pulse">Carregando Episódios...</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {seasonData?.episodes?.map((ep: any) => (
+                      <motion.div
+                        key={ep.id}
+                        whileHover={{ scale: 1.02, y: -5 }}
+                        onClick={() => {
+                          setEpisode(ep.episode_number);
+                          setShowEpisodeSelector(false);
+                        }}
+                        className={`group relative aspect-video rounded-3xl overflow-hidden cursor-pointer border-2 transition-all ${episode === ep.episode_number ? 'border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.2)]' : 'border-white/5 hover:border-white/20'}`}
+                      >
+                        <img 
+                          src={ep.still_path ? `https://image.tmdb.org/t/p/w500${ep.still_path}` : movieData.bg} 
+                          alt={ep.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                        
+                        <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">EP {ep.episode_number}</span>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 text-gold fill-gold" />
+                              <span className="text-[10px] font-black text-white">{ep.vote_average?.toFixed(1)}</span>
+                            </div>
+                          </div>
+                          <h4 className="text-sm font-black text-white uppercase tracking-tight line-clamp-1">{ep.name}</h4>
+                          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">{ep.runtime} min</p>
+                        </div>
+
+                        {episode === ep.episode_number && (
+                          <div className="absolute top-4 right-4 w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+                            <Play className="w-4 h-4 text-black fill-black ml-0.5" />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </div>
   );
 };

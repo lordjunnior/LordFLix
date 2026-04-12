@@ -7,11 +7,19 @@
   --font-display: "Inter", sans-serif;
   --color-obsidian: #020202;
   --color-silver: #f8f8f8;
-  --color-cyan-primary: #22d3ee;
-  --color-blue-secondary: #2563eb;
+  --color-cyan-500: #22d3ee;
+  --color-blue-600: #2563eb;
   --color-aluminum: #e2e2e2;
   --color-gold: #D4AF37;
   --color-gold-light: #F9E272;
+  --color-retro-orange: #ff6b35;
+  --color-retro-yellow: #f7c59f;
+}
+
+@theme .mode-90s {
+  --color-obsidian: #1a0f0f;
+  --color-cyan-500: #ff6b35;
+  --color-gold: #f7c59f;
 }
 
 @layer utilities {

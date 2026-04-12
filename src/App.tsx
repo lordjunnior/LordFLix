@@ -19,7 +19,7 @@ import { getMovies, searchMovies, getVideos, getMovieDetails, getSeasonDetails, 
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
-import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon } from 'lucide-react';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon, Zap, Globe } from 'lucide-react';
 
 // --- ERROR BOUNDARY COMPONENT ---
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
@@ -206,6 +206,12 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
       
       {/* ELITE BADGES */}
       <div className="absolute top-5 right-5 flex flex-col gap-3 items-end z-20">
+        {filme.isSaga && (
+          <div className="bg-retro-orange/90 backdrop-blur-2xl border border-white/20 px-4 py-1.5 rounded-full shadow-[0_0_30px_rgba(255,107,53,0.4)] flex items-center gap-2">
+            <Crown className="w-3 h-3 text-black" />
+            <span className="text-[9px] font-black text-black tracking-widest uppercase">Saga Completa</span>
+          </div>
+        )}
         <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-3 py-1.5 rounded-full shadow-2xl">
           <span className="text-[10px] font-black text-white tracking-widest uppercase">{filme.nota}</span>
         </div>
@@ -290,9 +296,11 @@ function LordFlixSupreme() {
   const [erroSistema, setErroSistema] = useState(false);
   const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
+  const [sagaSelecionada, setSagaSelecionada] = useState<any>(null);
   const [filmeEmReproducao, setFilmeEmReproducao] = useState<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLiveTV, setShowLiveTV] = useState(false);
+  const [is90sMode, setIs90sMode] = useState(false);
   const [currentLiveChannel, setCurrentLiveChannel] = useState(LIVE_CHANNELS[0]);
   const [notifications, setNotifications] = useState<any[]>([
     {
@@ -524,17 +532,71 @@ function LordFlixSupreme() {
     }
   };
 
-  // --- LÓGICA DE FILTRO ---
+  // --- LÓGICA DE FILTRO E AGRUPAMENTO ---
   const categoriasFiltradas = useMemo(() => {
+    const groupSagas = (filmes: any[]) => {
+      const sagas: { [key: string]: any[] } = {};
+      const keywords = ["Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Jaspion", "Kamen Rider", "Ultraman", "Star Wars", "Harry Potter"];
+      
+      const result: any[] = [];
+      const processedIds = new Set();
+
+      filmes.forEach(f => {
+        let foundSaga = false;
+        for (const kw of keywords) {
+          if (f.titulo.toLowerCase().includes(kw.toLowerCase())) {
+            if (!sagas[kw]) sagas[kw] = [];
+            sagas[kw].push(f);
+            foundSaga = true;
+            break;
+          }
+        }
+        if (!foundSaga) result.push(f);
+      });
+
+      Object.entries(sagas).forEach(([kw, items]) => {
+        if (items.length > 1) {
+          result.unshift({
+            ...items[0],
+            titulo: `${kw}: A Saga Completa`,
+            isSaga: true,
+            sagaItems: items
+          });
+        } else {
+          result.push(...items);
+        }
+      });
+
+      return result;
+    };
+
     let base = categorias.map(cat => ({
       ...cat,
-      filmes: cat.filmes.filter(filme => {
+      filmes: groupSagas(cat.filmes.filter(filme => {
         const termo = busca.toLowerCase();
         const bateBusca = (filme.titulo || "").toLowerCase().includes(termo);
         if (perfil === 'kids') return filme.kids && bateBusca;
         return bateBusca;
-      })
+      }))
     })).filter(cat => cat.filmes.length > 0);
+
+    // Injetar Seções Especiais se estiver no modo 90s
+    if (is90sMode) {
+      const nostalgia = categorias.flatMap(c => c.filmes).filter(f => 
+        ["Cavaleiros do Zodíaco", "Yu Yu Hakusho", "Dragon Ball", "Jaspion", "Changeman"].some(kw => f.titulo.includes(kw))
+      );
+      if (nostalgia.length > 0) {
+        base.unshift({ nome: "Nostalgia BR Anos 90", type: "nostalgia", filmes: groupSagas(nostalgia) });
+      }
+    }
+
+    // Injetar Tokusatsu
+    const tokusatsu = categorias.flatMap(c => c.filmes).filter(f => 
+      ["Jaspion", "Changeman", "Flashman", "Jiraiya", "Kamen Rider", "Ultraman"].some(kw => f.titulo.includes(kw))
+    );
+    if (tokusatsu.length > 0) {
+      base.push({ nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: groupSagas(tokusatsu) });
+    }
 
     // Injetar Continuar Assistindo
     if (history.length > 0) {
@@ -611,6 +673,10 @@ function LordFlixSupreme() {
   };
 
   const handleFilmeSelecionado = async (filme: any) => {
+    if (filme.isSaga) {
+      setSagaSelecionada(filme);
+      return;
+    }
     setFilmeSelecionado(filme);
     if (filme.ano === 'LIVE') return;
     
@@ -715,7 +781,7 @@ function LordFlixSupreme() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020202] selection:bg-cyan-500 selection:text-black">
+    <div className={`min-h-screen transition-colors duration-1000 selection:bg-cyan-500 selection:text-black ${is90sMode ? 'mode-90s bg-[#1a0f0f]' : 'bg-[#020202]'}`}>
       
       {/* GLOBAL ANNOUNCEMENT */}
       <AnimatePresence>
@@ -724,7 +790,7 @@ function LordFlixSupreme() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-cyan-500 text-black py-2 px-6 flex items-center justify-center gap-4 relative z-[150]"
+            className={`py-2 px-6 flex items-center justify-center gap-4 relative z-[150] ${is90sMode ? 'bg-retro-orange text-black' : 'bg-cyan-500 text-black'}`}
           >
             <Bell className="w-4 h-4 animate-bounce" />
             <span className="text-[10px] font-black uppercase tracking-widest">{adminConfig.global_announcement}</span>
@@ -734,64 +800,71 @@ function LordFlixSupreme() {
       
       {/* 1. BARRA DE NAVEGAÇÃO (NAVBAR) */}
       <nav className="fixed top-0 w-full z-[60] px-4 md:px-8 py-4 md:py-6 flex flex-row justify-between items-center gap-4 glass-nav">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={() => setView('home')}
-          className="flex flex-col cursor-pointer items-start"
-        >
-          <span className="text-2xl md:text-4xl font-display font-black italic tracking-tighter">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white/40 via-white to-white/40">LORD</span>
-            <span className="text-gold">FLIX</span>
-          </span>
-          <span className="hidden md:block text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black ml-1">
-            Cinema para Todos
-          </span>
-        </motion.div>
+        <div className="flex items-center gap-12">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={() => setView('home')}
+            className="flex flex-col cursor-pointer items-start"
+          >
+            <span className="text-2xl md:text-3xl font-display font-black italic tracking-tighter">
+              <span className={is90sMode ? 'text-retro-yellow' : 'text-white'}>LORD</span>
+              <span className={is90sMode ? 'text-retro-orange' : 'text-gold'}>FLIX</span>
+            </span>
+          </motion.div>
+
+          <div className="hidden lg:flex items-center gap-8">
+            {[
+              { label: 'Início', icon: Home },
+              { label: 'Explorar', icon: Search },
+              { label: 'Dublados', icon: Globe },
+              { label: 'Clássicos', icon: History },
+              { label: 'Tokusatsu', icon: Zap },
+              { label: 'Filmes', icon: Film }
+            ].map((item) => (
+              <button 
+                key={item.label}
+                className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all"
+              >
+                <item.icon className={`w-3 h-3 transition-colors ${item.label === 'Tokusatsu' ? 'group-hover:text-retro-orange' : 'group-hover:text-cyan-500'}`} />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* SELETOR DE PERFIL (CONTROLE PARENTAL) */}
-        <div className="flex gap-2 md:gap-4 items-center justify-end">
-          {/* SEARCH TRIGGER MOBILE */}
+        <div className="flex gap-2 md:gap-6 items-center justify-end">
+          {/* SEARCH BOX */}
+          <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 w-64 focus-within:w-80 transition-all">
+            <Search className="w-4 h-4 text-white/40 mr-2" />
+            <input 
+              type="text" 
+              placeholder="Busca inteligente..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="bg-transparent border-none outline-none text-[10px] uppercase font-black tracking-widest w-full text-white placeholder:text-white/20"
+            />
+          </div>
+
+          {/* 90s MODE TOGGLE */}
           <button 
-            onClick={() => setShowMobileSearch(!showMobileSearch)}
-            className="md:hidden w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors"
+            onClick={() => setIs90sMode(!is90sMode)}
+            className={`hidden md:flex px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${is90sMode ? 'bg-retro-orange text-black border-retro-orange' : 'bg-transparent text-white/40 border-white/10 hover:border-white/40'}`}
           >
-            <Search className="w-4 h-4 text-silver/40" />
+            Modo 90s
           </button>
 
           {/* ADMIN TRIGGER */}
           {userRole === 'admin' && (
             <button 
               onClick={() => setShowAdminPanel(true)}
-              className="w-8 h-8 md:w-10 md:h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:scale-110 transition-transform"
+              className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-transform hover:scale-110 ${is90sMode ? 'bg-retro-orange text-black' : 'bg-cyan-500 text-black'}`}
             >
-              <Shield className="w-4 h-4 md:w-5 md:h-5 text-black" />
+              <Shield className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           )}
 
-          <button 
-            onClick={() => setShowLiveTV(true)}
-            className="hidden md:flex px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/20 transition-all items-center gap-2"
-          >
-            <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-red-600 rounded-full animate-ping" />
-            Live
-          </button>
-
-          <div className="hidden md:flex gap-2">
-            <button 
-              onClick={() => setPerfil('kids')}
-              className={`px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'kids' ? 'bg-white text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
-            >
-              Kids
-            </button>
-            <button 
-              onClick={() => perfil === 'kids' ? setMostrarPin(true) : setPerfil('adulto')}
-              className={`px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'adulto' ? 'bg-gold text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
-            >
-              Adults
-            </button>
-          </div>
-          
           <div className="flex items-center gap-3 md:gap-4 md:pl-6 md:border-l border-white/10">
             {/* NOTIFICATION BELL */}
             <div className="relative">
@@ -820,22 +893,12 @@ function LordFlixSupreme() {
               </AnimatePresence>
             </div>
 
-            <div 
-              className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
-              onClick={() => setShowProfile(true)}
-            >
-              <img 
-                src={user?.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"} 
-                className="w-full h-full object-cover rounded-xl" 
-                referrerPolicy="no-referrer" 
-              />
-            </div>
+            {/* PROFILE */}
             <button 
-              onClick={() => auth.signOut()}
-              className="hidden md:block text-silver/20 hover:text-gold transition-colors text-[8px] md:text-[10px] font-black uppercase tracking-widest"
-              title="Sair"
+              onClick={() => setShowProfile(true)}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-white/10 hover:border-white/40 transition-all"
             >
-              Sair
+              <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} alt="User" />
             </button>
           </div>
         </div>
@@ -978,11 +1041,19 @@ function LordFlixSupreme() {
             </div>
 
             <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
-              ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span>
+              {is90sMode ? (
+                <>O QUARTETO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-retro-orange via-retro-yellow to-retro-orange bg-[length:200%_auto] animate-gradient-x">DO PODER</span></>
+              ) : (
+                <>ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span></>
+              )}
             </h1>
             
             <p className="max-w-2xl text-zinc-300 text-sm md:text-2xl font-medium leading-relaxed mb-8 md:mb-12 drop-shadow-2xl line-clamp-3 md:line-clamp-none">
-              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da <span className="text-white font-black">LORDFLIX SUPREME</span>.
+              {is90sMode ? (
+                "A nostalgia que define gerações. Reviva os clássicos que moldaram o Brasil com o bitrate absoluto da LordFlix."
+              ) : (
+                "Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME."
+              )}
             </p>
 
             {/* Busca Centralizada Estilo TMDB Elite com Voice Search Integrado */}
@@ -1043,6 +1114,50 @@ function LordFlixSupreme() {
       {/* 4. CONTEÚDO PRINCIPAL (TRILHOS SUPREMOS) */}
       <main id="catalogo" className="relative z-10 -mt-20 space-y-24 pb-32">
         
+        {/* START HERE - GUIA DE BATISMO */}
+        <section className="px-4 md:px-20">
+          <div className="flex items-center gap-4 mb-12">
+            <div className={`w-1 h-12 shadow-[0_0_20px_rgba(255,107,53,0.6)] ${is90sMode ? 'bg-retro-orange' : 'bg-cyan-500'}`} />
+            <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">Pra Começar Sem Erro</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { 
+                title: "BATISMO DE FOGO", 
+                desc: "Nunca viu anime? Comece pela elite absoluta.", 
+                img: "https://images.unsplash.com/photo-1578632738980-230555094976?q=80&w=1974&auto=format&fit=crop",
+                tag: "ESSENCIAL"
+              },
+              { 
+                title: "CURTO E BRUTAL", 
+                desc: "Sem tempo? Sagas intensas que resolvem rápido.", 
+                img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1974&auto=format&fit=crop",
+                tag: "VELOCIDADE"
+              },
+              { 
+                title: "ADRENALINA PURA", 
+                desc: "Só porradaria e torneios. Sem conversa fiada.", 
+                img: "https://images.unsplash.com/photo-1552072805-2a9039d00e57?q=80&w=1974&auto=format&fit=crop",
+                tag: "CONFLITO"
+              }
+            ].map((card, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -10 }}
+                className="relative h-[400px] rounded-[40px] overflow-hidden group cursor-pointer border border-white/5"
+              >
+                <img src={card.img} alt={card.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                  <span className={`text-[10px] font-black tracking-[0.3em] mb-2 ${is90sMode ? 'text-retro-orange' : 'text-cyan-500'}`}>{card.tag}</span>
+                  <h3 className="text-3xl font-black text-white italic tracking-tighter mb-4">{card.title}</h3>
+                  <p className="text-sm text-white/40 font-bold uppercase tracking-widest leading-relaxed">{card.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
         {/* SEÇÃO DE RESULTADOS DA BUSCA */}
         <AnimatePresence>
           {busca.trim() !== "" && (
@@ -1096,12 +1211,12 @@ function LordFlixSupreme() {
                 </div>
               </div>
 
-              <div className={`flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 pb-12 overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory ${(cat.nome === 'ANIMES' || cat.nome === 'KIDS') ? 'touch-pan-x' : ''}`}>
+              <div className={`flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 pb-12 overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory`}>
                 {(cat.filmes || []).map((filme: any) => (
                   <div key={filme.id} className="min-w-[160px] md:min-w-0 snap-start">
                     <MoviePoster 
                       filme={filme} 
-                      type={idx === 0 ? "release" : undefined}
+                      type={cat.type === 'classic' || cat.type === 'nostalgia' ? 'classic' : 'release'}
                       onClick={() => handleFilmeSelecionado(filme)} 
                     />
                   </div>
@@ -1176,7 +1291,52 @@ function LordFlixSupreme() {
         </div>
       </main>
 
-      {/* 5.5 MODAL DE DETALHES DO FILME */}
+      {/* 5.6 MODAL DE SAGA COMPLETA */}
+      <AnimatePresence>
+        {sagaSelecionada && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[160] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 md:p-10"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-7xl w-full h-full md:h-auto max-h-[90vh] bg-[#050505] rounded-[40px] overflow-hidden border border-white/5 shadow-2xl flex flex-col relative"
+            >
+              <div className="p-8 md:p-12 border-b border-white/5 flex justify-between items-center">
+                <div>
+                  <span className="text-retro-orange font-black text-[10px] uppercase tracking-[0.4em] mb-2 block">Coleção de Elite</span>
+                  <h2 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter uppercase">{sagaSelecionada.titulo}</h2>
+                </div>
+                <button 
+                  onClick={() => setSagaSelecionada(null)}
+                  className="bg-white/5 hover:bg-white/10 p-4 rounded-full transition-all"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 md:p-12 no-scrollbar">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  {sagaSelecionada.sagaItems.map((item: any) => (
+                    <MoviePoster 
+                      key={item.id} 
+                      filme={item} 
+                      onClick={() => {
+                        setSagaSelecionada(null);
+                        handleFilmeSelecionado(item);
+                      }} 
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {filmeSelecionado && (
           <motion.div 

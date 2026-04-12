@@ -416,23 +416,23 @@ export const LordPlayer = ({
               className="absolute inset-0 z-20 flex flex-col justify-between pointer-events-none"
             >
               {/* TOP BAR */}
-              <div className="p-8 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-start pointer-events-auto">
-                <div className="flex flex-col">
+              <div className="p-4 md:p-8 bg-gradient-to-b from-black/80 to-transparent flex flex-col md:flex-row justify-between items-start gap-4 pointer-events-auto">
+                <div className="flex flex-col w-full md:w-auto">
                   <motion.h2 
                     initial={{ x: -20 }}
                     animate={{ x: 0 }}
-                    className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-aluminum"
+                    className="text-xl md:text-4xl font-black uppercase italic tracking-tighter text-aluminum line-clamp-1"
                   >
                     {title} {media_type === 'tv' && `• S${season} E${episode}`}
                   </motion.h2>
-                  <div className="flex flex-wrap gap-4 mt-6">
-                    {providers.map((p, idx) => (
+                  <div className="flex flex-wrap gap-2 md:gap-4 mt-4 md:mt-6">
+                    {providers.slice(0, 3).map((p, idx) => (
                       <button
                         key={p.id}
                         onClick={() => setCurrentProvider(p.id)}
-                        className={`group relative px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 overflow-hidden ${currentProvider === p.id ? 'bg-white border-white text-black shadow-[0_0_40px_rgba(255,255,255,0.3)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
+                        className={`group relative px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] transition-all border-2 flex items-center gap-2 md:gap-3 overflow-hidden ${currentProvider === p.id ? 'bg-white border-white text-black shadow-[0_0_40px_rgba(255,255,255,0.3)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
                       >
-                        <div className={`w-2 h-2 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,1)]'}`} />
+                        <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${currentProvider === p.id ? 'bg-black animate-pulse' : 'bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,1)]'}`} />
                         <span className="relative z-10">{p.name}</span>
                         {currentProvider === p.id && (
                           <motion.div 
@@ -440,40 +440,39 @@ export const LordPlayer = ({
                             className="absolute inset-0 bg-white opacity-10"
                           />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       </button>
                     ))}
                     {media_type === 'tv' && (
                       <button
                         onClick={() => setShowEpisodeSelector(true)}
-                        className="bg-cyan-500 hover:bg-cyan-400 text-black px-8 py-3 rounded-2xl flex items-center gap-3 transition-all shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+                        className="bg-cyan-500 hover:bg-cyan-400 text-black px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl flex items-center gap-2 md:gap-3 transition-all shadow-[0_0_30px_rgba(34,211,238,0.3)]"
                       >
-                        <List className="w-5 h-5" />
-                        <span className="text-[11px] font-black uppercase tracking-[0.3em]">Episódios</span>
+                        <List className="w-4 h-4 md:w-5 md:h-5" />
+                        <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em]">Episódios</span>
                       </button>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:gap-4 self-end md:self-start">
                   <button 
                     onClick={() => setShowProviderSelector(!showProviderSelector)}
-                    className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${showProviderSelector ? 'bg-gold border-gold text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                    className={`w-10 h-10 md:w-12 md:h-12 rounded-full border flex items-center justify-center transition-all ${showProviderSelector ? 'bg-gold border-gold text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
                     title="Trocar Provedor de Sinal"
                   >
-                    <Globe className="w-5 h-5" />
+                    <Globe className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                   <button 
                     onClick={() => setIsLocked(!isLocked)}
-                    className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${isLocked ? 'bg-cyan-500 border-cyan-500 text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                    className={`w-10 h-10 md:w-12 md:h-12 rounded-full border flex items-center justify-center transition-all ${isLocked ? 'bg-cyan-500 border-cyan-500 text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
                     title={isLocked ? "Desbloquear Controles" : "Bloquear Controles"}
                   >
-                    {isLocked ? <Shield className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
+                    {isLocked ? <Shield className="w-4 h-4 md:w-5 md:h-5" /> : <Settings className="w-4 h-4 md:w-5 md:h-5" />}
                   </button>
                   <button 
                     onClick={onClose}
-                    className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all group"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all group"
                   >
-                    <X className="w-5 h-5 text-white group-hover:rotate-90 transition-transform" />
+                    <X className="w-4 h-4 md:w-5 md:h-5 text-white group-hover:rotate-90 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -495,10 +494,10 @@ export const LordPlayer = ({
               </div>
 
               {/* BOTTOM CONTROLS */}
-              <div className={`p-8 md:p-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-auto transition-all duration-500 ${isLocked ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-1'}`}>
+              <div className={`p-4 md:p-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-auto transition-all duration-500 ${isLocked ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-1'}`}>
                 {/* SEEK BAR */}
-                <div className="group relative mb-8 flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-silver/40 w-12 text-right">{formatTime(played * duration)}</span>
+                <div className="group relative mb-4 md:mb-8 flex items-center gap-2 md:gap-4">
+                  <span className="text-[8px] md:text-[10px] font-bold text-silver/40 w-8 md:w-12 text-right">{formatTime(played * duration)}</span>
                   <div className="flex-1 relative h-6 flex items-center">
                     <input
                       type="range"
@@ -509,43 +508,43 @@ export const LordPlayer = ({
                       onMouseDown={handleSeekMouseDown}
                       onChange={handleSeekChange}
                       onMouseUp={handleSeekMouseUp}
-                      className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer outline-none accent-cyan-500 z-10"
+                      className="w-full h-1 md:h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer outline-none accent-cyan-500 z-10"
                       style={{
                         background: `linear-gradient(to right, #22d3ee ${played * 100}%, rgba(255,255,255,0.1) ${played * 100}%)`
                       }}
                     />
                     {/* GLOWING HEAD */}
                     <div 
-                      className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_15px_rgba(34,211,238,1)] pointer-events-none transition-transform group-hover:scale-125 z-20"
-                      style={{ left: `calc(${played * 100}% - 8px)` }}
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 bg-white rounded-full shadow-[0_0_15px_rgba(34,211,238,1)] pointer-events-none transition-transform group-hover:scale-125 z-20"
+                      style={{ left: `calc(${played * 100}% - 6px)` }}
                     />
                   </div>
-                  <span className="text-[10px] font-bold text-silver/40 w-12">{formatTime(duration)}</span>
+                  <span className="text-[8px] md:text-[10px] font-bold text-silver/40 w-8 md:w-12">{formatTime(duration)}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6 md:gap-10">
+                  <div className="flex items-center gap-4 md:gap-10">
                     {/* PLAY/PAUSE */}
                     <button onClick={handlePlayPause} className="text-white hover:text-cyan-400 transition-colors">
-                      {playing ? <Pause className="w-8 h-8 md:w-10 md:h-10 fill-current" /> : <Play className="w-8 h-8 md:w-10 md:h-10 fill-current" />}
+                      {playing ? <Pause className="w-6 h-6 md:w-10 md:h-10 fill-current" /> : <Play className="w-6 h-6 md:w-10 md:h-10 fill-current" />}
                     </button>
 
                     {/* REWIND/FORWARD */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 md:gap-6">
                       <button onClick={rewind} className="flex flex-col items-center gap-1 text-white/40 hover:text-white transition-colors group">
-                        <RotateCcw className="w-6 h-6 group-hover:-rotate-45 transition-transform" />
-                        <span className="text-[8px] font-black uppercase tracking-widest">-10s</span>
+                        <RotateCcw className="w-4 h-4 md:w-6 md:h-6 group-hover:-rotate-45 transition-transform" />
+                        <span className="text-[6px] md:text-[8px] font-black uppercase tracking-widest">-10s</span>
                       </button>
                       <button onClick={fastForward} className="flex flex-col items-center gap-1 text-white/40 hover:text-white transition-colors group">
-                        <RotateCw className="w-6 h-6 group-hover:rotate-45 transition-transform" />
-                        <span className="text-[8px] font-black uppercase tracking-widest">+10s</span>
+                        <RotateCw className="w-4 h-4 md:w-6 md:h-6 group-hover:rotate-45 transition-transform" />
+                        <span className="text-[6px] md:text-[8px] font-black uppercase tracking-widest">+10s</span>
                       </button>
                     </div>
 
                     {/* VOLUME */}
-                    <div className="hidden sm:flex items-center gap-4 group/vol">
+                    <div className="hidden md:flex items-center gap-4 group/vol">
                       <button onClick={handleToggleMuted} className="text-white/60 hover:text-white transition-colors">
-                        {muted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                        {muted || volume === 0 ? <VolumeX className="w-5 h-5 md:w-6 md:h-6" /> : <Volume2 className="w-5 h-5 md:w-6 md:h-6" />}
                       </button>
                       <input 
                         type="range" 

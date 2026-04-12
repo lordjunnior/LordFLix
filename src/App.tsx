@@ -218,18 +218,18 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
       </div>
 
       {/* CONTENT INFO */}
-      <div className="absolute inset-x-0 bottom-0 p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-        <div className="flex flex-wrap gap-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
-          <span className="bg-white/10 backdrop-blur-xl border border-white/20 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-white">{filme.ano}</span>
-          <span className="bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-cyan-400">4K UHD</span>
-          <span className="bg-gold/20 backdrop-blur-xl border border-gold/30 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-gold-light">Dublado</span>
+      <div className="absolute inset-x-0 bottom-0 p-4 md:p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+        <div className="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+          <span className="bg-white/10 backdrop-blur-xl border border-white/20 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white">{filme.ano}</span>
+          <span className="bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-cyan-400">4K UHD</span>
+          <span className="bg-gold/20 backdrop-blur-xl border border-gold/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-gold-light">Dublado</span>
         </div>
 
-        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] line-clamp-2">
+        <h3 className="text-sm md:text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] line-clamp-2">
           {filme.titulo}
         </h3>
 
-        <div className="flex items-center gap-3 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
+        <div className="hidden md:flex items-center gap-3 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
           <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map(i => (
               <div key={i} className={`w-1 h-1 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/20'}`}></div>
@@ -238,8 +238,8 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
           <span className="text-[8px] font-bold text-silver/40 uppercase tracking-[0.3em]">Sinal Estabilizado</span>
         </div>
 
-        <button className="w-full bg-white text-black py-3.5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all active:scale-95 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-300">
-          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : 'Assistir Agora'}
+        <button className="w-full bg-white text-black py-2 md:py-3.5 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all active:scale-95 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-300">
+          {filme.ano === 'LIVE' ? 'Sintonizar' : 'Assistir'}
         </button>
       </div>
 
@@ -732,70 +732,56 @@ function LordFlixSupreme() {
       </AnimatePresence>
       
       {/* 1. BARRA DE NAVEGAÇÃO (NAVBAR) */}
-      <nav className="fixed top-0 w-full z-[60] px-8 py-6 flex justify-between items-center glass-nav">
+      <nav className="fixed top-0 w-full z-[60] px-4 md:px-8 py-4 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 glass-nav">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => setView('home')}
-          className="flex flex-col cursor-pointer"
+          className="flex flex-col cursor-pointer items-center md:items-start"
         >
-          <span className="text-4xl font-display font-black italic tracking-tighter">
+          <span className="text-3xl md:text-4xl font-display font-black italic tracking-tighter">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white/40 via-white to-white/40">LORD</span>
             <span className="text-gold">FLIX</span>
           </span>
-          <span className="text-[10px] uppercase tracking-[0.4em] text-gold font-black ml-1">
+          <span className="text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black ml-1">
             Cinema para Todos
           </span>
         </motion.div>
 
         {/* SELETOR DE PERFIL (CONTROLE PARENTAL) */}
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-2 md:gap-4 items-center justify-center">
           {/* ADMIN TRIGGER */}
           {userRole === 'admin' && (
             <button 
               onClick={() => setShowAdminPanel(true)}
-              className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:scale-110 transition-transform mr-4"
+              className="w-8 h-8 md:w-10 md:h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:scale-110 transition-transform"
             >
-              <Shield className="w-5 h-5 text-black" />
+              <Shield className="w-4 h-4 md:w-5 md:h-5 text-black" />
             </button>
           )}
 
           <button 
             onClick={() => setShowLiveTV(true)}
-            className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/20 transition-all mr-2 flex items-center gap-2"
+            className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/20 transition-all flex items-center gap-2"
           >
-            <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping" />
-            Lord Vision Live
-          </button>
-
-          <button 
-            onClick={() => setView('suporte')}
-            className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all mr-2"
-          >
-            Centro de Performance
+            <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-red-600 rounded-full animate-ping" />
+            Live
           </button>
 
           <button 
             onClick={() => setPerfil('kids')}
-            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'kids' ? 'bg-white text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
+            className={`px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'kids' ? 'bg-white text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
           >
-            Crianças
+            Kids
           </button>
           <button 
-            onClick={() => perfil === 'kids' ? setMostrarPin(true) : setPerfil('kids')}
-            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'adulto' ? 'bg-gold text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
+            onClick={() => perfil === 'kids' ? setMostrarPin(true) : setPerfil('adulto')}
+            className={`px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${perfil === 'adulto' ? 'bg-gold text-black' : 'bg-white/5 text-silver hover:bg-white/10'}`}
           >
-            Adultos
+            Adults
           </button>
-          <button 
-            onClick={() => auth.signOut()}
-            className="px-4 py-2 text-silver/20 hover:text-gold transition-colors text-[10px] font-black uppercase tracking-widest"
-            title="Sair"
-          >
-            Sair
-          </button>
-
-          <div className="flex items-center gap-4 pl-8 border-l border-white/10">
+          
+          <div className="flex items-center gap-3 md:gap-4 md:pl-6 md:border-l border-white/10">
             {/* NOTIFICATION BELL */}
             <div className="relative">
               <button 
@@ -803,11 +789,11 @@ function LordFlixSupreme() {
                   e.stopPropagation();
                   setShowNotifications(!showNotifications);
                 }}
-                className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors relative"
+                className="w-8 h-8 md:w-10 md:h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors relative"
               >
-                <Bell className={`w-5 h-5 ${notifications.some(n => !n.read) ? 'text-cyan-500 animate-pulse' : 'text-silver/40'}`} />
+                <Bell className={`w-4 h-4 md:w-5 md:h-5 ${notifications.some(n => !n.read) ? 'text-cyan-500 animate-pulse' : 'text-silver/40'}`} />
                 {notifications.some(n => !n.read) && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
                 )}
               </button>
               <AnimatePresence>
@@ -823,22 +809,8 @@ function LordFlixSupreme() {
               </AnimatePresence>
             </div>
 
-            <div className="text-right hidden sm:block">
-              <p className="text-[9px] font-black text-white uppercase tracking-widest">{user?.displayName || user?.email?.split('@')[0]}</p>
-              <p className="text-[8px] font-bold text-cyan-500 uppercase tracking-widest flex items-center justify-end gap-1">
-                {userRole === 'admin' ? 'Supreme Admin' : userRole === 'vip' ? 'Membro VIP' : 'Membro Comum'}
-                {(userRole === 'vip' || userRole === 'admin') && (
-                  <motion.div
-                    animate={{ filter: ['drop-shadow(0 0 2px #d4af37)', 'drop-shadow(0 0 8px #d4af37)', 'drop-shadow(0 0 2px #d4af37)'] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Crown className="w-3 h-3 text-gold" />
-                  </motion.div>
-                )}
-              </p>
-            </div>
             <div 
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
               onClick={() => setShowProfile(true)}
             >
               <img 
@@ -847,6 +819,13 @@ function LordFlixSupreme() {
                 referrerPolicy="no-referrer" 
               />
             </div>
+            <button 
+              onClick={() => auth.signOut()}
+              className="text-silver/20 hover:text-gold transition-colors text-[8px] md:text-[10px] font-black uppercase tracking-widest"
+              title="Sair"
+            >
+              Sair
+            </button>
           </div>
         </div>
       </nav>
@@ -943,7 +922,7 @@ function LordFlixSupreme() {
       </AnimatePresence>
 
       {/* 3. HERO SECTION (FULL-BLEED ELITE HERO CAROUSEL) */}
-      <section className="relative h-[90vh] min-h-[600px] w-screen overflow-hidden flex flex-col justify-center bg-black">
+      <section className="relative h-[70vh] md:h-[90vh] min-h-[500px] md:min-h-[600px] w-full overflow-hidden flex flex-col justify-center bg-black">
         {/* 1. A IMAGEM DE FORA A FORA (Full-Bleed Backdrop) - Ken Burns Effect */}
         <div className="absolute inset-0 z-0">
           <AnimatePresence mode="wait">
@@ -956,7 +935,7 @@ function LordFlixSupreme() {
                 transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
                 src={filmeDestaque.bg} 
                 alt="Destaque Sci-Fi LordFlix" 
-                className="w-full h-full object-cover object-top animate-subtle-zoom"
+                className="w-full h-full object-cover object-center md:object-top animate-subtle-zoom"
                 referrerPolicy="no-referrer"
                 // @ts-ignore - fetchPriority is supported in modern browsers/React
                 fetchPriority="high"
@@ -970,7 +949,7 @@ function LordFlixSupreme() {
         </div>
 
         {/* 3. O CONTEÚDO (Trio de Experiência: CTA + SEO + PNL) */}
-        <div className="relative z-20 h-full w-full flex flex-col justify-center px-8 md:px-20 lg:px-32">
+        <div className="relative z-20 h-full w-full flex flex-col justify-center px-6 md:px-20 lg:px-32">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -979,19 +958,19 @@ function LordFlixSupreme() {
           >
             {/* Tag de Autoridade (SEO + PNL) */}
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-cyan-400 font-black tracking-[0.5em] text-xs md:text-sm uppercase drop-shadow-neon">
-                LORDFLIX EXCLUSIVE • SCI-FI DESTINY
+              <span className="text-cyan-400 font-black tracking-[0.3em] md:tracking-[0.5em] text-[10px] md:text-sm uppercase drop-shadow-neon">
+                LORDFLIX EXCLUSIVE
               </span>
-              <span className="bg-gold text-black px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-sm">
+              <span className="bg-gold text-black px-2 md:px-3 py-0.5 md:py-1 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-sm">
                 Dublado
               </span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.75] tracking-tighter uppercase mb-8 italic">
+            <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
               ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span>
             </h1>
             
-            <p className="max-w-2xl text-zinc-300 text-lg md:text-2xl font-medium leading-relaxed mb-12 drop-shadow-2xl">
+            <p className="max-w-2xl text-zinc-300 text-sm md:text-2xl font-medium leading-relaxed mb-8 md:mb-12 drop-shadow-2xl line-clamp-3 md:line-clamp-none">
               Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da <span className="text-white font-black">LORDFLIX SUPREME</span>.
             </p>
 
@@ -1001,14 +980,14 @@ function LordFlixSupreme() {
               <div className="relative flex items-center bg-white rounded-full shadow-2xl overflow-hidden">
                 <input 
                   type="text" 
-                  placeholder="O que você quer assistir hoje?"
-                  className="w-full bg-transparent text-black py-5 md:py-6 px-8 text-lg outline-none font-medium placeholder:text-zinc-400"
+                  placeholder="O que assistir?"
+                  className="w-full bg-transparent text-black py-4 md:py-6 px-6 md:px-8 text-sm md:text-lg outline-none font-medium placeholder:text-zinc-400"
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                 />
-                <div className="flex items-center gap-2 pr-4">
+                <div className="flex items-center gap-2 pr-2 md:pr-4">
                   <VoiceSearch onResult={(text) => setBusca(text)} />
-                  <button className="bg-gradient-to-r from-cyan-500 to-blue-800 text-white px-8 py-3 rounded-full font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-cyan-500/30">
+                  <button className="bg-gradient-to-r from-cyan-500 to-blue-800 text-white px-4 md:px-8 py-2 md:py-3 rounded-full font-black uppercase tracking-widest text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-cyan-500/30">
                     Buscar
                   </button>
                 </div>

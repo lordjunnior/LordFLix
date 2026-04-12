@@ -177,16 +177,16 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
   return (
     <div className="fixed inset-0 z-[300] bg-[#1a0a0a] flex flex-col overflow-hidden font-sans text-white selection:bg-red-600">
       {/* TOP NAVIGATION BAR (PLEX STYLE) */}
-      <header className="h-20 px-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent z-50">
-        <div className="flex items-center gap-12">
+      <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent z-50">
+        <div className="flex items-center gap-4 md:gap-12">
           <div className="flex items-center gap-2 cursor-pointer group" onClick={onClose}>
-             <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.4)] group-hover:scale-110 transition-transform">
-               <Tv className="w-6 h-6 text-black" />
+             <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.4)] group-hover:scale-110 transition-transform">
+               <Tv className="w-4 h-4 md:w-6 md:h-6 text-black" />
              </div>
-             <span className="text-2xl font-black italic tracking-tighter uppercase text-white">Lord Vision</span>
+             <span className="text-lg md:text-2xl font-black italic tracking-tighter uppercase text-white">Lord Vision</span>
           </div>
           
-          <nav className="flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8">
             <button className="text-sm font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors">Filmes</button>
             <button className="text-sm font-bold uppercase tracking-widest text-white border-b-2 border-orange-500 pb-1">TV em Direto</button>
             <button className="text-sm font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors">A Pedido</button>
@@ -194,16 +194,19 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
           </nav>
         </div>
 
-        <div className="flex items-center gap-8">
-          <div className="relative group">
+        <div className="flex items-center gap-4 md:gap-8">
+          <div className="relative group hidden sm:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-orange-500 transition-colors" />
             <input 
               type="text" 
               placeholder="Pesquisar..." 
-              className="bg-white/5 border border-white/10 rounded-full py-2.5 pl-12 pr-6 text-xs font-bold focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all w-64"
+              className="bg-white/5 border border-white/10 rounded-full py-2 md:py-2.5 pl-10 md:pl-12 pr-4 md:pr-6 text-[10px] md:text-xs font-bold focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all w-32 md:w-64"
             />
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-600 border-2 border-white/20 flex items-center justify-center font-black text-sm shadow-lg">
+          <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center bg-white/5 rounded-full">
+            <X className="w-4 h-4" />
+          </button>
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-600 border-2 border-white/20 flex items-center justify-center font-black text-xs md:text-sm shadow-lg">
             L
           </div>
         </div>
@@ -212,11 +215,11 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar relative">
         {/* HERO SECTION (ACTIVE CHANNEL INFO) */}
-        <section className="px-10 py-12 flex gap-12 items-start relative min-h-[450px]">
+        <section className="px-4 md:px-10 py-6 md:py-12 flex flex-col lg:flex-row gap-6 md:gap-12 items-start relative min-h-[450px]">
           {/* PLAYER PREVIEW */}
           <div 
             ref={containerRef}
-            className="relative w-[550px] aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black group"
+            className="relative w-full lg:w-[550px] aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black group"
             onMouseMove={handleMouseMove}
           >
             <video 
@@ -256,8 +259,8 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 bg-black/40 flex items-center justify-center"
                 >
-                  <button onClick={() => setPlaying(!playing)} className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center text-black shadow-2xl hover:scale-110 transition-transform">
-                    {playing ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+                  <button onClick={() => setPlaying(!playing)} className="w-12 h-12 md:w-16 md:h-16 bg-orange-500 rounded-full flex items-center justify-center text-black shadow-2xl hover:scale-110 transition-transform">
+                    {playing ? <Pause className="w-6 h-6 md:w-8 md:h-8 fill-current" /> : <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />}
                   </button>
                 </motion.div>
               )}
@@ -265,40 +268,40 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
           </div>
 
           {/* SHOW INFO */}
-          <div className="flex-1 flex flex-col pt-4">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="bg-orange-500 text-black px-3 py-1 rounded font-black text-[10px] uppercase tracking-widest">TV-PG</div>
-              <div className="text-white/40 font-bold text-xs uppercase tracking-widest">E4 • 1 min restante</div>
+          <div className="flex-1 flex flex-col pt-0 md:pt-4">
+            <div className="flex items-center gap-4 mb-4 md:mb-6">
+              <div className="bg-orange-500 text-black px-2 md:px-3 py-0.5 md:py-1 rounded font-black text-[8px] md:text-[10px] uppercase tracking-widest">TV-PG</div>
+              <div className="text-white/40 font-bold text-[10px] md:text-xs uppercase tracking-widest">E4 • 1 min restante</div>
             </div>
             
-            <h1 className="text-6xl font-black uppercase italic tracking-tighter text-white mb-2">{activeEPG.title}</h1>
-            <h2 className="text-2xl font-bold text-white/60 mb-8">{currentChannel.name}</h2>
+            <h1 className="text-3xl md:text-6xl font-black uppercase italic tracking-tighter text-white mb-2">{activeEPG.title}</h1>
+            <h2 className="text-lg md:text-2xl font-bold text-white/60 mb-6 md:mb-8">{currentChannel.name}</h2>
             
-            <div className="flex gap-4 mb-10">
-              <button className="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-xl flex items-center gap-3 transition-all">
-                <Share2 className="w-5 h-5" />
-                <span className="text-sm font-bold uppercase tracking-widest">Partilhar</span>
+            <div className="flex gap-3 md:gap-4 mb-6 md:mb-10">
+              <button className="bg-white/10 hover:bg-white/20 border border-white/10 px-4 md:px-8 py-2 md:py-3 rounded-xl flex items-center gap-2 md:gap-3 transition-all">
+                <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-widest">Partilhar</span>
               </button>
-              <button className="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-xl flex items-center gap-3 transition-all">
-                <Info className="w-5 h-5" />
-                <span className="text-sm font-bold uppercase tracking-widest">Mais Info</span>
+              <button className="bg-white/10 hover:bg-white/20 border border-white/10 px-4 md:px-8 py-2 md:py-3 rounded-xl flex items-center gap-2 md:gap-3 transition-all">
+                <Info className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-widest">Mais Info</span>
               </button>
             </div>
 
-            <p className="text-xl text-white/40 leading-relaxed max-w-3xl font-medium">
+            <p className="text-sm md:text-xl text-white/40 leading-relaxed max-w-3xl font-medium line-clamp-4 md:line-clamp-none">
               {activeEPG.description}
             </p>
           </div>
         </section>
 
         {/* CATEGORY FILTER BAR */}
-        <section className="px-10 mb-8">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-4 border-b border-white/5">
+        <section className="px-4 md:px-10 mb-4 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar py-2 md:py-4 border-b border-white/5">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-8 py-2.5 rounded-full text-xs font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${selectedCategory === cat.id ? 'bg-white text-black shadow-xl' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                className={`px-4 md:px-8 py-2 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${selectedCategory === cat.id ? 'bg-white text-black shadow-xl' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
               >
                 {cat.name}
               </button>
@@ -307,79 +310,81 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
         </section>
 
         {/* EPG GRID (THE CORE) */}
-        <section className="px-10 pb-20">
+        <section className="px-4 md:px-10 pb-20">
           {/* TIME HEADER */}
-          <div className="flex items-center mb-6 sticky top-0 bg-[#1a0a0a] z-40 py-4 border-b border-white/5">
-            <div className="w-64 flex items-center gap-3">
-              <span className="text-xs font-black uppercase tracking-widest text-orange-500">Hoje</span>
-              <ChevronRight className="w-4 h-4 text-white/20" />
+          <div className="flex items-center mb-4 md:mb-6 sticky top-0 bg-[#1a0a0a] z-40 py-2 md:py-4 border-b border-white/5">
+            <div className="w-32 md:w-64 flex items-center gap-2 md:gap-3">
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-orange-500">Hoje</span>
+              <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-white/20" />
             </div>
             <div className="flex-1 flex">
               {timeSlots.map(time => (
-                <div key={time} className="flex-1 text-[10px] font-black uppercase tracking-widest text-white/20 border-l border-white/5 pl-4">
+                <div key={time} className="flex-1 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white/20 border-l border-white/5 pl-2 md:pl-4">
                   {time}
                 </div>
               ))}
             </div>
-            <div className="flex gap-2 ml-4">
+            <div className="hidden md:flex gap-2 ml-4">
               <button className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all"><ChevronLeft className="w-4 h-4" /></button>
               <button className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all"><ChevronRight className="w-4 h-4" /></button>
             </div>
           </div>
 
           {/* CHANNEL ROWS */}
-          <div className="flex flex-col gap-1">
-            {LIVE_CHANNELS.map(channel => {
-              const epg = generateEPG(channel.id);
-              const isActive = currentChannel.id === channel.id;
-              
-              return (
-                <div 
-                  key={channel.id}
-                  onClick={() => onChannelChange(channel)}
-                  className={`flex items-stretch group cursor-pointer transition-all ${isActive ? 'bg-orange-500/10' : 'hover:bg-white/5'}`}
-                >
-                  {/* CHANNEL LOGO & NAME */}
-                  <div className="w-64 p-4 flex items-center gap-6 border-r border-white/5 bg-black/40 backdrop-blur-xl">
-                    <div className="w-16 aspect-video rounded-lg overflow-hidden bg-[#121212] border border-white/10 p-1.5 flex items-center justify-center">
-                      <img src={channel.logo} alt={channel.name} className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-black uppercase tracking-widest text-white group-hover:text-orange-500 transition-colors">{channel.name}</span>
-                      <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest mt-1">{channel.quality}</span>
-                    </div>
-                  </div>
-
-                  {/* SHOW TIMELINE */}
-                  <div className="flex-1 flex bg-white/[0.01] backdrop-blur-md">
-                    {epg.map((show, idx) => (
-                      <div 
-                        key={show.id}
-                        className={`p-4 border-l border-white/5 flex flex-col justify-center transition-all relative overflow-hidden group/show ${idx === 0 && isActive ? 'bg-orange-500/20 backdrop-blur-lg' : 'hover:bg-white/10'}`}
-                        style={{ flex: show.duration / 30 }}
-                      >
-                        <span className="text-xs font-black uppercase tracking-tight text-white/80 line-clamp-1 group-hover/show:text-orange-500 transition-colors">{show.title}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{show.duration} min restante</span>
-                          {idx === 0 && <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(249,115,22,1)]" />}
-                        </div>
-                        
-                        {/* PROGRESS BAR FOR CURRENT SHOW */}
-                        {idx === 0 && (
-                          <div className="absolute bottom-0 left-0 h-0.5 bg-orange-500/30 w-full">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: '40%' }}
-                              className="h-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
-                            />
-                          </div>
-                        )}
+          <div className="flex flex-col gap-1 overflow-x-auto md:overflow-visible">
+            <div className="min-w-[800px] md:min-w-0 flex flex-col gap-1">
+              {LIVE_CHANNELS.map(channel => {
+                const epg = generateEPG(channel.id);
+                const isActive = currentChannel.id === channel.id;
+                
+                return (
+                  <div 
+                    key={channel.id}
+                    onClick={() => onChannelChange(channel)}
+                    className={`flex items-stretch group cursor-pointer transition-all ${isActive ? 'bg-orange-500/10' : 'hover:bg-white/5'}`}
+                  >
+                    {/* CHANNEL LOGO & NAME */}
+                    <div className="w-32 md:w-64 p-2 md:p-4 flex flex-col md:flex-row items-center gap-2 md:gap-6 border-r border-white/5 bg-black/40 backdrop-blur-xl">
+                      <div className="w-12 md:w-16 aspect-video rounded-lg overflow-hidden bg-[#121212] border border-white/10 p-1 md:p-1.5 flex items-center justify-center">
+                        <img src={channel.logo} alt={channel.name} className="w-full h-full object-contain" />
                       </div>
-                    ))}
+                      <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white group-hover:text-orange-500 transition-colors line-clamp-1">{channel.name}</span>
+                        <span className="text-[8px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest mt-0.5 md:mt-1">{channel.quality}</span>
+                      </div>
+                    </div>
+
+                    {/* SHOW TIMELINE */}
+                    <div className="flex-1 flex bg-white/[0.01] backdrop-blur-md">
+                      {epg.map((show, idx) => (
+                        <div 
+                          key={show.id}
+                          className={`p-2 md:p-4 border-l border-white/5 flex flex-col justify-center transition-all relative overflow-hidden group/show ${idx === 0 && isActive ? 'bg-orange-500/20 backdrop-blur-lg' : 'hover:bg-white/10'}`}
+                          style={{ flex: show.duration / 30 }}
+                        >
+                          <span className="text-[10px] md:text-xs font-black uppercase tracking-tight text-white/80 line-clamp-1 group-hover/show:text-orange-500 transition-colors">{show.title}</span>
+                          <div className="flex items-center gap-2 mt-0.5 md:mt-1">
+                            <span className="text-[8px] md:text-[9px] font-bold text-white/30 uppercase tracking-widest">{show.duration} min restante</span>
+                            {idx === 0 && <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-orange-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(249,115,22,1)]" />}
+                          </div>
+                          
+                          {/* PROGRESS BAR FOR CURRENT SHOW */}
+                          {idx === 0 && (
+                            <div className="absolute bottom-0 left-0 h-0.5 bg-orange-500/30 w-full">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: '40%' }}
+                                className="h-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </section>
       </main>

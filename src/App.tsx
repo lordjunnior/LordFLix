@@ -19,7 +19,7 @@ import { getMovies, searchMovies, getVideos, getMovieDetails, getSeasonDetails, 
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
-import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon } from 'lucide-react';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon, Zap, Sparkles, Flame, Brain, Heart, Sword, Play as PlayIcon } from 'lucide-react';
 
 // --- ERROR BOUNDARY COMPONENT ---
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
@@ -65,68 +65,14 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
-  { nome: "FILMES", type: "movie", filmes: [] },
-  { nome: "SERIES", type: "tv", filmes: [] },
-  { nome: "TVs", type: "live", filmes: [
-    { 
-      id: 301, 
-      titulo: "Lord News 24h", 
-      nota: "9.8", 
-      idade: "L", 
-      kids: false, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Global",
-      resumo: "Cobertura global em tempo real. A notícia onde ela acontece, com a clareza do 4K.",
-      img: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    },
-    { 
-      id: 302, 
-      titulo: "Lord Sports Ultra", 
-      nota: "9.9", 
-      idade: "L", 
-      kids: false, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Sports",
-      resumo: "O ápice do esporte mundial. Sinta a adrenalina de cada jogada em HDR10+.",
-      img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    },
-    { 
-      id: 303, 
-      titulo: "Lord Cinema One", 
-      nota: "9.5", 
-      idade: "14", 
-      kids: false, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Studios",
-      resumo: "Estreias exclusivas e clássicos remasterizados em loop infinito de perfeição.",
-      img: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    },
-    { 
-      id: 304, 
-      titulo: "Lord Nature 4K", 
-      nota: "9.7", 
-      idade: "L", 
-      kids: true, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Earth",
-      resumo: "A beleza crua do planeta Terra capturada com tecnologia de ponta.",
-      img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    }
-  ]},
-  { nome: "ANIMES", type: "anime", filmes: [] },
-  { nome: "KIDS", type: "kids", filmes: [] }
+  { nome: "EM ALTA NO BRASIL", type: "trending", filmes: [] },
+  { nome: "NOSTALGIA BR ANOS 90", type: "nostalgia", filmes: [] },
+  { nome: "TOKUSATSU CLÁSSICO", type: "tokusatsu", filmes: [] },
+  { nome: "PORRADARIA E TORNEIO", type: "action", filmes: [] },
+  { nome: "HISTÓRIAS INTELIGENTES", type: "smart", filmes: [] },
+  { nome: "VAI TE FAZER CHORAR", type: "drama", filmes: [] },
+  { nome: "HERÓIS E TRANSFORMAÇÕES", type: "heroes", filmes: [] },
+  { nome: "FILMES IMPERDÍVEIS", type: "movies", filmes: [] }
 ];
 
 const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item => ({
@@ -317,6 +263,7 @@ function LordFlixSupreme() {
   const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
   const [buscando, setBuscando] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [modoNostalgia, setModoNostalgia] = useState(false);
 
   // --- SEO ENGINE: DYNAMIC METADATA ---
   useEffect(() => {
@@ -434,30 +381,51 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, animes, kids] = await Promise.allSettled([
-          getMovies("movie"),
-          getMovies("tv"),
-          getMoviesByGenre("tv", 16), // Animes
-          getMoviesByGenre("movie", 10751) // Kids/Family
+        const [trending, nostalgia, tokusatsu, action, smart, drama, heroes, movies] = await Promise.allSettled([
+          getMovies("trending"),
+          Promise.all([
+            searchMovies("Saint Seiya"),
+            searchMovies("Yu Yu Hakusho"),
+            searchMovies("Dragon Ball Z"),
+            searchMovies("Sailor Moon")
+          ]).then(res => res.flat()),
+          Promise.all([
+            searchMovies("Jaspion"),
+            searchMovies("Changeman"),
+            searchMovies("Flashman"),
+            searchMovies("Jiraiya"),
+            searchMovies("Kamen Rider Black"),
+            searchMovies("Ultraman")
+          ]).then(res => res.flat()),
+          getMoviesByGenre("tv", 10759), // Action & Adventure TV (Anime focus)
+          getMoviesByGenre("tv", 9648), // Mystery
+          getMoviesByGenre("tv", 18), // Drama
+          getMoviesByGenre("tv", 10765), // Sci-Fi & Fantasy
+          getMoviesByGenre("movie", 16) // Animation Movies
         ]);
 
+        const formattedTrending = trending.status === 'fulfilled' ? formatTMDBData(trending.value) : [];
+        const formattedNostalgia = nostalgia.status === 'fulfilled' ? formatTMDBData(nostalgia.value) : [];
+        const formattedTokusatsu = tokusatsu.status === 'fulfilled' ? formatTMDBData(tokusatsu.value) : [];
+        const formattedAction = action.status === 'fulfilled' ? formatTMDBData(action.value) : [];
+        const formattedSmart = smart.status === 'fulfilled' ? formatTMDBData(smart.value) : [];
+        const formattedDrama = drama.status === 'fulfilled' ? formatTMDBData(drama.value) : [];
+        const formattedHeroes = heroes.status === 'fulfilled' ? formatTMDBData(heroes.value) : [];
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
-        const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
-        const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
-        const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
 
-        setCategorias(prev => {
-          const newCats = [...prev];
-          if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
-          if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
-          // Index 2 is TVs (live), which is static
-          if (formattedAnimes.length > 0) newCats[3] = { ...newCats[3], filmes: formattedAnimes };
-          if (formattedKids.length > 0) newCats[4] = { ...newCats[4], filmes: formattedKids };
-          return newCats;
-        });
-        
-        if (formattedMovies.length > 0) {
-          setFilmeDestaque(formattedMovies[0]);
+        setCategorias([
+          { nome: "EM ALTA NO BRASIL", type: "trending", filmes: formattedTrending },
+          { nome: "NOSTALGIA BR ANOS 90", type: "nostalgia", filmes: formattedNostalgia },
+          { nome: "TOKUSATSU CLÁSSICO", type: "tokusatsu", filmes: formattedTokusatsu },
+          { nome: "PORRADARIA E TORNEIO", type: "action", filmes: formattedAction },
+          { nome: "HISTÓRIAS INTELIGENTES", type: "smart", filmes: formattedSmart },
+          { nome: "VAI TE FAZER CHORAR", type: "drama", filmes: formattedDrama },
+          { nome: "HERÓIS E TRANSFORMAÇÕES", type: "heroes", filmes: formattedHeroes },
+          { nome: "FILMES IMPERDÍVEIS", type: "movies", filmes: formattedMovies }
+        ]);
+
+        if (formattedNostalgia.length > 0) {
+          setFilmeDestaque(formattedNostalgia[0]);
         }
       } catch (error) {
         console.error("Erro crítico ao carregar dados do TMDB:", error);
@@ -536,44 +504,24 @@ function LordFlixSupreme() {
       })
     })).filter(cat => cat.filmes.length > 0);
 
-    // Injetar Continuar Assistindo
-    if (history.length > 0) {
-      const historyMovies = history.map(h => {
-        // Encontrar o filme completo nas categorias ou buscar se necessário
-        // Por simplicidade, vamos usar os dados salvos no histórico
-        return {
-          ...h,
-          id: h.movieId,
-          titulo: h.titulo || "Filme em Progresso",
-          img: h.img,
-          bg: h.bg,
-          isHistory: true,
-          progress: h.duration ? (h.progress / h.duration) * 100 : 0
-        };
-      });
-      base.unshift({ nome: "Continuar Assistindo", type: "history", filmes: historyMovies });
-    }
-
     // Injetar Minha Lista
     if (watchlist.length > 0) {
       base.unshift({ nome: "Minha Lista", type: "watchlist", filmes: watchlist });
     }
 
-    // Injetar Recomendações (Simples: Baseado no que assistiu por último)
-    if (history.length > 0) {
-      const lastWatched = history[0];
-      const recommended = categorias
-        .flatMap(c => c.filmes)
-        .filter(f => (f as any).media_type === lastWatched.media_type && String(f.id) !== String(lastWatched.movieId))
-        .slice(0, 6);
-      
-      if (recommended.length > 0) {
-        base.push({ nome: "Recomendado para Você", type: "recommendation", filmes: recommended });
-      }
+    // Ordenação Especial para Modo Nostalgia
+    if (modoNostalgia) {
+      base.sort((a, b) => {
+        const aIsNostalgia = a.type === 'nostalgia' || a.type === 'tokusatsu';
+        const bIsNostalgia = b.type === 'nostalgia' || b.type === 'tokusatsu';
+        if (aIsNostalgia && !bIsNostalgia) return -1;
+        if (!aIsNostalgia && bIsNostalgia) return 1;
+        return 0;
+      });
     }
 
     return base;
-  }, [categorias, busca, perfil, watchlist, history]);
+  }, [categorias, busca, perfil, watchlist, modoNostalgia]);
 
   const handleAssistir = async (filme: any) => {
     const isVIP = userRole === 'vip' || userRole === 'admin';
@@ -733,7 +681,7 @@ function LordFlixSupreme() {
       </AnimatePresence>
       
       {/* 1. BARRA DE NAVEGAÇÃO (NAVBAR) */}
-      <nav className="fixed top-0 w-full z-[60] px-4 md:px-8 py-4 md:py-6 flex flex-row justify-between items-center gap-4 glass-nav">
+      <nav className={`fixed top-0 w-full z-[60] px-4 md:px-8 py-4 md:py-6 flex flex-row justify-between items-center gap-4 transition-all duration-500 ${modoNostalgia ? 'bg-orange-950/40 border-b border-orange-500/20' : 'glass-nav'}`}>
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -741,16 +689,38 @@ function LordFlixSupreme() {
           className="flex flex-col cursor-pointer items-start"
         >
           <span className="text-2xl md:text-4xl font-display font-black italic tracking-tighter">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white/40 via-white to-white/40">LORD</span>
-            <span className="text-gold">FLIX</span>
+            <span className={`text-transparent bg-clip-text ${modoNostalgia ? 'bg-gradient-to-r from-orange-400 to-yellow-600' : 'bg-gradient-to-r from-white/40 via-white to-white/40'}`}>LORD</span>
+            <span className={modoNostalgia ? 'text-orange-500' : 'text-gold'}>FLIX</span>
           </span>
-          <span className="hidden md:block text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black ml-1">
-            Cinema para Todos
+          <span className={`hidden md:block text-[8px] md:text-[10px] uppercase tracking-[0.4em] font-black ml-1 ${modoNostalgia ? 'text-orange-400' : 'text-gold'}`}>
+            Anime & Tokusatsu
           </span>
         </motion.div>
 
-        {/* SELETOR DE PERFIL (CONTROLE PARENTAL) */}
+        {/* MENU CENTRAL (DESKTOP) */}
+        <div className="hidden lg:flex items-center gap-8">
+          {['Início', 'Explorar', 'Dublados', 'Clássicos', 'Tokusatsu ⚡', 'Filmes'].map((item) => (
+            <button 
+              key={item}
+              className="text-[10px] font-black uppercase tracking-[0.3em] text-silver/60 hover:text-white transition-colors relative group"
+            >
+              {item}
+              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-cyan-500 group-hover:w-full transition-all duration-300" />
+            </button>
+          ))}
+        </div>
+
+        {/* SELETOR DE PERFIL E MODO NOSTALGIA */}
         <div className="flex gap-2 md:gap-4 items-center justify-end">
+          {/* MODO NOSTALGIA TOGGLE */}
+          <button 
+            onClick={() => setModoNostalgia(!modoNostalgia)}
+            className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${modoNostalgia ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : 'bg-white/5 text-silver border-white/10 hover:bg-white/10'}`}
+          >
+            <Sparkles className={`w-3 h-3 ${modoNostalgia ? 'animate-spin' : ''}`} />
+            <span className="text-[8px] font-black uppercase tracking-widest">Modo 90s</span>
+          </button>
+
           {/* SEARCH TRIGGER MOBILE */}
           <button 
             onClick={() => setShowMobileSearch(!showMobileSearch)}
@@ -968,25 +938,48 @@ function LordFlixSupreme() {
             className="max-w-6xl"
           >
             {/* Tag de Autoridade (SEO + PNL) */}
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-cyan-400 font-black tracking-[0.3em] md:tracking-[0.5em] text-[10px] md:text-sm uppercase drop-shadow-neon">
-                LORDFLIX EXCLUSIVE
-              </span>
-              <span className="bg-gold text-black px-2 md:px-3 py-0.5 md:py-1 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-sm">
-                Dublado
-              </span>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center gap-2 bg-cyan-500 px-4 py-1.5 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.4)]">
+                <Sparkles className="w-3 h-3 text-black animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black italic">Destaque do Dia</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="bg-white/10 backdrop-blur-xl border border-white/10 px-3 py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white">Dublado 🇧🇷</span>
+                <span className="bg-white/10 backdrop-blur-xl border border-white/10 px-3 py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white">Clássico</span>
+                <span className="bg-white/10 backdrop-blur-xl border border-white/10 px-3 py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white">Saga Longa</span>
+              </div>
             </div>
 
             <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
-              ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span>
+              {filmeDestaque?.titulo || "Cavaleiros <br /> do Zodíaco"}
             </h1>
             
             <p className="max-w-2xl text-zinc-300 text-sm md:text-2xl font-medium leading-relaxed mb-8 md:mb-12 drop-shadow-2xl line-clamp-3 md:line-clamp-none">
-              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da <span className="text-white font-black">LORDFLIX SUPREME</span>.
+              {filmeDestaque?.resumo || "O clássico que marcou gerações no Brasil. Acompanhe a jornada de Seiya e seus amigos para proteger a deusa Athena."}
             </p>
 
+            <div className="flex flex-wrap items-center gap-6 mt-12">
+              <button 
+                onClick={() => handleFilmeSelecionado(filmeDestaque)}
+                className="group relative bg-white text-black px-10 md:px-14 py-5 md:py-6 rounded-full font-black text-xs md:text-sm uppercase tracking-[0.4em] hover:bg-cyan-500 transition-all active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.2)] overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  <PlayIcon className="w-4 h-4 fill-current" />
+                  Assistir Agora
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </button>
+              <button 
+                onClick={() => toggleWatchlist(filmeDestaque)}
+                className="group px-10 md:px-14 py-5 md:py-6 rounded-full border-2 border-white/10 text-white font-black text-xs md:text-sm uppercase tracking-[0.4em] hover:bg-white/5 transition-all flex items-center gap-3"
+              >
+                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                Minha Lista
+              </button>
+            </div>
+
             {/* Busca Centralizada Estilo TMDB Elite com Voice Search Integrado */}
-            <div className={`relative group mb-12 max-w-2xl transition-all duration-500 ${showMobileSearch ? 'opacity-100 translate-y-0' : 'md:opacity-100 md:translate-y-0 opacity-0 -translate-y-10 pointer-events-none md:pointer-events-auto'}`}>
+            <div className={`relative group mt-12 mb-12 max-w-2xl transition-all duration-500 ${showMobileSearch ? 'opacity-100 translate-y-0' : 'md:opacity-100 md:translate-y-0 opacity-0 -translate-y-10 pointer-events-none md:pointer-events-auto'}`}>
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/50 to-blue-900/50 rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
               <div className="relative flex items-center bg-white rounded-full shadow-2xl overflow-hidden">
                 <input 
@@ -1004,9 +997,6 @@ function LordFlixSupreme() {
                 </div>
               </div>
             </div>
-
-            {/* TRIO DE EXPERIÊNCIA: CTA + PNL */}
-            {/* Botões removidos a pedido do usuário */}
           </motion.div>
         </div>
 
@@ -1077,31 +1067,64 @@ function LordFlixSupreme() {
           )}
         </AnimatePresence>
 
+        {/* CONTINUE ASSISTINDO */}
+        {history.length > 0 && (
+          <section className="px-4 md:px-20 mb-20">
+            <div className="flex items-center gap-4 mb-8">
+              <History className="w-6 h-6 text-cyan-500" />
+              <h2 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-white">Continue Assistindo</h2>
+            </div>
+            <div className="flex gap-6 overflow-x-auto no-scrollbar pb-8 snap-x">
+              {history.map((item: any) => (
+                <div key={item.id} className="min-w-[280px] md:min-w-[350px] snap-start group cursor-pointer" onClick={() => handleFilmeSelecionado(item)}>
+                  <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/5 group-hover:border-cyan-500/50 transition-all">
+                    <img src={item.bg} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h4 className="text-white font-black uppercase text-xs truncate">{item.titulo}</h4>
+                      <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-500" style={{ width: `${(item.progress || 0) * 100}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-40">
             <div className="w-20 h-20 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
           </div>
         ) : (
           (categoriasFiltradas || []).map((cat, idx) => (
-            <section key={idx} className="px-4 md:px-20">
+            <section key={idx} className={`px-4 md:px-20 transition-all duration-1000 ${modoNostalgia && cat.type !== 'nostalgia' && cat.type !== 'tokusatsu' ? 'opacity-30 grayscale blur-[2px] scale-95' : 'opacity-100'}`}>
               <div className="flex items-center justify-between mb-8 md:mb-12">
                 <div className="flex items-center gap-4 md:gap-8">
+                  <div className={`p-3 rounded-2xl ${modoNostalgia ? 'bg-orange-500/20 text-orange-500' : 'bg-cyan-500/20 text-cyan-500'}`}>
+                    {cat.type === 'trending' && <Flame className="w-6 h-6" />}
+                    {cat.type === 'nostalgia' && <Sparkles className="w-6 h-6" />}
+                    {cat.type === 'tokusatsu' && <Zap className="w-6 h-6" />}
+                    {cat.type === 'action' && <Sword className="w-6 h-6" />}
+                    {cat.type === 'smart' && <Brain className="w-6 h-6" />}
+                    {cat.type === 'drama' && <Heart className="w-6 h-6" />}
+                    {cat.type === 'heroes' && <Zap className="w-6 h-6" />}
+                    {cat.type === 'movies' && <Film className="w-6 h-6" />}
+                  </div>
                   <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">{cat.nome}</h2>
-                  <div className="hidden md:block h-px w-32 bg-gradient-to-r from-cyan-500 to-transparent opacity-30" />
                 </div>
-                <div className="flex bg-white/5 backdrop-blur-xl rounded-full p-1 border border-white/10">
-                  <span className={`px-4 md:px-8 py-1 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] ${cat.type === 'live' ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.5)]' : 'bg-white text-black'}`}>
-                    {cat.type === 'live' ? 'Live Stream' : 'Premium Access'}
-                  </span>
-                </div>
+                {cat.type === 'tokusatsu' && (
+                  <button className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:text-white transition-colors">Ver tudo Tokusatsu</button>
+                )}
               </div>
 
-              <div className={`flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 pb-12 overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory ${(cat.nome === 'ANIMES' || cat.nome === 'KIDS') ? 'touch-pan-x' : ''}`}>
+              <div className={`flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 pb-12 overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory`}>
                 {(cat.filmes || []).map((filme: any) => (
                   <div key={filme.id} className="min-w-[160px] md:min-w-0 snap-start">
                     <MoviePoster 
                       filme={filme} 
-                      type={idx === 0 ? "release" : undefined}
+                      type={cat.type === 'trending' ? "release" : undefined}
                       onClick={() => handleFilmeSelecionado(filme)} 
                     />
                   </div>
@@ -1111,61 +1134,25 @@ function LordFlixSupreme() {
           ))
         )}
 
-        {/* LORD VISION LIVE (SEÇÃO DE ELITE) */}
-        <section className="px-8 md:px-20 relative overflow-hidden py-24">
-          {/* BACKGROUND GLOW */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
-          
-          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 relative z-10">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Live Now</span>
-                </div>
-                <span className="text-cyan-500 font-black tracking-[0.4em] text-[10px] uppercase">Lord Vision Broadcast System</span>
-              </div>
-              <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-white leading-none">Lord Vision <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Live TV</span></h2>
-              <p className="text-zinc-400 text-lg md:text-xl font-medium mt-8 leading-relaxed">A revolução da TV ao vivo. Transmissão via satélite com latência zero e qualidade 4K Ultra HD. Sinta a imersão total.</p>
-            </div>
-            <button 
-              onClick={() => setShowLiveTV(true)}
-              className="group relative bg-white text-black px-12 py-5 rounded-full font-black text-xs uppercase tracking-[0.4em] hover:bg-cyan-500 transition-all active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] overflow-hidden"
-            >
-              <span className="relative z-10">Sintonizar Agora</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            </button>
+        {/* PRA COMEÇAR SEM ERRO (SEÇÃO EXPLICATIVA) */}
+        <section className="px-4 md:px-20 py-24 bg-gradient-to-b from-transparent to-cyan-950/20">
+          <div className="flex items-center gap-4 mb-16">
+            <Sparkles className="w-8 h-8 text-cyan-500" />
+            <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">Pra Começar sem Erro</h2>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: 'Lord Sports Premium', category: 'Esportes', img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop' },
-              { title: 'Lord Cinema Elite', category: 'Cinema', img: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop' },
-              { title: 'Lord News 24h', category: 'Notícias', img: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop' }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -15, scale: 1.02 }}
-                onClick={() => setShowLiveTV(true)}
-                className="group relative aspect-video rounded-[40px] overflow-hidden border-2 border-white/5 hover:border-cyan-500/50 transition-all duration-700 cursor-pointer shadow-2xl bg-zinc-900"
-              >
-                <img src={item.img} alt={item.title} className="w-full h-full object-cover opacity-40 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                
-                <div className="absolute top-6 right-6">
-                  <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-full">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">1080p / 4K Supreme</span>
-                  </div>
+              { title: "Nunca viu anime?", desc: "Comece pelos clássicos que definiram o gênero.", icon: Sparkles, color: "from-blue-500 to-cyan-500" },
+              { title: "Quer algo curto?", desc: "Séries de 12 episódios para maratonar em um dia.", icon: Zap, color: "from-purple-500 to-pink-500" },
+              { title: "Quer só ação?", desc: "Tokusatsu e Shonen com as melhores lutas.", icon: Flame, color: "from-orange-500 to-red-500" }
+            ].map((card, i) => (
+              <div key={i} className={`p-10 rounded-[40px] bg-gradient-to-br ${card.color} opacity-80 hover:opacity-100 transition-all cursor-pointer group`}>
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                  <card.icon className="w-8 h-8 text-white" />
                 </div>
-
-                <div className="absolute bottom-8 left-8 right-8">
-                  <span className="text-cyan-500 font-black text-[9px] uppercase tracking-[0.3em] mb-2 block">{item.category}</span>
-                  <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{item.title}</h3>
-                </div>
-
-                {/* SHINE EFFECT */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </motion.div>
+                <h3 className="text-3xl font-black text-white uppercase italic mb-4">{card.title}</h3>
+                <p className="text-white/80 font-medium">{card.desc}</p>
+              </div>
             ))}
           </div>
         </section>

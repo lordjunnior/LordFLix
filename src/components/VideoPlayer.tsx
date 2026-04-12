@@ -27,7 +27,8 @@ import {
   List,
   ChevronRight,
   ChevronLeft,
-  Star
+  Star,
+  Smartphone
 } from 'lucide-react';
 
 export const LordPlayer = ({ 
@@ -69,6 +70,15 @@ export const LordPlayer = ({
   const [episode, setEpisode] = useState(1);
   const [seasonData, setSeasonData] = useState<any>(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const providers = [
     { 
@@ -649,6 +659,31 @@ export const LordPlayer = ({
         {/* LOADING INDICATOR */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <AnimatePresence>
+            {isPortrait && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="z-[100] bg-black/80 backdrop-blur-2xl p-8 rounded-[40px] border border-white/10 flex flex-col items-center gap-6 text-center max-w-xs pointer-events-auto"
+              >
+                <div className="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center animate-bounce">
+                  <Smartphone className="w-8 h-8 text-cyan-500 rotate-90" />
+                </div>
+                <div>
+                  <h3 className="text-white font-black uppercase italic tracking-tighter text-xl mb-2">Gire o Celular</h3>
+                  <p className="text-silver/40 text-[10px] font-black uppercase tracking-widest leading-relaxed">
+                    Para uma experiência cinematográfica LordFlix, use o modo paisagem.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsPortrait(false)}
+                  className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-widest text-white transition-all"
+                >
+                  Continuar assim
+                </button>
+              </motion.div>
+            )}
+
             {(!duration && !isEmbed || isShadowBanned) ? (
               <motion.div 
                 initial={{ opacity: 0 }}

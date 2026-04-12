@@ -186,7 +186,7 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
         <img 
           src={filme.img} 
           alt={filme.titulo} 
-          className={`w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'grayscale-[0.8] contrast-[1.2]' : 'contrast-[1.1] saturate-[1.1]'}`}
+          className={`w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'contrast-[1.2]' : 'contrast-[1.1] saturate-[1.1]'}`}
           referrerPolicy="no-referrer"
           loading="lazy"
           onLoad={() => setIsLoaded(true)}
@@ -442,17 +442,19 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, animes, kids] = await Promise.allSettled([
+        const [movies, tv, animes, kids, tokusatsu] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
           getMoviesByGenre("tv", 16), // Animes
-          getMoviesByGenre("movie", 10751) // Kids/Family
+          getMoviesByGenre("movie", 10751), // Kids/Family
+          searchMovies("Jaspion Changeman Jiraiya") // Tokusatsu
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
         const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
         const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
         const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
+        const formattedTokusatsu = tokusatsu.status === 'fulfilled' ? formatTMDBData(tokusatsu.value) : [];
 
         setCategorias(prev => {
           const newCats = [...prev];
@@ -461,6 +463,15 @@ function LordFlixSupreme() {
           // Index 2 is TVs (live), which is static
           if (formattedAnimes.length > 0) newCats[3] = { ...newCats[3], filmes: formattedAnimes };
           if (formattedKids.length > 0) newCats[4] = { ...newCats[4], filmes: formattedKids };
+          
+          // Adicionar Tokusatsu se houver resultados
+          if (formattedTokusatsu.length > 0) {
+            const tokusatsuCat = { nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: formattedTokusatsu };
+            // Evitar duplicatas se já existir
+            if (!newCats.find(c => c.type === 'tokusatsu')) {
+              newCats.push(tokusatsuCat);
+            }
+          }
           return newCats;
         });
         
@@ -590,14 +601,8 @@ function LordFlixSupreme() {
       }
     }
 
-    // Injetar Tokusatsu
-    const tokusatsu = categorias.flatMap(c => c.filmes).filter(f => 
-      ["Jaspion", "Changeman", "Flashman", "Jiraiya", "Kamen Rider", "Ultraman"].some(kw => f.titulo.includes(kw))
-    );
-    if (tokusatsu.length > 0) {
-      base.push({ nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: groupSagas(tokusatsu) });
-    }
-
+    // Injetar Tokusatsu - Removido pois agora é carregado no loadData
+    
     // Injetar Continuar Assistindo
     if (history.length > 0) {
       const historyMovies = history.map(h => {
@@ -815,18 +820,19 @@ function LordFlixSupreme() {
 
           <div className="hidden lg:flex items-center gap-8">
             {[
-              { label: 'Início', icon: Home },
-              { label: 'Explorar', icon: Search },
-              { label: 'Dublados', icon: Globe },
-              { label: 'Clássicos', icon: History },
-              { label: 'Tokusatsu', icon: Zap },
-              { label: 'Filmes', icon: Film }
+              { label: 'Início', icon: Home, action: () => { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+              { label: 'Explorar', icon: Search, action: () => { setBusca(''); document.querySelector('input')?.focus(); } },
+              { label: 'Dublados', icon: Globe, action: () => setBusca('dublado') },
+              { label: 'Clássicos', icon: History, action: () => setBusca('clássico') },
+              { label: 'Tokusatsu', icon: Zap, action: () => document.getElementById('tokusatsu')?.scrollIntoView({ behavior: 'smooth' }) },
+              { label: 'Filmes', icon: Film, action: () => setBusca('filme') }
             ].map((item) => (
               <button 
                 key={item.label}
+                onClick={item.action}
                 className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all"
               >
-                <item.icon className={`w-3 h-3 transition-colors ${item.label === 'Tokusatsu' ? 'group-hover:text-retro-orange' : 'group-hover:text-cyan-500'}`} />
+                <item.icon className={`w-3 h-3 transition-colors ${item.label === 'Tokusatsu' ? 'group-hover:text-cyan-500' : 'group-hover:text-cyan-500'}`} />
                 {item.label}
               </button>
             ))}
@@ -1056,26 +1062,6 @@ function LordFlixSupreme() {
               )}
             </p>
 
-            {/* Busca Centralizada Estilo TMDB Elite com Voice Search Integrado */}
-            <div className={`relative group mb-12 max-w-2xl transition-all duration-500 ${showMobileSearch ? 'opacity-100 translate-y-0' : 'md:opacity-100 md:translate-y-0 opacity-0 -translate-y-10 pointer-events-none md:pointer-events-auto'}`}>
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/50 to-blue-900/50 rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
-              <div className="relative flex items-center bg-white rounded-full shadow-2xl overflow-hidden">
-                <input 
-                  type="text" 
-                  placeholder="O que assistir?"
-                  className="w-full bg-transparent text-black py-4 md:py-6 px-6 md:px-8 text-sm md:text-lg outline-none font-medium placeholder:text-zinc-400"
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                />
-                <div className="flex items-center gap-2 pr-2 md:pr-4">
-                  <VoiceSearch onResult={(text) => setBusca(text)} />
-                  <button className="bg-gradient-to-r from-cyan-500 to-blue-800 text-white px-4 md:px-8 py-2 md:py-3 rounded-full font-black uppercase tracking-widest text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-cyan-500/30">
-                    Buscar
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* TRIO DE EXPERIÊNCIA: CTA + PNL */}
             {/* Botões removidos a pedido do usuário */}
           </motion.div>
@@ -1125,31 +1111,35 @@ function LordFlixSupreme() {
               { 
                 title: "BATISMO DE FOGO", 
                 desc: "Nunca viu anime? Comece pela elite absoluta.", 
-                img: "https://images.unsplash.com/photo-1578632738980-230555094976?q=80&w=1974&auto=format&fit=crop",
-                tag: "ESSENCIAL"
+                img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1974&auto=format&fit=crop",
+                tag: "ESSENCIAL",
+                search: "Naruto"
               },
               { 
                 title: "CURTO E BRUTAL", 
                 desc: "Sem tempo? Sagas intensas que resolvem rápido.", 
-                img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1974&auto=format&fit=crop",
-                tag: "VELOCIDADE"
+                img: "https://images.unsplash.com/photo-1578632738980-230555094976?q=80&w=1974&auto=format&fit=crop",
+                tag: "VELOCIDADE",
+                search: "Death Note"
               },
               { 
                 title: "ADRENALINA PURA", 
                 desc: "Só porradaria e torneios. Sem conversa fiada.", 
                 img: "https://images.unsplash.com/photo-1552072805-2a9039d00e57?q=80&w=1974&auto=format&fit=crop",
-                tag: "CONFLITO"
+                tag: "CONFLITO",
+                search: "Dragon Ball"
               }
             ].map((card, i) => (
               <motion.div 
                 key={i}
                 whileHover={{ y: -10 }}
+                onClick={() => setBusca(card.search)}
                 className="relative h-[400px] rounded-[40px] overflow-hidden group cursor-pointer border border-white/5"
               >
-                <img src={card.img} alt={card.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
+                <img src={card.img} alt={card.title} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                  <span className={`text-[10px] font-black tracking-[0.3em] mb-2 ${is90sMode ? 'text-retro-orange' : 'text-cyan-500'}`}>{card.tag}</span>
+                  <span className={`text-[10px] font-black tracking-[0.3em] mb-2 text-cyan-500`}>{card.tag}</span>
                   <h3 className="text-3xl font-black text-white italic tracking-tighter mb-4">{card.title}</h3>
                   <p className="text-sm text-white/40 font-bold uppercase tracking-widest leading-relaxed">{card.desc}</p>
                 </div>
@@ -1198,7 +1188,7 @@ function LordFlixSupreme() {
           </div>
         ) : (
           (categoriasFiltradas || []).map((cat, idx) => (
-            <section key={idx} className="px-4 md:px-20">
+            <section key={idx} id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} className="px-4 md:px-20">
               <div className="flex items-center justify-between mb-8 md:mb-12">
                 <div className="flex items-center gap-4 md:gap-8">
                   <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">{cat.nome}</h2>
@@ -1285,10 +1275,7 @@ function LordFlixSupreme() {
           </div>
         </section>
 
-        {/* DASHBOARD DE MONITORAMENTO (AUTORIDADE) */}
-        <div className="max-w-4xl mx-auto px-10">
-          <MediaDashboard />
-        </div>
+        {/* DASHBOARD DE MONITORAMENTO (AUTORIDADE) - Removido a pedido do usuário */}
       </main>
 
       {/* 5.6 MODAL DE SAGA COMPLETA */}

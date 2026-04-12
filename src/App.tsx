@@ -235,6 +235,13 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
           {filme.titulo}
         </h3>
 
+        {/* CTR HOOK (PNL AGRESSIVA) */}
+        <div className="mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-150">
+          <p className="text-[7px] md:text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em] animate-pulse">
+            {filme.ctrHook || "🔥 Alta taxa de clique entre fãs da elite"}
+          </p>
+        </div>
+
         <div className="hidden md:flex items-center gap-3 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
           <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map(i => (
@@ -245,7 +252,7 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
         </div>
 
         <button className="w-full bg-white text-black py-2 md:py-3.5 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all active:scale-95 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-300">
-          {filme.ano === 'LIVE' ? 'Sintonizar' : 'Assistir'}
+          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : (filme.microCta || 'Assistir Agora')}
         </button>
       </div>
 
@@ -288,11 +295,12 @@ function LordFlixSupreme() {
   // --- ESTADOS DO SISTEMA ---
   const [perfil, setPerfil] = useState('adulto'); 
   const [busca, setBusca] = useState(''); 
+  const [priorizarDublados, setPriorizarDublados] = useState(false);
   const [mostrarPin, setMostrarPin] = useState(false); 
   const [pinDigitado, setPinDigitado] = useState(''); 
   const [pinErro, setPinErro] = useState(false); 
   const [carregado, setCarregado] = useState(false); 
-  const [view, setView] = useState<'home' | 'guia' | 'rede' | 'suporte'>('home');
+  const [view, setView] = useState<'home' | 'guia' | 'rede' | 'suporte' | 'movies' | 'tv' | 'profile'>('home');
   const [erroSistema, setErroSistema] = useState(false);
   const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -547,11 +555,9 @@ function LordFlixSupreme() {
   const categoriasFiltradas = useMemo(() => {
     const groupSagas = (filmes: any[]) => {
       const sagas: { [key: string]: any[] } = {};
-      const keywords = ["Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Jaspion", "Kamen Rider", "Ultraman", "Star Wars", "Harry Potter"];
+      const keywords = ["Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Jaspion", "Kamen Rider", "Ultraman", "Star Wars", "Harry Potter", "Yu Yu Hakusho"];
       
       const result: any[] = [];
-      const processedIds = new Set();
-
       filmes.forEach(f => {
         let foundSaga = false;
         for (const kw of keywords) {
@@ -569,9 +575,12 @@ function LordFlixSupreme() {
         if (items.length > 1) {
           result.unshift({
             ...items[0],
-            titulo: `${kw}: A Saga Completa`,
+            id: `saga-${kw}`,
+            titulo: `Saga ${kw} Completa`,
             isSaga: true,
-            sagaItems: items
+            sagaItems: items,
+            ctrHook: "🔥 Coleção completa em 4K",
+            microCta: "Explorar Saga"
           });
         } else {
           result.push(...items);
@@ -581,15 +590,33 @@ function LordFlixSupreme() {
       return result;
     };
 
-    let base = categorias.map(cat => ({
-      ...cat,
-      filmes: groupSagas(cat.filmes.filter(filme => {
+    const calculateScore = (filme: any) => {
+      let score = 0;
+      if (is90sMode) {
+        const nostalgiaKws = ["Cavaleiros do Zodíaco", "Yu Yu Hakusho", "Dragon Ball", "Jaspion", "Changeman", "Flashman", "Jiraiya"];
+        if (nostalgiaKws.some(kw => filme.titulo.includes(kw))) score += 100;
+      }
+      if (priorizarDublados) score += 50;
+      return score;
+    };
+
+    let base = categorias.map(cat => {
+      let filmesFiltrados = cat.filmes.filter(filme => {
         const termo = busca.toLowerCase();
         const bateBusca = (filme.titulo || "").toLowerCase().includes(termo);
         if (perfil === 'kids') return filme.kids && bateBusca;
         return bateBusca;
-      }))
-    })).filter(cat => cat.filmes.length > 0);
+      });
+
+      if (is90sMode || priorizarDublados) {
+        filmesFiltrados = [...filmesFiltrados].sort((a, b) => calculateScore(b) - calculateScore(a));
+      }
+
+      return {
+        ...cat,
+        filmes: groupSagas(filmesFiltrados)
+      };
+    }).filter(cat => cat.filmes.length > 0);
 
     // Injetar Seções Especiais se estiver no modo 90s
     if (is90sMode) {
@@ -640,7 +667,7 @@ function LordFlixSupreme() {
     }
 
     return base;
-  }, [categorias, busca, perfil, watchlist, history]);
+  }, [categorias, busca, perfil, is90sMode, priorizarDublados, history, view, watchlist]);
 
   const handleAssistir = async (filme: any) => {
     const isVIP = userRole === 'vip' || userRole === 'admin';
@@ -787,6 +814,8 @@ function LordFlixSupreme() {
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 selection:bg-cyan-500 selection:text-black ${is90sMode ? 'mode-90s bg-[#1a0f0f]' : 'bg-[#020202]'}`}>
+      {/* AMBILIGHT GLOW (IMERSÃO TOTAL) */}
+      <div className="ambilight-glow" />
       
       {/* GLOBAL ANNOUNCEMENT */}
       <AnimatePresence>
@@ -1046,6 +1075,12 @@ function LordFlixSupreme() {
               </span>
             </div>
 
+            <div className="flex flex-wrap gap-3 mb-8">
+              <span className="bg-cyan-500 text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.4)]">Dublado 🇧🇷</span>
+              <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Clássico</span>
+              <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Saga Longa</span>
+            </div>
+
             <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
               {is90sMode ? (
                 <>O QUARTETO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-retro-orange via-retro-yellow to-retro-orange bg-[length:200%_auto] animate-gradient-x">DO PODER</span></>
@@ -1061,6 +1096,44 @@ function LordFlixSupreme() {
                 "Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME."
               )}
             </p>
+
+            {/* MOTOR DE CONVERSÃO: PREFERÊNCIAS DE CLIQUE (PNL + CTR) */}
+            <div className="flex flex-wrap gap-4 mb-12">
+              <button 
+                onClick={() => setIs90sMode(!is90sMode)}
+                className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 ${is90sMode ? 'bg-retro-orange border-retro-orange text-black shadow-[0_0_30px_rgba(255,107,53,0.5)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
+              >
+                <Zap className="w-4 h-4" />
+                Modo Infância Anos 90
+              </button>
+              <button 
+                onClick={() => setPriorizarDublados(!priorizarDublados)}
+                className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 ${priorizarDublados ? 'bg-cyan-500 border-cyan-500 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
+              >
+                <Globe className="w-4 h-4" />
+                Priorizar Dublados 🇧🇷
+              </button>
+            </div>
+
+            {/* BUSCA CENTRAL E PROMINENTE (SEO + CTR) */}
+            <div className="relative group mb-12 max-w-3xl">
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-[40px] blur opacity-20 group-focus-within:opacity-100 transition duration-1000"></div>
+              <div className="relative flex items-center bg-white rounded-[40px] shadow-2xl overflow-hidden">
+                <input 
+                  type="text" 
+                  placeholder="Busca Inteligente: Animes, Tokusatsu, Clássicos..."
+                  className="w-full bg-transparent text-black py-6 md:py-8 px-8 md:px-12 text-sm md:text-xl outline-none font-black uppercase tracking-widest placeholder:text-zinc-400"
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                />
+                <div className="flex items-center gap-4 pr-6 md:pr-10">
+                  <VoiceSearch onResult={(text) => setBusca(text)} />
+                  <button className="bg-black text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-black uppercase tracking-[0.3em] text-[10px] md:text-xs hover:bg-cyan-500 hover:text-black transition-all shadow-2xl">
+                    Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* TRIO DE EXPERIÊNCIA: CTA + PNL */}
             {/* Botões removidos a pedido do usuário */}
@@ -1113,21 +1186,21 @@ function LordFlixSupreme() {
                 desc: "Nunca viu anime? Comece pela elite absoluta.", 
                 img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1974&auto=format&fit=crop",
                 tag: "ESSENCIAL",
-                search: "Naruto"
+                search: "Naruto Dragon Ball"
               },
               { 
                 title: "CURTO E BRUTAL", 
                 desc: "Sem tempo? Sagas intensas que resolvem rápido.", 
                 img: "https://images.unsplash.com/photo-1578632738980-230555094976?q=80&w=1974&auto=format&fit=crop",
                 tag: "VELOCIDADE",
-                search: "Death Note"
+                search: "Death Note Monster"
               },
               { 
                 title: "ADRENALINA PURA", 
-                desc: "Só porradaria e torneios. Sem conversa fiada.", 
+                desc: "Tokusatsu e ação frenética dos anos 90.", 
                 img: "https://images.unsplash.com/photo-1552072805-2a9039d00e57?q=80&w=1974&auto=format&fit=crop",
-                tag: "CONFLITO",
-                search: "Dragon Ball"
+                tag: "NOSTALGIA",
+                search: "Jaspion Changeman Jiraiya"
               }
             ].map((card, i) => (
               <motion.div 
@@ -1188,7 +1261,11 @@ function LordFlixSupreme() {
           </div>
         ) : (
           (categoriasFiltradas || []).map((cat, idx) => (
-            <section key={idx} id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} className="px-4 md:px-20">
+            <section 
+              key={idx} 
+              id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} 
+              className={`px-4 md:px-20 transition-all duration-700 ${is90sMode && cat.type !== 'nostalgia' && cat.type !== 'tokusatsu' ? 'category-non-priority' : ''}`}
+            >
               <div className="flex items-center justify-between mb-8 md:mb-12">
                 <div className="flex items-center gap-4 md:gap-8">
                   <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">{cat.nome}</h2>
@@ -1276,6 +1353,25 @@ function LordFlixSupreme() {
         </section>
 
         {/* DASHBOARD DE MONITORAMENTO (AUTORIDADE) - Removido a pedido do usuário */}
+        {/* BOTTOM NAVIGATION BAR (MOBILE APP-LIKE) */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 px-8 py-4 flex justify-between items-center z-[100]">
+          <button onClick={() => setView('home')} className={`flex flex-col items-center gap-1 ${view === 'home' ? 'text-cyan-500' : 'text-zinc-500'}`}>
+            <Home className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Home</span>
+          </button>
+          <button onClick={() => setView('movies')} className={`flex flex-col items-center gap-1 ${view === 'movies' ? 'text-cyan-500' : 'text-zinc-500'}`}>
+            <Film className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Filmes</span>
+          </button>
+          <button onClick={() => setView('tv')} className={`flex flex-col items-center gap-1 ${view === 'tv' ? 'text-cyan-500' : 'text-zinc-500'}`}>
+            <Tv className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">TV</span>
+          </button>
+          <button onClick={() => setView('profile')} className={`flex flex-col items-center gap-1 ${view === 'profile' ? 'text-cyan-500' : 'text-zinc-500'}`}>
+            <UserIcon className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Perfil</span>
+          </button>
+        </div>
       </main>
 
       {/* 5.6 MODAL DE SAGA COMPLETA */}

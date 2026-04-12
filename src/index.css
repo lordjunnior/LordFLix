@@ -6,6 +6,7 @@
   --font-sans: "Inter", "Montserrat", sans-serif;
   --font-display: "Inter", sans-serif;
   --color-obsidian: #020202;
+  --color-zinc-950: #09090b;
   --color-silver: #f8f8f8;
   --color-cyan-500: #22d3ee;
   --color-blue-600: #2563eb;
@@ -16,6 +17,7 @@
 
 @theme .mode-90s {
   --color-obsidian: #1a0f0f;
+  --color-zinc-950: #1a0f0f;
 }
 
 @layer utilities {
@@ -57,10 +59,9 @@
 
 @layer base {
   body {
-    /* Fundo preto profundo para economizar energia e dar aspecto de cinema */
-    @apply bg-obsidian text-silver font-sans antialiased overflow-x-hidden;
+    /* Fundo profundo zinc-950 para imersão total */
+    @apply bg-zinc-950 text-silver font-sans antialiased overflow-x-hidden;
     letter-spacing: 0.02em;
-    /* Removemos o cursor:none para evitar a sensação de tela travada */
     cursor: auto !important; 
   }
 
@@ -77,7 +78,38 @@
   }
 }
 
-/* Utilitários Customizados */
+/* Ambilight Effect */
+.ambilight-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, var(--color-cyan-500) 0%, transparent 70%);
+  opacity: 0.15;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.mode-90s .ambilight-glow {
+  background: radial-gradient(circle, #ff6b35 0%, transparent 70%);
+}
+
+/* 90s Mode Blur/Scale for non-priority categories */
+.mode-90s .category-non-priority {
+  filter: blur(4px) grayscale(0.5);
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: all 0.5s ease;
+}
+
+.mode-90s .category-non-priority:hover {
+  filter: blur(0) grayscale(0);
+  opacity: 1;
+  transform: scale(1);
+}
 .glass-panel {
   @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
 }

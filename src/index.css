@@ -16,6 +16,15 @@
   --color-metal-light: #D1D5DB;
   --color-metal-mid: #9CA3AF;
   --color-metal-dark: #4B5563;
+  
+  /* Category Colors */
+  --color-cat-nostalgia: #D4AF37;
+  --color-cat-action: #ff4d4d;
+  --color-cat-drama: #9333ea;
+  --color-cat-comedy: #facc15;
+  --color-cat-intellectual: #3b82f6;
+  --color-cat-emotional: #ec4899;
+  --color-cat-philosophical: #6366f1;
 }
 
 @layer utilities {
@@ -211,11 +220,47 @@
   @apply w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 transition-transform;
 }
 
-.play-icon-triangle {
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 15px solid white;
-  margin-left: 5px;
+/* Category Specific Glows */
+.cat-nostalgia { border-left: 4px solid var(--color-cat-nostalgia); }
+.cat-action { border-left: 4px solid var(--color-cat-action); }
+.cat-drama { border-left: 4px solid var(--color-cat-drama); }
+.cat-comedy { border-left: 4px solid var(--color-cat-comedy); }
+.cat-intellectual { border-left: 4px solid var(--color-cat-intellectual); }
+.cat-emotional { border-left: 4px solid var(--color-cat-emotional); }
+.cat-philosophical { border-left: 4px solid var(--color-cat-philosophical); }
+
+/* New Card Design */
+.movie-card-expanded {
+  @apply absolute inset-x-0 bottom-0 bg-black/90 backdrop-blur-xl p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-30;
+}
+
+.badge-mini {
+  @apply text-[7px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-sm;
+}
+
+/* Mobile Specific Refinements */
+@media (max-width: 768px) {
+  .hero-carousel-container {
+    @apply h-[50vh];
+  }
+  
+  .pnl-title {
+    @apply text-lg;
+  }
+  
+  .pnl-description {
+    @apply text-[8px];
+  }
+  
+  .cta-supreme-mini {
+    @apply px-4 py-2 text-[8px];
+  }
+}
+
+.bottom-sheet {
+  @apply fixed bottom-0 left-0 right-0 bg-zinc-900 rounded-t-[32px] p-6 z-[200] transform translate-y-full transition-transform duration-500 border-t border-white/10;
+}
+
+.bottom-sheet.active {
+  @apply translate-y-0;
 }

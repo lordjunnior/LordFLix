@@ -65,9 +65,20 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
 const CATEGORIAS_INICIAIS = [
-  { nome: "FILMES", type: "movie", filmes: [] },
-  { nome: "SERIES", type: "tv", filmes: [] },
-  { nome: "TVs", type: "live", filmes: [
+  { nome: "🔥 Continue assistindo", type: "history", filmes: [] },
+  { nome: "🚀 Em alta agora", type: "trending", filmes: [] },
+  { nome: "🏆 Clássicos Obrigatórios", type: "classic", filmes: [] },
+  { nome: "⚔️ Ação Insana", type: "action", filmes: [] },
+  { nome: "🧠 Mente Explodindo", type: "intellectual", filmes: [] },
+  { nome: "💔 Vai te fazer chorar", type: "emotional", filmes: [] },
+  { nome: "🌌 Obras Profundas", type: "philosophical", filmes: [] },
+  { nome: "🎌 Nostalgia Pesada", type: "nostalgia", filmes: [] },
+  { nome: "🎬 Filmes Imperdíveis", type: "movie", filmes: [] },
+  { nome: "🧩 Maratonar no Fim de Semana", type: "binge", filmes: [] },
+  { nome: "💎 Obras-primas", type: "masterpiece", filmes: [] },
+  { nome: "🇧🇷 Dublados que valem muito", type: "dubbed", filmes: [] },
+  { nome: "⚡ Tokusatsu Clássico", type: "tokusatsu", filmes: [] },
+  { nome: "📺 TV ao Vivo", type: "live", filmes: [
     { 
       id: 301, 
       titulo: "Lord News 24h", 
@@ -95,38 +106,8 @@ const CATEGORIAS_INICIAIS = [
       img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop", 
       bg: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
       src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    },
-    { 
-      id: 303, 
-      titulo: "Lord Cinema One", 
-      nota: "9.5", 
-      idade: "14", 
-      kids: false, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Studios",
-      resumo: "Estreias exclusivas e clássicos remasterizados em loop infinito de perfeição.",
-      img: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
-    },
-    { 
-      id: 304, 
-      titulo: "Lord Nature 4K", 
-      nota: "9.7", 
-      idade: "L", 
-      kids: true, 
-      ano: "LIVE",
-      duracao: "Ao Vivo",
-      diretor: "LordFlix Earth",
-      resumo: "A beleza crua do planeta Terra capturada com tecnologia de ponta.",
-      img: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop", 
-      bg: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2074&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
     }
-  ]},
-  { nome: "ANIMES", type: "anime", filmes: [] },
-  { nome: "KIDS", type: "kids", filmes: [] }
+  ]}
 ];
 
 const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item => ({
@@ -153,12 +134,15 @@ interface MoviePosterProps {
   filme: any;
   onClick: () => void;
   type?: 'release' | 'classic';
-  key?: React.Key;
+  handleAssistir: (filme: any) => void;
+  toggleWatchlist: (filme: any) => void;
+  watchlist: any[];
 }
 
-const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
+const MoviePoster = ({ filme, onClick, type, handleAssistir, toggleWatchlist, watchlist }: MoviePosterProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <motion.div 
@@ -167,6 +151,8 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
       tabIndex={0}
       className={`relative w-full aspect-[2/3] cursor-pointer group outline-none rounded-[32px] overflow-hidden transition-all duration-700 ${type === 'release' ? 'shadow-[0_0_40px_rgba(34,211,238,0.2)]' : 'shadow-2xl'}`}
       onClick={onClick}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
     >
       {(!isLoaded && !hasError) && (
@@ -199,70 +185,59 @@ const MoviePoster = ({ filme, onClick, type }: MoviePosterProps) => {
 
       {/* ATMOSPHERIC OVERLAYS */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700" />
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-transparent to-blue-500/20" />
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-      </div>
       
       {/* ELITE BADGES */}
-      <div className="absolute top-5 right-5 flex flex-col gap-3 items-end z-20">
+      <div className="absolute top-4 right-4 flex flex-col gap-2 items-end z-20">
         {filme.isSaga && (
-          <div className="bg-retro-orange/90 backdrop-blur-2xl border border-white/20 px-4 py-1.5 rounded-full shadow-[0_0_30px_rgba(255,107,53,0.4)] flex items-center gap-2">
-            <Crown className="w-3 h-3 text-black" />
-            <span className="text-[9px] font-black text-black tracking-widest uppercase">Saga Completa</span>
+          <div className="bg-retro-orange/90 backdrop-blur-2xl border border-white/20 px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+            <Crown className="w-2.5 h-2.5 text-black" />
+            <span className="text-[8px] font-black text-black tracking-widest uppercase">Saga</span>
           </div>
         )}
-        <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-3 py-1.5 rounded-full shadow-2xl">
-          <span className="text-[10px] font-black text-white tracking-widest uppercase">{filme.nota}</span>
+        <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-2.5 py-1 rounded-full shadow-2xl">
+          <span className="text-[9px] font-black text-white tracking-widest uppercase">{filme.nota}</span>
         </div>
-        {filme.ano === 'LIVE' && (
-          <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white italic">Live</span>
-          </div>
-        )}
       </div>
 
-      {/* CONTENT INFO */}
-      <div className="absolute inset-x-0 bottom-0 p-4 md:p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-        <div className="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
-          <span className="bg-white/10 backdrop-blur-xl border border-white/20 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white">{filme.ano}</span>
-          <span className="bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-cyan-400">4K UHD</span>
-          <span className="bg-gold/20 backdrop-blur-xl border border-gold/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest text-gold-light">Dublado</span>
+      {/* EXPANDED INFO ON HOVER */}
+      <div className="movie-card-expanded">
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <span className="badge-mini bg-cyan-500 text-black">Dublado</span>
+          <span className="badge-mini bg-white/10 text-white">4K</span>
+          {filme.ano && <span className="badge-mini bg-white/10 text-white">{filme.ano}</span>}
         </div>
-
-        <h3 className="text-sm md:text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] line-clamp-2">
+        
+        <h3 className="text-sm font-black text-white uppercase italic tracking-tighter mb-2 line-clamp-1">
           {filme.titulo}
         </h3>
-
-        {/* CTR HOOK (PNL AGRESSIVA) */}
-        <div className="mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-150">
-          <p className="text-[7px] md:text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em] animate-pulse">
-            {filme.ctrHook || "🔥 Alta taxa de clique entre fãs da elite"}
-          </p>
+        
+        <p className="text-[8px] text-white/60 font-medium uppercase tracking-widest mb-4 line-clamp-2 leading-relaxed">
+          {filme.resumo || "Uma obra-prima absoluta do catálogo LordFlix Supreme."}
+        </p>
+        
+        <div className="flex gap-2">
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleAssistir(filme); }}
+            className="flex-1 bg-white text-black py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-cyan-500 transition-all"
+          >
+            Assistir
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); toggleWatchlist(filme); }}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${watchlist.some(w => w.id === filme.id) ? 'bg-cyan-500' : 'bg-white/10 hover:bg-white/20'}`}
+          >
+            {watchlist.some(w => w.id === filme.id) ? <CheckIcon className="w-4 h-4 text-black" /> : <Plus className="w-4 h-4 text-white" />}
+          </button>
         </div>
-
-        <div className="hidden md:flex items-center gap-3 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
-          <div className="flex gap-0.5">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className={`w-1 h-1 rounded-full ${i <= 4 ? 'bg-cyan-500' : 'bg-white/20'}`}></div>
-            ))}
-          </div>
-          <span className="text-[8px] font-bold text-silver/40 uppercase tracking-[0.3em]">Sinal Estabilizado</span>
-        </div>
-
-        <button className="w-full bg-white text-black py-2 md:py-3.5 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] hover:bg-cyan-500 hover:text-black transition-all active:scale-95 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-300">
-          {filme.ano === 'LIVE' ? 'Sintonizar Agora' : (filme.microCta || 'Assistir Agora')}
-        </button>
       </div>
 
       {/* PROGRESS BAR FOR HISTORY */}
       {filme.isHistory && (
-        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/5">
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${filme.progress}%` }}
-            className="h-full bg-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.6)]"
+            className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)]"
           />
         </div>
       )}
@@ -301,6 +276,7 @@ function LordFlixSupreme() {
   const [pinErro, setPinErro] = useState(false); 
   const [carregado, setCarregado] = useState(false); 
   const [view, setView] = useState<'home' | 'guia' | 'rede' | 'suporte' | 'movies' | 'tv' | 'profile'>('home');
+  const [viewCategory, setViewCategory] = useState<any | null>(null);
   const [erroSistema, setErroSistema] = useState(false);
   const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -553,6 +529,8 @@ function LordFlixSupreme() {
 
   // --- LÓGICA DE FILTRO E AGRUPAMENTO ---
   const categoriasFiltradas = useMemo(() => {
+    const allMovies = categorias.flatMap(c => c.filmes) as any[];
+    
     const groupSagas = (filmes: any[]) => {
       const sagas: { [key: string]: any[] } = {};
       const keywords = ["Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Jaspion", "Kamen Rider", "Ultraman", "Star Wars", "Harry Potter", "Yu Yu Hakusho"];
@@ -590,83 +568,108 @@ function LordFlixSupreme() {
       return result;
     };
 
-    const calculateScore = (filme: any) => {
-      let score = 0;
-      if (is90sMode) {
-        const nostalgiaKws = ["Cavaleiros do Zodíaco", "Yu Yu Hakusho", "Dragon Ball", "Jaspion", "Changeman", "Flashman", "Jiraiya"];
-        if (nostalgiaKws.some(kw => filme.titulo.includes(kw))) score += 100;
-      }
-      if (priorizarDublados) score += 50;
-      return score;
-    };
-
-    let base = categorias.map(cat => {
-      let filmesFiltrados = cat.filmes.filter(filme => {
-        const termo = busca.toLowerCase();
-        const bateBusca = (filme.titulo || "").toLowerCase().includes(termo);
-        if (perfil === 'kids') return filme.kids && bateBusca;
-        return bateBusca;
-      });
-
-      if (is90sMode || priorizarDublados) {
-        filmesFiltrados = [...filmesFiltrados].sort((a, b) => calculateScore(b) - calculateScore(a));
-      }
-
-      return {
-        ...cat,
-        filmes: groupSagas(filmesFiltrados)
+    if (busca.trim() !== "") {
+      const b = busca.toLowerCase();
+      // Busca por vibe (SEO + PNL)
+      const vibeMap: {[key: string]: string[]} = {
+        "triste": ["drama", "chorar", "emocional"],
+        "épico": ["ação", "aventura", "fantasia"],
+        "sombrio": ["terror", "suspense", "mistério"],
+        "engraçado": ["comédia", "divertido"]
       };
-    }).filter(cat => cat.filmes.length > 0);
 
-    // Injetar Seções Especiais se estiver no modo 90s
-    if (is90sMode) {
-      const nostalgia = categorias.flatMap(c => c.filmes).filter(f => 
-        ["Cavaleiros do Zodíaco", "Yu Yu Hakusho", "Dragon Ball", "Jaspion", "Changeman"].some(kw => f.titulo.includes(kw))
-      );
-      if (nostalgia.length > 0) {
-        base.unshift({ nome: "Nostalgia BR Anos 90", type: "nostalgia", filmes: groupSagas(nostalgia) });
-      }
-    }
-
-    // Injetar Tokusatsu - Removido pois agora é carregado no loadData
-    
-    // Injetar Continuar Assistindo
-    if (history.length > 0) {
-      const historyMovies = history.map(h => {
-        // Encontrar o filme completo nas categorias ou buscar se necessário
-        // Por simplicidade, vamos usar os dados salvos no histórico
-        return {
-          ...h,
-          id: h.movieId,
-          titulo: h.titulo || "Filme em Progresso",
-          img: h.img,
-          bg: h.bg,
-          isHistory: true,
-          progress: h.duration ? (h.progress / h.duration) * 100 : 0
-        };
+      let searchTerms = [b];
+      Object.entries(vibeMap).forEach(([vibe, terms]) => {
+        if (b.includes(vibe)) searchTerms = [...searchTerms, ...terms];
       });
-      base.unshift({ nome: "Continuar Assistindo", type: "history", filmes: historyMovies });
+
+      const filtered = allMovies.filter(f => 
+        searchTerms.some(term => 
+          f.titulo.toLowerCase().includes(term) || 
+          f.resumo?.toLowerCase().includes(term) ||
+          f.genero?.toLowerCase().includes(term)
+        )
+      );
+      return [{ nome: `Resultados para "${busca}"`, type: "search", filmes: groupSagas(filtered) }];
     }
 
-    // Injetar Minha Lista
-    if (watchlist.length > 0) {
-      base.unshift({ nome: "Minha Lista", type: "watchlist", filmes: watchlist });
-    }
-
-    // Injetar Recomendações (Simples: Baseado no que assistiu por último)
-    if (history.length > 0) {
-      const lastWatched = history[0];
-      const recommended = categorias
-        .flatMap(c => c.filmes)
-        .filter(f => (f as any).media_type === lastWatched.media_type && String(f.id) !== String(lastWatched.movieId))
-        .slice(0, 6);
-      
-      if (recommended.length > 0) {
-        base.push({ nome: "Recomendado para Você", type: "recommendation", filmes: recommended });
+    const intelligentCategories = [
+      { 
+        nome: "🔥 Continue assistindo", 
+        type: "history", 
+        filmes: history.map(h => {
+          const movie = allMovies.find(m => String(m.id) === String(h.movieId));
+          return movie ? { ...movie, progress: h.progress, isHistory: true } : null;
+        }).filter(Boolean)
+      },
+      { 
+        nome: "🚀 Em alta agora", 
+        type: "trending", 
+        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5).slice(0, 15)) 
+      },
+      { 
+        nome: "🏆 Clássicos Obrigatórios", 
+        type: "classic", 
+        filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010).slice(0, 15)) 
+      },
+      { 
+        nome: "⚔️ Ação Insana", 
+        type: "action", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura')).slice(0, 15)) 
+      },
+      { 
+        nome: "🧠 Mente Explodindo", 
+        type: "intellectual", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('mistério') || f.genero?.toLowerCase().includes('ficção')).slice(0, 15)) 
+      },
+      { 
+        nome: "💔 Vai te fazer chorar", 
+        type: "emotional", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('drama') || f.genero?.toLowerCase().includes('romance')).slice(0, 15)) 
+      },
+      { 
+        nome: "🌌 Obras Profundas", 
+        type: "philosophical", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('psicológico') || f.genero?.toLowerCase().includes('filosófico')).slice(0, 15)) 
+      },
+      { 
+        nome: "🎌 Nostalgia Pesada", 
+        type: "nostalgia", 
+        filmes: groupSagas(allMovies.filter(f => f.type === 'nostalgia' || f.genero?.toLowerCase().includes('clássico')).slice(0, 15)) 
+      },
+      { 
+        nome: "🎬 Filmes Imperdíveis", 
+        type: "movie", 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'movie').slice(0, 15)) 
+      },
+      { 
+        nome: "🧩 Maratonar no Fim de Semana", 
+        type: "binge", 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv' && f.genero?.toLowerCase().includes('viciante')).slice(0, 15)) 
+      },
+      { 
+        nome: "💎 Obras-primas", 
+        type: "masterpiece", 
+        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 9.0).slice(0, 15)) 
+      },
+      { 
+        nome: "🇧🇷 Dublados que valem muito", 
+        type: "dubbed", 
+        filmes: groupSagas(allMovies.filter(f => f.dublado || true).slice(0, 15)) 
+      },
+      { 
+        nome: "⚡ Tokusatsu Clássico", 
+        type: "tokusatsu", 
+        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu').slice(0, 20)) 
+      },
+      { 
+        nome: "📺 TV ao Vivo", 
+        type: "live", 
+        filmes: categorias.find(c => c.type === 'live')?.filmes || [] 
       }
-    }
+    ];
 
-    return base;
+    return intelligentCategories.filter(c => c.filmes.length > 0);
   }, [categorias, busca, perfil, is90sMode, priorizarDublados, history, view, watchlist]);
 
   const handleAssistir = async (filme: any) => {
@@ -709,7 +712,12 @@ function LordFlixSupreme() {
       setSagaSelecionada(filme);
       return;
     }
-    setFilmeSelecionado(filme);
+    setFilmeSelecionado({ 
+      ...filme, 
+      similar: (categorias.flatMap(c => c.filmes) as any[])
+        .filter(f => f.id !== filme.id && (f.genero === filme.genero || f.media_type === filme.media_type))
+        .slice(0, 6)
+    });
     if (filme.ano === 'LIVE') return;
     
     try {
@@ -838,7 +846,7 @@ function LordFlixSupreme() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => setView('home')}
+            onClick={() => { setView('home'); setBusca(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className="flex flex-col cursor-pointer items-start"
           >
             <div className="flex items-center">
@@ -1153,6 +1161,9 @@ function LordFlixSupreme() {
                       key={`search-${filme.id}`} 
                       filme={filme} 
                       onClick={() => handleFilmeSelecionado(filme)} 
+                      handleAssistir={handleAssistir}
+                      toggleWatchlist={toggleWatchlist}
+                      watchlist={watchlist}
                     />
                   ))}
                 </div>
@@ -1169,37 +1180,81 @@ function LordFlixSupreme() {
             <div className="w-20 h-20 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-          (categoriasFiltradas || []).map((cat, idx) => (
-            <section 
-              key={idx} 
-              id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} 
-              className="px-4 md:px-20 transition-all duration-700"
-            >
-              <div className="flex items-center justify-between mb-8 md:mb-12">
-                <div className="flex items-center gap-4 md:gap-8">
-                  <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">{cat.nome}</h2>
-                  <div className="hidden md:block h-px w-32 bg-gradient-to-r from-cyan-500 to-transparent opacity-30" />
-                </div>
-                <div className="flex bg-white/5 backdrop-blur-xl rounded-full p-1 border border-white/10">
-                  <span className={`px-4 md:px-8 py-1 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] ${cat.type === 'live' ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.5)]' : 'bg-white text-black'}`}>
-                    {cat.type === 'live' ? 'Live Stream' : 'Premium Access'}
-                  </span>
-                </div>
+          <div className="space-y-24 md:space-y-40">
+            {/* ONBOARDING RAIL (PNL + CTR) */}
+            <section className="px-4 md:px-20">
+              <div className="mb-8 md:mb-12">
+                <h2 className="text-2xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Não sabe por onde começar?</h2>
+                <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mt-2">Guia rápido para sua primeira imersão</p>
               </div>
-
-              <div className={`flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 pb-12 overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory`}>
-                {(cat.filmes || []).map((filme: any) => (
-                  <div key={filme.id} className="min-w-[160px] md:min-w-0 snap-start">
-                    <MoviePoster 
-                      filme={filme} 
-                      type={cat.type === 'classic' || cat.type === 'nostalgia' ? 'classic' : 'release'}
-                      onClick={() => handleFilmeSelecionado(filme)} 
-                    />
-                  </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-8">
+                {[
+                  { t: "Melhor para Iniciantes", d: "Comece com o pé direito", c: "bg-cyan-500", icon: <Zap className="w-5 h-5" /> },
+                  { t: "Melhor Dublado", d: "Vozes icônicas do Brasil", c: "bg-retro-orange", icon: <Globe className="w-5 h-5" /> },
+                  { t: "Melhor Curto", d: "Para maratonar hoje", c: "bg-purple-500", icon: <RefreshCw className="w-5 h-5" /> },
+                  { t: "Melhor Clássico", d: "A base de tudo", c: "bg-gold", icon: <Crown className="w-5 h-5" /> },
+                  { t: "Melhor Moderno", d: "O ápice da animação", c: "bg-blue-500", icon: <Zap className="w-5 h-5" /> }
+                ].map((item, i) => (
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ y: -10, scale: 1.02 }}
+                    className="group cursor-pointer bg-zinc-900/50 border border-white/5 p-6 md:p-10 rounded-[40px] hover:bg-zinc-800 transition-all relative overflow-hidden"
+                  >
+                    <div className={`w-12 h-12 ${item.c} rounded-2xl mb-6 flex items-center justify-center text-black shadow-lg`}>
+                      {item.icon}
+                    </div>
+                    <h3 className="text-white font-black text-xs md:text-sm uppercase tracking-widest mb-2">{item.t}</h3>
+                    <p className="text-zinc-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">{item.d}</p>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </motion.div>
                 ))}
               </div>
             </section>
-          ))
+
+            {(categoriasFiltradas || []).map((cat, idx) => (
+              <section 
+                key={idx} 
+                id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} 
+                className={`px-4 md:px-20 transition-all duration-700 cat-${cat.type}`}
+              >
+                <div className="flex items-center justify-between mb-8 md:mb-16">
+                  <div className="flex items-center gap-4 md:gap-10">
+                    <div className="h-12 md:h-24 w-2 bg-cyan-500 rounded-full shadow-[0_0_30px_rgba(34,211,238,0.6)]" />
+                    <div>
+                      <h2 className="text-3xl md:text-8xl font-black text-white uppercase italic tracking-tighter leading-none">
+                        {cat.nome}
+                      </h2>
+                      <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mt-4">
+                        {cat.type === 'tokusatsu' ? '⚡ O Império do Sol Nascente' : '🎯 Seleção de Elite LordFlix'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={() => setViewCategory(cat)}
+                    className="group flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 px-8 py-4 rounded-full transition-all active:scale-95"
+                  >
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white">Ver Tudo</span>
+                    <RefreshCw className="w-4 h-4 md:w-5 md:h-5 text-cyan-500 group-hover:rotate-180 transition-transform duration-700" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 md:gap-10">
+                  {(cat.filmes || []).slice(0, 8).map((filme: any) => (
+                    <MoviePoster 
+                      key={filme.id} 
+                      filme={filme} 
+                      onClick={() => handleFilmeSelecionado(filme)}
+                      type={cat.type === 'classic' || cat.type === 'nostalgia' ? 'classic' : 'release'}
+                      handleAssistir={handleAssistir}
+                      toggleWatchlist={toggleWatchlist}
+                      watchlist={watchlist}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         )}
 
         {/* LORD VISION LIVE (SEÇÃO DE ELITE) */}
@@ -1283,7 +1338,51 @@ function LordFlixSupreme() {
         </div>
       </main>
 
-      {/* 5.6 MODAL DE SAGA COMPLETA */}
+      {/* 5.7 MODAL VER TUDO (CATEGORY DETAIL) */}
+      <AnimatePresence>
+        {viewCategory && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[170] bg-black/98 backdrop-blur-3xl flex flex-col"
+          >
+            <div className="p-8 md:p-16 border-b border-white/5 flex justify-between items-center bg-black/50 backdrop-blur-md sticky top-0 z-20">
+              <div className="flex items-center gap-6">
+                <div className="h-12 w-1.5 bg-cyan-500 rounded-full shadow-lg" />
+                <div>
+                  <h2 className="text-3xl md:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">{viewCategory.nome}</h2>
+                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Explorando o catálogo supremo</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setViewCategory(null)}
+                className="bg-white/5 hover:bg-white/10 p-5 rounded-full transition-all group"
+              >
+                <X className="w-8 h-8 text-white group-hover:rotate-90 transition-transform" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 md:p-20 no-scrollbar">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6 md:gap-10">
+                {viewCategory.filmes.map((item: any) => (
+                  <MoviePoster 
+                    key={item.id} 
+                    filme={item} 
+                    onClick={() => {
+                      setViewCategory(null);
+                      handleFilmeSelecionado(item);
+                    }} 
+                    handleAssistir={handleAssistir}
+                    toggleWatchlist={toggleWatchlist}
+                    watchlist={watchlist}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {sagaSelecionada && (
           <motion.div 
@@ -1321,6 +1420,9 @@ function LordFlixSupreme() {
                         setSagaSelecionada(null);
                         handleFilmeSelecionado(item);
                       }} 
+                      handleAssistir={handleAssistir}
+                      toggleWatchlist={toggleWatchlist}
+                      watchlist={watchlist}
                     />
                   ))}
                 </div>
@@ -1425,7 +1527,7 @@ function LordFlixSupreme() {
 
                 {/* Internal Linking (SEO Teia) */}
 
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 mb-12">
                   <button 
                     onClick={() => {
                       handleAssistir(filmeSelecionado);
@@ -1452,6 +1554,27 @@ function LordFlixSupreme() {
                     )}
                   </button>
                 </div>
+
+                {/* PARECIDO COM ESTE (RECOMENDAÇÃO INTELIGENTE) */}
+                {filmeSelecionado.similar && filmeSelecionado.similar.length > 0 && (
+                  <div className="mt-auto pt-10 border-t border-white/5">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 mb-6">Parecido com este</h3>
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                      {filmeSelecionado.similar.map((sim: any) => (
+                        <div 
+                          key={sim.id} 
+                          className="aspect-[2/3] rounded-xl overflow-hidden cursor-pointer group relative"
+                          onClick={() => handleFilmeSelecionado(sim)}
+                        >
+                          <img src={sim.img} alt={sim.titulo} className="w-full h-full object-cover transition-transform group-hover:scale-110" referrerPolicy="no-referrer" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Plus className="w-6 h-6 text-white" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

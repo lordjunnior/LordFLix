@@ -841,20 +841,21 @@ function LordFlixSupreme() {
             onClick={() => setView('home')}
             className="flex flex-col cursor-pointer items-start"
           >
-            <span className="text-2xl md:text-3xl font-display font-black italic tracking-tighter">
-              <span className={is90sMode ? 'text-retro-yellow' : 'text-white'}>LORD</span>
-              <span className={is90sMode ? 'text-retro-orange' : 'text-gold'}>FLIX</span>
-            </span>
+            <div className="flex items-center">
+              <span className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase logo-lord">LORD</span>
+              <span className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase logo-flix">FLIX</span>
+            </div>
+            <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] ml-1">Anime & Tokusatsu</span>
           </motion.div>
 
           <div className="hidden lg:flex items-center gap-8">
             {[
-              { label: 'Início', icon: Home, action: () => { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+              { label: 'Início', icon: Home, action: () => { setView('home'); setBusca(''); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
               { label: 'Explorar', icon: Search, action: () => { setBusca(''); document.querySelector('input')?.focus(); } },
-              { label: 'Dublados', icon: Globe, action: () => setBusca('dublado') },
-              { label: 'Clássicos', icon: History, action: () => setBusca('clássico') },
-              { label: 'Tokusatsu', icon: Zap, action: () => document.getElementById('tokusatsu')?.scrollIntoView({ behavior: 'smooth' }) },
-              { label: 'Filmes', icon: Film, action: () => setBusca('filme') }
+              { label: 'Dublados', icon: Globe, action: () => { setBusca('dublado'); setView('home'); } },
+              { label: 'Clássicos', icon: History, action: () => { setBusca('clássico'); setView('home'); } },
+              { label: 'Tokusatsu', icon: Zap, action: () => { setView('home'); setTimeout(() => document.getElementById('tokusatsu')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
+              { label: 'Filmes', icon: Film, action: () => { setBusca('filme'); setView('home'); } }
             ].map((item) => (
               <button 
                 key={item.label}
@@ -881,24 +882,6 @@ function LordFlixSupreme() {
               className="bg-transparent border-none outline-none text-[10px] uppercase font-black tracking-widest w-full text-white placeholder:text-white/20"
             />
           </div>
-
-          {/* 90s MODE TOGGLE */}
-          <button 
-            onClick={() => setIs90sMode(!is90sMode)}
-            className={`hidden md:flex px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${is90sMode ? 'bg-retro-orange text-black border-retro-orange' : 'bg-transparent text-white/40 border-white/10 hover:border-white/40'}`}
-          >
-            Modo 90s
-          </button>
-
-          {/* ADMIN TRIGGER */}
-          {userRole === 'admin' && (
-            <button 
-              onClick={() => setShowAdminPanel(true)}
-              className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-transform hover:scale-110 ${is90sMode ? 'bg-retro-orange text-black' : 'bg-cyan-500 text-black'}`}
-            >
-              <Shield className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-          )}
 
           <div className="flex items-center gap-3 md:gap-4 md:pl-6 md:border-l border-white/10">
             {/* NOTIFICATION BELL */}
@@ -1082,38 +1065,12 @@ function LordFlixSupreme() {
             </div>
 
             <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
-              {is90sMode ? (
-                <>O QUARTETO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-retro-orange via-retro-yellow to-retro-orange bg-[length:200%_auto] animate-gradient-x">DO PODER</span></>
-              ) : (
-                <>ALÉM DO <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-[length:200%_auto] animate-gradient-x">HORIZONTE</span></>
-              )}
+              O CINEMA <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-cyan-400 bg-[length:200%_auto] animate-gradient-x">DE ELITE</span>
             </h1>
             
             <p className="max-w-2xl text-zinc-300 text-sm md:text-2xl font-medium leading-relaxed mb-8 md:mb-12 drop-shadow-2xl line-clamp-3 md:line-clamp-none">
-              {is90sMode ? (
-                "A nostalgia que define gerações. Reviva os clássicos que moldaram o Brasil com o bitrate absoluto da LordFlix."
-              ) : (
-                "Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME."
-              )}
+              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME.
             </p>
-
-            {/* MOTOR DE CONVERSÃO: PREFERÊNCIAS DE CLIQUE (PNL + CTR) */}
-            <div className="flex flex-wrap gap-4 mb-12">
-              <button 
-                onClick={() => setIs90sMode(!is90sMode)}
-                className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 ${is90sMode ? 'bg-retro-orange border-retro-orange text-black shadow-[0_0_30px_rgba(255,107,53,0.5)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
-              >
-                <Zap className="w-4 h-4" />
-                Modo Infância Anos 90
-              </button>
-              <button 
-                onClick={() => setPriorizarDublados(!priorizarDublados)}
-                className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center gap-3 ${priorizarDublados ? 'bg-cyan-500 border-cyan-500 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)]' : 'bg-white/5 border-white/10 text-white hover:border-white/30'}`}
-              >
-                <Globe className="w-4 h-4" />
-                Priorizar Dublados 🇧🇷
-              </button>
-            </div>
 
             {/* BUSCA CENTRAL E PROMINENTE (SEO + CTR) */}
             <div className="relative group mb-12 max-w-3xl">
@@ -1173,54 +1130,6 @@ function LordFlixSupreme() {
       {/* 4. CONTEÚDO PRINCIPAL (TRILHOS SUPREMOS) */}
       <main id="catalogo" className="relative z-10 -mt-20 space-y-24 pb-32">
         
-        {/* START HERE - GUIA DE BATISMO */}
-        <section className="px-4 md:px-20">
-          <div className="flex items-center gap-4 mb-12">
-            <div className={`w-1 h-12 shadow-[0_0_20px_rgba(255,107,53,0.6)] ${is90sMode ? 'bg-retro-orange' : 'bg-cyan-500'}`} />
-            <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">Pra Começar Sem Erro</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { 
-                title: "BATISMO DE FOGO", 
-                desc: "Nunca viu anime? Comece pela elite absoluta.", 
-                img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1974&auto=format&fit=crop",
-                tag: "ESSENCIAL",
-                search: "Naruto Dragon Ball"
-              },
-              { 
-                title: "CURTO E BRUTAL", 
-                desc: "Sem tempo? Sagas intensas que resolvem rápido.", 
-                img: "https://images.unsplash.com/photo-1578632738980-230555094976?q=80&w=1974&auto=format&fit=crop",
-                tag: "VELOCIDADE",
-                search: "Death Note Monster"
-              },
-              { 
-                title: "ADRENALINA PURA", 
-                desc: "Tokusatsu e ação frenética dos anos 90.", 
-                img: "https://images.unsplash.com/photo-1552072805-2a9039d00e57?q=80&w=1974&auto=format&fit=crop",
-                tag: "NOSTALGIA",
-                search: "Jaspion Changeman Jiraiya"
-              }
-            ].map((card, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -10 }}
-                onClick={() => setBusca(card.search)}
-                className="relative h-[400px] rounded-[40px] overflow-hidden group cursor-pointer border border-white/5"
-              >
-                <img src={card.img} alt={card.title} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                  <span className={`text-[10px] font-black tracking-[0.3em] mb-2 text-cyan-500`}>{card.tag}</span>
-                  <h3 className="text-3xl font-black text-white italic tracking-tighter mb-4">{card.title}</h3>
-                  <p className="text-sm text-white/40 font-bold uppercase tracking-widest leading-relaxed">{card.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
         {/* SEÇÃO DE RESULTADOS DA BUSCA */}
         <AnimatePresence>
           {busca.trim() !== "" && (
@@ -1264,7 +1173,7 @@ function LordFlixSupreme() {
             <section 
               key={idx} 
               id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} 
-              className={`px-4 md:px-20 transition-all duration-700 ${is90sMode && cat.type !== 'nostalgia' && cat.type !== 'tokusatsu' ? 'category-non-priority' : ''}`}
+              className="px-4 md:px-20 transition-all duration-700"
             >
               <div className="flex items-center justify-between mb-8 md:mb-12">
                 <div className="flex items-center gap-4 md:gap-8">

@@ -13,11 +13,9 @@
   --color-aluminum: #e2e2e2;
   --color-gold: #D4AF37;
   --color-gold-light: #F9E272;
-}
-
-@theme .mode-90s {
-  --color-obsidian: #1a0f0f;
-  --color-zinc-950: #1a0f0f;
+  --color-metal-light: #D1D5DB;
+  --color-metal-mid: #9CA3AF;
+  --color-metal-dark: #4B5563;
 }
 
 @layer utilities {
@@ -110,8 +108,20 @@
   opacity: 1;
   transform: scale(1);
 }
-.glass-panel {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+.logo-lord {
+  background: linear-gradient(to bottom, var(--color-metal-light), var(--color-metal-mid), var(--color-metal-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.logo-flix {
+  background: linear-gradient(to bottom, var(--color-cyan-500), var(--color-blue-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(34,211,238,0.5));
 }
 
 .glass-nav {

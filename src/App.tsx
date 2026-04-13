@@ -63,8 +63,40 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+// --- INTERFACES DE ELITE ---
+interface Movie {
+  id: number | string;
+  titulo: string;
+  nota: string;
+  idade?: string;
+  kids?: boolean;
+  ano?: string;
+  duracao?: string;
+  diretor?: string;
+  resumo?: string;
+  img: string;
+  bg?: string;
+  src?: string;
+  trailer?: string;
+  media_type?: 'movie' | 'tv' | 'live';
+  isSaga?: boolean;
+  sagaItems?: Movie[];
+  isHistory?: boolean;
+  progress?: number;
+  popularity?: number;
+  genero?: string;
+  atores?: string;
+  type?: string; // Para compatibilidade com filtros
+}
+
+interface Categoria {
+  nome: string;
+  type: string;
+  filmes: Movie[];
+}
+
 // 1. BANCO DE DADOS LOCAL (Integração TMDB Real)
-const CATEGORIAS_INICIAIS = [
+const CATEGORIAS_INICIAIS: Categoria[] = [
   { nome: "Continue assistindo", type: "history", filmes: [] },
   { nome: "Em alta agora", type: "trending", filmes: [] },
   { nome: "Filmes", type: "movie", filmes: [] },
@@ -82,7 +114,8 @@ const CATEGORIAS_INICIAIS = [
       resumo: "Cobertura global em tempo real. A notícia onde ela acontece, com a clareza do 4K.",
       img: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop", 
       bg: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
+      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+      media_type: 'live'
     },
     { 
       id: 302, 
@@ -96,7 +129,8 @@ const CATEGORIAS_INICIAIS = [
       resumo: "O ápice do esporte mundial. Sinta a adrenalina de cada jogada em HDR10+.",
       img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop", 
       bg: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
-      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
+      src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+      media_type: 'live'
     }
   ]},
   { nome: "Animes", type: "animes", filmes: [] },
@@ -104,33 +138,30 @@ const CATEGORIAS_INICIAIS = [
   { nome: "Kids", type: "kids", filmes: [] }
 ];
 
-const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item => ({
+const formatTMDBData = (data: any[]): Movie[] => data.filter(i => i.poster_path).map(item => ({
   id: item.id,
   titulo: item.title || item.name,
   nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
   idade: "14", 
   kids: false,
   ano: (item.release_date || item.first_air_date || "").split("-")[0],
-  first_air_date: item.first_air_date,
-  original_name: item.original_name,
-  duracao: item.runtime ? `${Math.floor(item.runtime / 60)}h ${item.runtime % 60}min` : "N/A",
-  diretor: "N/A",
   resumo: item.overview,
   img: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
   bg: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
   src: "",
   trailer: "",
-  media_type: item.media_type || (item.title ? "movie" : "tv")
+  media_type: item.media_type || (item.title ? "movie" : "tv"),
+  popularity: item.popularity
 }));
 
 // --- COMPONENTE DE CAPA ELITE (PNL + SEO) ---
 interface MoviePosterProps {
-  filme: any;
+  filme: Movie;
   onClick: () => void;
   type?: 'release' | 'classic';
-  handleAssistir: (filme: any) => void;
-  toggleWatchlist: (filme: any) => void;
-  watchlist: any[];
+  handleAssistir: (filme: Movie) => void;
+  toggleWatchlist: (filme: Movie) => void;
+  watchlist: Movie[];
 }
 
 const MoviePoster = ({ filme, onClick, type, handleAssistir, toggleWatchlist, watchlist }: MoviePosterProps) => {
@@ -524,10 +555,10 @@ function LordFlixSupreme() {
 
   // --- LÓGICA DE FILTRO E AGRUPAMENTO ---
   const categoriasFiltradas = useMemo(() => {
-    const allMovies = categorias.flatMap(c => c.filmes) as any[];
+    const allMovies = categorias.flatMap(c => c.filmes);
     
-    const groupSagas = (filmes: any[]) => {
-      const sagas: { [key: string]: any[] } = {};
+    const groupSagas = (filmes: Movie[]): Movie[] => {
+      const sagas: { [key: string]: Movie[] } = {};
       const keywords = [
         "Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Yu Yu Hakusho",
         "Jaspion", "Jiraiya", "Jiban", "Changeman", "Flashman", "Lion Man", "Kamen Rider", 
@@ -536,7 +567,7 @@ function LordFlixSupreme() {
         "Star Wars", "Harry Potter"
       ];
       
-      const result: any[] = [];
+      const result: Movie[] = [];
       filmes.forEach(f => {
         let foundSaga = false;
         for (const kw of keywords) {
@@ -558,8 +589,6 @@ function LordFlixSupreme() {
             titulo: `Saga ${kw} Completa`,
             isSaga: true,
             sagaItems: items,
-            ctrHook: "Coleção completa em 4K",
-            microCta: "Explorar Saga"
           });
         } else {
           result.push(...items);
@@ -594,14 +623,14 @@ function LordFlixSupreme() {
       return [{ nome: `Resultados para "${busca}"`, type: "search", filmes: groupSagas(filtered) }];
     }
 
-    const intelligentCategories = [
+    const intelligentCategories: Categoria[] = [
       { 
         nome: "Continue assistindo", 
         type: "history", 
         filmes: history.map(h => {
           const movie = allMovies.find(m => String(m.id) === String(h.movieId));
           return movie ? { ...movie, progress: h.progress, isHistory: true } : null;
-        }).filter(Boolean)
+        }).filter((m): m is Movie => m !== null)
       },
       { 
         nome: "Em alta agora", 

@@ -100,7 +100,7 @@ const CATEGORIAS_INICIAIS = [
     }
   ]},
   { nome: "Animes", type: "animes", filmes: [] },
-  { nome: "Tokusatsu", type: "tokusatsu", filmes: [] },
+  { nome: "TOKUSATSU: AS LENDAS DO JAPÃO", type: "tokusatsu", filmes: [] },
   { nome: "Kids", type: "kids", filmes: [] }
 ];
 
@@ -425,7 +425,7 @@ function LordFlixSupreme() {
           getMovies("tv"),
           getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
           getMoviesByGenre("movie", 10751), // Kids/Family
-          searchMovies("Jaspion Changeman Jiraiya Flashman Winspector Ultraman Kamen Rider") // Popular Tokusatsu
+          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman Lion Man Black Kamen Rider Cybercop Winspector Solbrain National Kid Ultraman Spectreman Sharivan Shaider Goggle V Dynaman Maskman Patrine Spielvan") // Iconic Tokusatsu
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
@@ -528,7 +528,13 @@ function LordFlixSupreme() {
     
     const groupSagas = (filmes: any[]) => {
       const sagas: { [key: string]: any[] } = {};
-      const keywords = ["Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Jaspion", "Kamen Rider", "Ultraman", "Star Wars", "Harry Potter", "Yu Yu Hakusho"];
+      const keywords = [
+        "Dragon Ball", "Naruto", "One Piece", "Cavaleiros do Zodíaco", "Yu Yu Hakusho",
+        "Jaspion", "Jiraiya", "Jiban", "Changeman", "Flashman", "Lion Man", "Kamen Rider", 
+        "Cybercop", "Winspector", "Solbrain", "National Kid", "Ultraman", "Spectreman", 
+        "Sharivan", "Shaider", "Goggle V", "Dynaman", "Maskman", "Patrine", "Spielvan",
+        "Star Wars", "Harry Potter"
+      ];
       
       const result: any[] = [];
       filmes.forEach(f => {
@@ -625,9 +631,9 @@ function LordFlixSupreme() {
         filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('animação') || f.genero?.toLowerCase().includes('anime')).slice(0, 15)) 
       },
       { 
-        nome: "Tokusatsu", 
+        nome: "TOKUSATSU: AS LENDAS DO JAPÃO", 
         type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya')).slice(0, 20)) 
+        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya') || f.titulo.toLowerCase().includes('jiban') || f.titulo.toLowerCase().includes('changeman') || f.titulo.toLowerCase().includes('flashman')).slice(0, 20)) 
       },
       { 
         nome: "Kids", 

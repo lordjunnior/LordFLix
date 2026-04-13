@@ -629,7 +629,7 @@ function LordFlixSupreme() {
         type: "history", 
         filmes: history.map(h => {
           const movie = allMovies.find(m => String(m.id) === String(h.movieId));
-          return movie ? { ...movie, progress: h.progress, isHistory: true } : null;
+          return movie ? ({ ...movie, progress: h.progress, isHistory: true } as Movie) : null;
         }).filter((m): m is Movie => m !== null)
       },
       { 
@@ -796,10 +796,12 @@ function LordFlixSupreme() {
     );
   }
 
-  // --- TELA DE LOGIN ---
+  // --- TELA DE LOGIN REMOVIDA PARA TESTES ---
+  /*
   if (!user) {
     return <LordLogin onLogin={() => {}} />;
   }
+  */
 
   // --- KILL SWITCH (MAINTENANCE MODE) ---
   if (adminConfig?.maintenance_mode && userRole !== 'admin') {

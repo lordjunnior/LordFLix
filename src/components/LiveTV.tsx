@@ -220,6 +220,14 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
       {/* TOP NAVIGATION BAR (PLEX STYLE) */}
       <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent z-50">
         <div className="flex items-center gap-4 md:gap-12">
+          <button 
+            onClick={onClose}
+            className="flex items-center gap-2 text-white/40 hover:text-white transition-all group mr-2"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] hidden sm:block">Voltar</span>
+          </button>
+
           <div className="flex items-center gap-2 cursor-pointer group" onClick={onClose}>
              <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.4)] group-hover:scale-110 transition-transform">
                <Tv className="w-4 h-4 md:w-6 md:h-6 text-black" />

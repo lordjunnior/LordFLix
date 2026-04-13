@@ -115,20 +115,61 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentChannel, onChannelChange, onClose]);
 
+  // Pre-fetching Manifests
+  useEffect(() => {
+    // Warm up cache for all channel manifests
+    LIVE_CHANNELS.forEach(channel => {
+      if (channel.stream) {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = channel.stream;
+        link.as = 'fetch';
+        document.head.appendChild(link);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const initPlayer = () => {
       if (videoRef.current && currentChannel.stream) {
         setLoading(true);
         if (Hls.isSupported()) {
           if (hlsRef.current) hlsRef.current.destroy();
-          const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+          const hls = new Hls({ 
+            enableWorker: true, 
+            lowLatencyMode: true,
+            liveSyncDurationCount: 3,
+            maxBufferLength: 4, // Fragmentação agressiva
+            startLevel: 0,
+            capLevelToPlayerSize: true,
+            abrEwmaDefaultEstimate: 50000, // Prioridade de primeiro frame
+          });
           hls.loadSource(currentChannel.stream);
           hls.attachMedia(videoRef.current);
           hlsRef.current = hls;
+          
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             setLoading(false);
             if (playing) videoRef.current?.play().catch(() => setPlaying(false));
           });
+
+          // Reconexão Automática (500ms)
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  setTimeout(() => hls.startLoad(), 500);
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  setTimeout(() => hls.recoverMediaError(), 500);
+                  break;
+                default:
+                  setTimeout(() => initPlayer(), 500);
+                  break;
+              }
+            }
+          });
+
         } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
           videoRef.current.src = currentChannel.stream;
           videoRef.current.addEventListener('loadedmetadata', () => {
@@ -227,6 +268,7 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
               className="w-full h-full object-contain"
               onClick={() => setPlaying(!playing)}
               playsInline
+              preload="metadata"
             />
             
             {/* AMBILIGHT GLOW */}
@@ -245,7 +287,7 @@ export default function LiveTV({ onClose, currentChannel, onChannelChange }: Liv
                   className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
                 >
                   <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white animate-pulse">Sincronizando sinal reserva...</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white animate-pulse">Sincronizando sinal...</p>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -31,6 +31,11 @@ export default function BackgroundStream({ streamUrl, active }: BackgroundStream
           const hls = new Hls({
             enableWorker: true,
             lowLatencyMode: true,
+            liveSyncDurationCount: 3,
+            maxBufferLength: 4,
+            startLevel: 0,
+            capLevelToPlayerSize: true,
+            abrEwmaDefaultEstimate: 50000,
           });
           hls.loadSource(streamUrl);
           hls.attachMedia(videoRef.current);
@@ -38,6 +43,23 @@ export default function BackgroundStream({ streamUrl, active }: BackgroundStream
           
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             videoRef.current?.play().catch(() => {});
+          });
+
+          // Reconexão Automática
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  setTimeout(() => hls.startLoad(), 500);
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  setTimeout(() => hls.recoverMediaError(), 500);
+                  break;
+                default:
+                  setTimeout(() => initPlayer(), 500);
+                  break;
+              }
+            }
           });
         } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
           videoRef.current.src = streamUrl;
@@ -66,6 +88,7 @@ export default function BackgroundStream({ streamUrl, active }: BackgroundStream
         muted
         playsInline
         loop
+        preload="metadata"
       />
       {/* VIGNETTE & OVERLAYS */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80" />

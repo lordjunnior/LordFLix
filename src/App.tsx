@@ -423,9 +423,9 @@ function LordFlixSupreme() {
         const [movies, tv, animes, kids, tokusatsu] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
-          getMoviesByGenre("tv", 16), // Animes
+          getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
           getMoviesByGenre("movie", 10751), // Kids/Family
-          searchMovies("Jaspion Changeman Jiraiya") // Tokusatsu
+          searchMovies("Jaspion Changeman Jiraiya Flashman Winspector Ultraman Kamen Rider") // Popular Tokusatsu
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
@@ -439,7 +439,9 @@ function LordFlixSupreme() {
           const updateCat = (type: string, data: any[]) => {
             const idx = newCats.findIndex(c => c.type === type);
             if (idx !== -1 && data.length > 0) {
-              newCats[idx] = { ...newCats[idx], filmes: data };
+              // Sort by popularity to ensure "most searched/watched" feel
+              const sortedData = [...data].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+              newCats[idx] = { ...newCats[idx], filmes: sortedData.slice(0, 20) };
             }
           };
 
@@ -835,12 +837,12 @@ function LordFlixSupreme() {
           <div className="hidden lg:flex items-center gap-8">
             {[
               { label: 'Início', icon: Home, action: () => { setView('home'); setBusca(''); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-              { label: 'Filmes', icon: Film, action: () => { setBusca('filme'); setView('home'); } },
-              { label: 'Séries', icon: Tv, action: () => { setBusca('série'); setView('home'); } },
+              { label: 'Filmes', icon: Film, action: () => { setView('home'); setBusca(''); setTimeout(() => document.getElementById('cat-movie')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } },
+              { label: 'Séries', icon: Tv, action: () => { setView('home'); setBusca(''); setTimeout(() => document.getElementById('cat-tv')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } },
               { label: 'TV ao Vivo', icon: Globe, action: () => { setShowLiveTV(true); } },
-              { label: 'Animes', icon: Zap, action: () => { setBusca('anime'); setView('home'); } },
-              { label: 'Tokusatsu', icon: Zap, action: () => { setBusca('tokusatsu'); setView('home'); } },
-              { label: 'Kids', icon: Smile, action: () => { setBusca('kids'); setView('home'); } }
+              { label: 'Animes', icon: Zap, action: () => { setView('home'); setBusca(''); setTimeout(() => document.getElementById('cat-animes')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } },
+              { label: 'Tokusatsu', icon: Zap, action: () => { setView('home'); setBusca(''); setTimeout(() => document.getElementById('cat-tokusatsu')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } },
+              { label: 'Kids', icon: Smile, action: () => { setView('home'); setBusca(''); setTimeout(() => document.getElementById('cat-kids')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } }
             ].map((item) => (
               <button 
                 key={item.label}
@@ -1161,7 +1163,7 @@ function LordFlixSupreme() {
             {(categoriasFiltradas || []).map((cat, idx) => (
               <section 
                 key={idx} 
-                id={cat.type === 'tokusatsu' ? 'tokusatsu' : undefined} 
+                id={`cat-${cat.type}`} 
                 className={`px-4 md:px-20 transition-all duration-700 cat-${cat.type}`}
               >
                 <div className="flex items-center justify-between mb-8 md:mb-16">

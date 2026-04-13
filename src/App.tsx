@@ -19,7 +19,7 @@ import { getMovies, searchMovies, getVideos, getMovieDetails, getSeasonDetails, 
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
-import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon, Zap, Globe } from 'lucide-react';
+import { Shield, AlertCircle, Bell, Plus, Check as CheckIcon, History, Crown, X, RefreshCw, Search, Home, Film, Tv, User as UserIcon, Zap, Globe, Smile } from 'lucide-react';
 
 // --- ERROR BOUNDARY COMPONENT ---
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
@@ -67,17 +67,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 const CATEGORIAS_INICIAIS = [
   { nome: "Continue assistindo", type: "history", filmes: [] },
   { nome: "Em alta agora", type: "trending", filmes: [] },
-  { nome: "Clássicos Obrigatórios", type: "classic", filmes: [] },
-  { nome: "Ação Insana", type: "action", filmes: [] },
-  { nome: "Mente Explodindo", type: "intellectual", filmes: [] },
-  { nome: "Vai te fazer chorar", type: "emotional", filmes: [] },
-  { nome: "Obras Profundas", type: "philosophical", filmes: [] },
-  { nome: "Nostalgia Pesada", type: "nostalgia", filmes: [] },
-  { nome: "Filmes Imperdíveis", type: "movie", filmes: [] },
-  { nome: "Maratonar no Fim de Semana", type: "binge", filmes: [] },
-  { nome: "Obras-primas", type: "masterpiece", filmes: [] },
-  { nome: "Dublados que valem muito", type: "dubbed", filmes: [] },
-  { nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: [] },
+  { nome: "Filmes", type: "movie", filmes: [] },
+  { nome: "Series", type: "tv", filmes: [] },
   { nome: "TV ao Vivo", type: "live", filmes: [
     { 
       id: 301, 
@@ -107,7 +98,10 @@ const CATEGORIAS_INICIAIS = [
       bg: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop",
       src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" 
     }
-  ]}
+  ]},
+  { nome: "Animes", type: "animes", filmes: [] },
+  { nome: "Tokusatsu", type: "tokusatsu", filmes: [] },
+  { nome: "Kids", type: "kids", filmes: [] }
 ];
 
 const formatTMDBData = (data: any[]) => data.filter(i => i.poster_path).map(item => ({
@@ -442,20 +436,19 @@ function LordFlixSupreme() {
 
         setCategorias(prev => {
           const newCats = [...prev];
-          if (formattedMovies.length > 0) newCats[0] = { ...newCats[0], filmes: formattedMovies };
-          if (formattedTv.length > 0) newCats[1] = { ...newCats[1], filmes: formattedTv };
-          // Index 2 is TVs (live), which is static
-          if (formattedAnimes.length > 0) newCats[3] = { ...newCats[3], filmes: formattedAnimes };
-          if (formattedKids.length > 0) newCats[4] = { ...newCats[4], filmes: formattedKids };
-          
-          // Adicionar Tokusatsu se houver resultados
-          if (formattedTokusatsu.length > 0) {
-            const tokusatsuCat = { nome: "Tokusatsu Clássico", type: "tokusatsu", filmes: formattedTokusatsu };
-            // Evitar duplicatas se já existir
-            if (!newCats.find(c => c.type === 'tokusatsu')) {
-              newCats.push(tokusatsuCat);
+          const updateCat = (type: string, data: any[]) => {
+            const idx = newCats.findIndex(c => c.type === type);
+            if (idx !== -1 && data.length > 0) {
+              newCats[idx] = { ...newCats[idx], filmes: data };
             }
-          }
+          };
+
+          updateCat("movie", formattedMovies);
+          updateCat("tv", formattedTv);
+          updateCat("animes", formattedAnimes);
+          updateCat("kids", formattedKids);
+          updateCat("tokusatsu", formattedTokusatsu);
+          
           return newCats;
         });
         
@@ -607,45 +600,48 @@ function LordFlixSupreme() {
         type: "trending", 
         filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5).slice(0, 15)) 
       },
+      // PRINCIPAL
       { 
-        nome: "Clássicos que todo mundo precisa ver", 
-        type: "classic", 
-        filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010).slice(0, 15)) 
+        nome: "Filmes", 
+        type: "movie", 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'movie').slice(0, 15)) 
       },
       { 
-        nome: "Ação insana", 
-        type: "action", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura')).slice(0, 15)) 
-      },
-      { 
-        nome: "Mente explodindo (estratégia & plot twist)", 
-        type: "intellectual", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('mistério') || f.genero?.toLowerCase().includes('ficção')).slice(0, 15)) 
-      },
-      { 
-        nome: "Tokusatsu Clássico", 
-        type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu').slice(0, 20)) 
-      },
-      { 
-        nome: "Nostalgia BR anos 90", 
-        type: "nostalgia", 
-        filmes: groupSagas(allMovies.filter(f => f.type === 'nostalgia' || f.genero?.toLowerCase().includes('clássico') || f.type === 'tokusatsu').slice(0, 20)) 
-      },
-      { 
-        nome: "Heróis em Transformação", 
-        type: "heroes", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('fantasia') || f.titulo.toLowerCase().includes('kamen') || f.titulo.toLowerCase().includes('jaspion')).slice(0, 15)) 
-      },
-      { 
-        nome: "Lendas da cultura pop japonesa", 
-        type: "legends", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('culto') || f.titulo.toLowerCase().includes('ultraman') || f.titulo.toLowerCase().includes('evangelion')).slice(0, 15)) 
+        nome: "Series", 
+        type: "tv", 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv').slice(0, 15)) 
       },
       { 
         nome: "TV ao Vivo", 
         type: "live", 
         filmes: categorias.find(c => c.type === 'live')?.filmes || [] 
+      },
+      // BELOW PRINCIPAL
+      { 
+        nome: "Animes", 
+        type: "animes", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('animação') || f.genero?.toLowerCase().includes('anime')).slice(0, 15)) 
+      },
+      { 
+        nome: "Tokusatsu", 
+        type: "tokusatsu", 
+        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya')).slice(0, 20)) 
+      },
+      { 
+        nome: "Kids", 
+        type: "kids", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('família') || f.genero?.toLowerCase().includes('infantil')).slice(0, 15)) 
+      },
+      // OTHERS
+      { 
+        nome: "Classicos", 
+        type: "classic", 
+        filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010).slice(0, 15)) 
+      },
+      { 
+        nome: "Acao", 
+        type: "action", 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura')).slice(0, 15)) 
       }
     ];
 
@@ -839,11 +835,12 @@ function LordFlixSupreme() {
           <div className="hidden lg:flex items-center gap-8">
             {[
               { label: 'Início', icon: Home, action: () => { setView('home'); setBusca(''); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-              { label: 'Explorar', icon: Search, action: () => { setBusca(''); document.querySelector('input')?.focus(); } },
-              { label: 'Dublados', icon: Globe, action: () => { setBusca('dublado'); setView('home'); } },
-              { label: 'Clássicos', icon: History, action: () => { setBusca('clássico'); setView('home'); } },
-              { label: 'Tokusatsu', icon: Zap, action: () => { setView('home'); setTimeout(() => document.getElementById('tokusatsu')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
-              { label: 'Filmes', icon: Film, action: () => { setBusca('filme'); setView('home'); } }
+              { label: 'Filmes', icon: Film, action: () => { setBusca('filme'); setView('home'); } },
+              { label: 'Séries', icon: Tv, action: () => { setBusca('série'); setView('home'); } },
+              { label: 'TV ao Vivo', icon: Globe, action: () => { setShowLiveTV(true); } },
+              { label: 'Animes', icon: Zap, action: () => { setBusca('anime'); setView('home'); } },
+              { label: 'Tokusatsu', icon: Zap, action: () => { setBusca('tokusatsu'); setView('home'); } },
+              { label: 'Kids', icon: Smile, action: () => { setBusca('kids'); setView('home'); } }
             ].map((item) => (
               <button 
                 key={item.label}
@@ -1161,36 +1158,6 @@ function LordFlixSupreme() {
           </div>
         ) : (
           <div className="space-y-24 md:space-y-40">
-            {/* ONBOARDING RAIL (PNL + CTR) */}
-            <section className="px-4 md:px-20">
-              <div className="mb-8 md:mb-12">
-                <h2 className="text-2xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Não sabe por onde começar?</h2>
-                <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mt-2">Guia rápido para sua primeira imersão</p>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-8">
-                {[
-                  { t: "Melhor para Iniciantes", d: "Comece com o pé direito", c: "bg-cyan-500", icon: <Zap className="w-5 h-5" /> },
-                  { t: "Melhor Dublado", d: "Vozes icônicas do Brasil", c: "bg-retro-orange", icon: <Globe className="w-5 h-5" /> },
-                  { t: "Melhor Curto", d: "Para maratonar hoje", c: "bg-purple-500", icon: <RefreshCw className="w-5 h-5" /> },
-                  { t: "Melhor Clássico", d: "A base de tudo", c: "bg-gold", icon: <Crown className="w-5 h-5" /> },
-                  { t: "Melhor Moderno", d: "O ápice da animação", c: "bg-blue-500", icon: <Zap className="w-5 h-5" /> }
-                ].map((item, i) => (
-                  <motion.div 
-                    key={i} 
-                    whileHover={{ y: -10, scale: 1.02 }}
-                    className="group cursor-pointer bg-zinc-900/50 border border-white/5 p-6 md:p-10 rounded-[40px] hover:bg-zinc-800 transition-all relative overflow-hidden"
-                  >
-                    <div className={`w-12 h-12 ${item.c} rounded-2xl mb-6 flex items-center justify-center text-black shadow-lg`}>
-                      {item.icon}
-                    </div>
-                    <h3 className="text-white font-black text-xs md:text-sm uppercase tracking-widest mb-2">{item.t}</h3>
-                    <p className="text-zinc-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">{item.d}</p>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.div>
-                ))}
-              </div>
-            </section>
-
             {(categoriasFiltradas || []).map((cat, idx) => (
               <section 
                 key={idx} 
@@ -1205,7 +1172,7 @@ function LordFlixSupreme() {
                         {cat.nome}
                       </h2>
                       <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mt-4">
-                        {cat.type === 'tokusatsu' ? 'O Império do Sol Nascente' : 'Seleção de Elite LordFlix'}
+                        {cat.type === 'tokusatsu' ? 'Cultura Pop Japonesa' : 'Catálogo LordFlix'}
                       </p>
                     </div>
                   </div>
@@ -1249,9 +1216,9 @@ function LordFlixSupreme() {
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Live Now</span>
                 </div>
-                <span className="text-cyan-500 font-black tracking-[0.4em] text-[10px] uppercase">Lord Vision Broadcast System</span>
+                <span className="text-cyan-500 font-black tracking-[0.4em] text-[10px] uppercase">LordFlix Broadcast</span>
               </div>
-              <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-white leading-none">Lord Vision <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Live TV</span></h2>
+              <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-white leading-none">LordFlix <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Live TV</span></h2>
               <p className="text-zinc-400 text-lg md:text-xl font-medium mt-8 leading-relaxed">A revolução da TV ao vivo. Transmissão via satélite com latência zero e qualidade 4K Ultra HD. Sinta a imersão total.</p>
             </div>
             <button 
@@ -1280,7 +1247,7 @@ function LordFlixSupreme() {
                 
                 <div className="absolute top-6 right-6">
                   <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-full">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">1080p / 4K Supreme</span>
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">1080p / 4K Ultra HD</span>
                   </div>
                 </div>
 

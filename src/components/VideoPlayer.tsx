@@ -27,8 +27,7 @@ import {
   List,
   ChevronRight,
   ChevronLeft,
-  Star,
-  Smartphone
+  Star
 } from 'lucide-react';
 
 export const LordPlayer = ({ 
@@ -51,7 +50,7 @@ export const LordPlayer = ({
   const lastSavedTime = useRef<number>(0);
   
   const [playing, setPlaying] = useState(true);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(1.0);
   const [muted, setMuted] = useState(false);
   const [played, setPlayed] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -70,15 +69,6 @@ export const LordPlayer = ({
   const [episode, setEpisode] = useState(1);
   const [seasonData, setSeasonData] = useState<any>(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsPortrait(window.innerHeight > window.innerWidth);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const providers = [
     { 
@@ -352,7 +342,7 @@ export const LordPlayer = ({
             {/* LOADING STATE OVERLAY */}
             <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center gap-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-               <p className="text-[8px] font-black uppercase tracking-widest text-white/40">Sincronizando sinal reserva...</p>
+               <p className="text-[8px] font-black uppercase tracking-widest text-white/40">Sincronizando sinal...</p>
             </div>
           </div>
         ) : (
@@ -667,7 +657,7 @@ export const LordPlayer = ({
                 className="flex flex-col items-center"
               >
                 <div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 animate-pulse">Buffers de Elite Ativos</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500 animate-pulse">Carregando...</span>
               </motion.div>
             )}
           </AnimatePresence>

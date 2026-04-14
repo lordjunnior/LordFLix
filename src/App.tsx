@@ -303,7 +303,19 @@ function LordFlixSupreme() {
   const [view, setView] = useState<'home' | 'guia' | 'rede' | 'suporte' | 'movies' | 'tv' | 'profile'>('home');
   const [viewCategory, setViewCategory] = useState<any | null>(null);
   const [erroSistema, setErroSistema] = useState(false);
-  const [filmeDestaque, setFilmeDestaque] = useState<any>(null);
+  const [filmeDestaque, setFilmeDestaque] = useState<any>({
+    id: 'supreme-exclusive',
+    titulo: "LORDFLIX SUPREME",
+    nota: "10.0",
+    idade: "18",
+    ano: "2024",
+    duracao: "4K ULTRA HD",
+    diretor: "Lord Junnior",
+    resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
+    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop", 
+    bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+    media_type: 'movie'
+  });
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
   const [sagaSelecionada, setSagaSelecionada] = useState<any>(null);
   const [filmeEmReproducao, setFilmeEmReproducao] = useState<any>(null);
@@ -502,9 +514,22 @@ function LordFlixSupreme() {
           return newCats;
         });
         
-        if (formattedMovies.length > 0) {
-          setFilmeDestaque(formattedMovies[0]);
-        }
+        // --- DEFINIÇÃO DO HERO SUPREMO (Identidade da Página) ---
+        const supremeHero = {
+          id: 'supreme-exclusive',
+          titulo: "LORDFLIX SUPREME",
+          nota: "10.0",
+          idade: "18",
+          ano: "2024",
+          duracao: "4K ULTRA HD",
+          diretor: "Lord Junnior",
+          resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
+          img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop", 
+          bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+          media_type: 'movie'
+        };
+
+        setFilmeDestaque(supremeHero);
       } catch (error) {
         console.error("Erro crítico ao carregar dados do TMDB:", error);
       } finally {
@@ -1114,12 +1139,16 @@ function LordFlixSupreme() {
               <span className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Saga Longa</span>
             </div>
 
-            <h1 className="text-4xl md:text-8xl lg:text-[11rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
-              O CINEMA <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-cyan-400 bg-[length:200%_auto] animate-gradient-x">DE ELITE</span>
+            <h1 className="text-4xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.8] md:leading-[0.75] tracking-tighter uppercase mb-6 md:mb-8 italic">
+              {filmeDestaque?.id === 'supreme-exclusive' ? (
+                <>O CINEMA <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-cyan-400 bg-[length:200%_auto] animate-gradient-x">DE ELITE</span></>
+              ) : (
+                <>{filmeDestaque?.titulo?.split(' ')[0]} <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-cyan-400 bg-[length:200%_auto] animate-gradient-x">{filmeDestaque?.titulo?.split(' ').slice(1).join(' ')}</span></>
+              )}
             </h1>
             
             <p className="max-w-2xl text-zinc-300 text-sm md:text-2xl font-medium leading-relaxed mb-8 md:mb-12 drop-shadow-2xl line-clamp-3 md:line-clamp-none">
-              Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME.
+              {filmeDestaque?.resumo || "Onde a tecnologia encontra a nostalgia. Vivencie o épico em cada pixel da LORDFLIX SUPREME."}
             </p>
 
             {/* BUSCA CENTRAL E PROMINENTE (SEO + CTR) */}

@@ -508,7 +508,6 @@ function LordFlixSupreme() {
           getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
           getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
           getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
-          // BUSCA CIRÚRGICA JBOX: Nomes exatos para a API não errar
           searchMovies("O Fantástico Jaspion Jiraiya Changeman Flashman Jiban"),
           searchMovies("Kamen Rider Black Sun Winspector Solbrain Lion Man"),
           searchMovies("National Kid Cybercop Ultraman Blazar Spectreman"),
@@ -520,7 +519,7 @@ function LordFlixSupreme() {
             ...(r1.status === 'fulfilled' ? r1.value : []),
             ...(r2.status === 'fulfilled' ? r2.value : [])
           ];
-          return formatTMDBData(data, type).slice(0, 20); // GARANTE OS 20 CARDS
+          return formatTMDBData(data, type).slice(0, 20);
         };
 
         const tokusatsuData = [
@@ -529,7 +528,6 @@ function LordFlixSupreme() {
           ...(tok3.status === 'fulfilled' ? tok3.value : [])
         ];
 
-        // FIX DE IMAGENS: Garante que o Hero Section carregue a foto
         if (heroData.status === 'fulfilled' && heroData.value) {
           const h = heroData.value;
           setFilmeDestaque({
@@ -556,31 +554,6 @@ function LordFlixSupreme() {
           update("tv", merge(t1, t2));
           update("animes", merge(a1, a2));
           update("kids", merge(k1, k2));
-          update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
-          return next;
-        });
-
-      } catch (error) {
-        console.error("Erro na LordEngine:", error);
-      } finally {
-        setLoading(false);
-        setCarregado(true);
-      }
-    }
-    loadData();
-  }, []);
-
-        setCategorias(prev => {
-          const next = [...prev];
-          const update = (type: string, data: any[]) => {
-            const i = next.findIndex(c => c.type === type);
-            if (i !== -1) next[i] = { ...next[i], filmes: data };
-          };
-
-          update("movie", merge(m1, m2, "movie"));
-          update("tv", merge(t1, t2, "tv"));
-          update("animes", merge(a1, a2, "animes"));
-          update("kids", merge(k1, k2, "kids"));
           update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
           return next;
         });

@@ -161,23 +161,40 @@ const GENRE_MAP: { [key: number]: string } = {
   10768: "Guerra & Política"
 };
 
-const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => ({
-  id: item.id,
-  titulo: (item.title || item.name || "").toUpperCase(),
-  nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
-  idade: "14", 
-  kids: item.genre_ids?.includes(10751) || item.genre_ids?.includes(10762),
-  ano: (item.release_date || item.first_air_date || "").split("-")[0],
-  resumo: item.overview,
-  img: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-  bg: (item.backdrop_path || item.poster_path) ? `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}` : "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-  src: "",
-  trailer: "",
-  media_type: item.media_type || (item.title ? "movie" : "tv"),
-  popularity: item.popularity,
-  genero: item.genre_ids?.map((id: number) => GENRE_MAP[id]).filter(Boolean).join(", ") || "",
-  type: type || item.media_type || (item.title ? "movie" : "tv")
-}));
+const OFFICIAL_POSTERS: { [key: number]: string } = {
+  43505: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyNjEtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43506: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43508: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43509: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+};
+
+const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
+  const poster = OFFICIAL_POSTERS[item.id] || (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null);
+  const backdrop = (item.backdrop_path || item.poster_path) ? `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}` : null;
+  
+  return {
+    id: item.id,
+    titulo: (item.title || item.name || "").toUpperCase(),
+    nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
+    idade: "14", 
+    kids: item.genre_ids?.includes(10751) || item.genre_ids?.includes(10762),
+    ano: (item.release_date || item.first_air_date || "").split("-")[0],
+    resumo: item.overview,
+    img: poster || "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
+    bg: backdrop || poster || "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
+    src: "",
+    trailer: "",
+    media_type: item.media_type || (item.title ? "movie" : "tv"),
+    popularity: item.popularity,
+    genero: item.genre_ids?.map((id: number) => GENRE_MAP[id]).filter(Boolean).join(", ") || "",
+    type: type || item.media_type || (item.title ? "movie" : "tv")
+  };
+});
 
 // --- COMPONENTE DE CAPA ELITE (PNL + SEO) ---
 interface MoviePosterProps {
@@ -517,7 +534,7 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [m1, m2, t1, t2, a1, a2, k1, k2, r1, heroData] = await Promise.allSettled([
+        const [m1, m2, t1, t2, a1, a2, k1, k2, r1, trend, heroData] = await Promise.allSettled([
           getMoviesByGenre("movie", 28), // Ação
           searchMovies("Filmes Dublados 2024"),
           getMoviesByGenre("tv", 10759), // Ação e Aventura
@@ -527,6 +544,7 @@ function LordFlixSupreme() {
           getMoviesByGenre("movie", 10751), // Kids
           searchMovies("Desenho Animado Dublado"),
           searchMovies("Runtime TV Filmes Dublados"),
+          getMovies("trending"),
           getMovieDetails(872585, "movie")
         ]);
 
@@ -577,9 +595,48 @@ function LordFlixSupreme() {
           };
 
           update("movie", merge(m1, m2, "movie"));
-          update("tv", merge(t1, t2, "tv"));
+          
+          // Séries - REMOVER TOKUSATSU
+          const seriesData = merge(t1, t2, "tv").filter(f => 
+            !TOKUSATSU_VAULT.some(v => v.id === f.id) && 
+            !f.titulo.toLowerCase().includes('jaspion') &&
+            !f.titulo.toLowerCase().includes('jiraiya') &&
+            !f.titulo.toLowerCase().includes('jiban') &&
+            !f.titulo.toLowerCase().includes('changeman') &&
+            !f.titulo.toLowerCase().includes('flashman') &&
+            !f.titulo.toLowerCase().includes('kamen rider') &&
+            !f.titulo.toLowerCase().includes('ultraman')
+          );
+          update("tv", seriesData);
+
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
+          
+          // Trending - SEM CAPAS CINZAS
+          if (trend.status === 'fulfilled') {
+            const trendData = formatTMDBData(trend.value).filter(f => 
+              f.img && 
+              !f.img.includes('unsplash') && 
+              f.resumo && 
+              f.resumo.length > 10
+            );
+            update("trending", trendData.slice(0, 20));
+          }
+
+          // TV ao Vivo - GRADE COMPLETA LORD + RUNTIME
+          const allLive: Movie[] = LIVE_CHANNELS.map(c => ({
+            id: c.id as any,
+            titulo: c.name.toUpperCase(),
+            nota: "10.0",
+            ano: "LIVE",
+            genero: "Canal ao Vivo",
+            resumo: `Assista ${c.name} ao vivo e dublado. Sinal Supreme 4K.`,
+            img: c.logo,
+            bg: c.logo,
+            src: c.stream,
+            media_type: 'live'
+          }));
+          update("live", allLive);
           
           // Runtime Category (Live Channels + Conteúdo Dublado)
           const runtimeLive: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => ({
@@ -596,7 +653,7 @@ function LordFlixSupreme() {
           }));
           const runtimeMovies = [
             ...runtimeLive,
-            ...(r1.status === 'fulfilled' ? formatTMDBData(r1.value, "runtime") : [])
+            ...(r1.status === 'fulfilled' ? formatTMDBData(r1.value, "runtime").map(m => ({ ...m, src: 'runtime' })) : [])
           ];
           update("runtime", runtimeMovies.slice(0, 20));
           

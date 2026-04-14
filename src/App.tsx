@@ -498,7 +498,7 @@ function LordFlixSupreme() {
     };
   }, [user]);
 
-// --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS + JBOX SYNC) ---
+  // --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS) ---
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -508,9 +508,9 @@ function LordFlixSupreme() {
           getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
           getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
           getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
-          searchMovies("O Fantástico Jaspion Jiraiya Changeman Flashman Jiban"),
-          searchMovies("Kamen Rider Black Sun Winspector Solbrain Lion Man"),
-          searchMovies("National Kid Cybercop Ultraman Blazar Spectreman"),
+          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"),
+          searchMovies("Kamen Rider Black Ultraman Cybercop"),
+          searchMovies("Lion Man National Kid Spectreman"),
           getMovieDetails(872585, "movie")
         ]);
 
@@ -519,7 +519,7 @@ function LordFlixSupreme() {
             ...(r1.status === 'fulfilled' ? r1.value : []),
             ...(r2.status === 'fulfilled' ? r2.value : [])
           ];
-          return formatTMDBData(data, type).slice(0, 20);
+          return formatTMDBData(data, type).slice(0, 20); // GARANTE OS 20 CARDS
         };
 
         const tokusatsuData = [
@@ -550,10 +550,10 @@ function LordFlixSupreme() {
             if (i !== -1) next[i] = { ...next[i], filmes: data };
           };
 
-          update("movie", merge(m1, m2));
-          update("tv", merge(t1, t2));
-          update("animes", merge(a1, a2));
-          update("kids", merge(k1, k2));
+          update("movie", merge(m1, m2, "movie"));
+          update("tv", merge(t1, t2, "tv"));
+          update("animes", merge(a1, a2, "animes"));
+          update("kids", merge(k1, k2, "kids"));
           update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
           return next;
         });

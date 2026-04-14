@@ -367,7 +367,18 @@ function LordFlixSupreme() {
   // --- 1. AUTH STATE ---
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+      if (firebaseUser) {
+        setUser(firebaseUser);
+      } else {
+        // AUTO-LOGIN ELITE BYPASS: Mock user for testing phase
+        setUser({
+          uid: 'lord-bypass-uid',
+          email: 'lordjunnior@gmail.com',
+          displayName: 'Lord Junnior (Bypass)',
+          photoURL: 'https://cdn-icons-png.flaticon.com/512/2503/2503508.png',
+          emailVerified: true
+        } as any);
+      }
       setIsAuthReady(true);
     });
 
@@ -456,14 +467,16 @@ function LordFlixSupreme() {
           getMovies("tv"),
           getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
           getMoviesByGenre("movie", 10751), // Kids/Family
-          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman Lion Man Black Kamen Rider Cybercop Winspector Solbrain National Kid Ultraman Spectreman Sharivan Shaider Goggle V Dynaman Maskman Patrine Spielvan") // Iconic Tokusatsu
+          searchMovies("Tokusatsu Jaspion Jiraiya Kamen Rider Ultraman Super Sentai Metal Hero") // Targeted Tokusatsu Search
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
         const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
         const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
         const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
-        const formattedTokusatsu = tokusatsu.status === 'fulfilled' ? formatTMDBData(tokusatsu.value) : [];
+        const formattedTokusatsu = tokusatsu.status === 'fulfilled' 
+          ? formatTMDBData(tokusatsu.value).map(f => ({ ...f, type: 'tokusatsu' })) 
+          : [];
 
         setCategorias(prev => {
           const newCats = [...prev];
@@ -649,6 +662,11 @@ function LordFlixSupreme() {
         filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv').slice(0, 15)) 
       },
       { 
+        nome: "TOKUSATSU: AS LENDAS DO JAPÃO", 
+        type: "tokusatsu", 
+        filmes: groupSagas(allMovies.filter(f => (f as any).type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya') || f.titulo.toLowerCase().includes('jiban') || f.titulo.toLowerCase().includes('changeman') || f.titulo.toLowerCase().includes('flashman') || f.titulo.toLowerCase().includes('kamen rider') || f.titulo.toLowerCase().includes('ultraman')).slice(0, 20)) 
+      },
+      { 
         nome: "TV ao Vivo", 
         type: "live", 
         filmes: categorias.find(c => c.type === 'live')?.filmes || [] 
@@ -658,11 +676,6 @@ function LordFlixSupreme() {
         nome: "Animes", 
         type: "animes", 
         filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('animação') || f.genero?.toLowerCase().includes('anime')).slice(0, 15)) 
-      },
-      { 
-        nome: "TOKUSATSU: AS LENDAS DO JAPÃO", 
-        type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => f.type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya') || f.titulo.toLowerCase().includes('jiban') || f.titulo.toLowerCase().includes('changeman') || f.titulo.toLowerCase().includes('flashman')).slice(0, 20)) 
       },
       { 
         nome: "Kids", 
@@ -796,12 +809,10 @@ function LordFlixSupreme() {
     );
   }
 
-  // --- TELA DE LOGIN REMOVIDA PARA TESTES ---
-  /*
-  if (!user) {
+  // --- TELA DE LOGIN (BYPASS ATIVO) ---
+  if (!user && isAuthReady) {
     return <LordLogin onLogin={() => {}} />;
   }
-  */
 
   // --- KILL SWITCH (MAINTENANCE MODE) ---
   if (adminConfig?.maintenance_mode && userRole !== 'admin') {

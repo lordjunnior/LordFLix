@@ -57,8 +57,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
+  
+  const errorMsg = error instanceof Error ? error.message : String(error);
+  const isPermissionError = errorMsg.toLowerCase().includes('permission') || errorMsg.toLowerCase().includes('insufficient');
+  
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  
+  // Only throw if it's NOT a permission error, to avoid crashing the app during bypass/dev
+  if (!isPermissionError) {
+    throw new Error(JSON.stringify(errInfo));
+  }
 }
 
 // Test Connection

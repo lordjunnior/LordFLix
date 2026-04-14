@@ -161,7 +161,7 @@ const GENRE_MAP: { [key: number]: string } = {
   10768: "Guerra & Política"
 };
 
-const formatTMDBData = (data: any[], type?: string): Movie[] => data.filter(i => i.poster_path).map(item => ({
+const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => ({
   id: item.id,
   titulo: (item.title || item.name || "").toUpperCase(),
   nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
@@ -169,8 +169,8 @@ const formatTMDBData = (data: any[], type?: string): Movie[] => data.filter(i =>
   kids: item.genre_ids?.includes(10751) || item.genre_ids?.includes(10762),
   ano: (item.release_date || item.first_air_date || "").split("-")[0],
   resumo: item.overview,
-  img: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-  bg: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
+  img: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
+  bg: (item.backdrop_path || item.poster_path) ? `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}` : "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
   src: "",
   trailer: "",
   media_type: item.media_type || (item.title ? "movie" : "tv"),
@@ -242,6 +242,12 @@ const MoviePoster = ({ filme, onClick, type, handleAssistir, toggleWatchlist, wa
           <div className="bg-red-600/90 backdrop-blur-2xl border border-white/20 px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
             <Globe className="w-2.5 h-2.5 text-white" />
             <span className="text-[8px] font-black text-white tracking-widest uppercase">Oficial</span>
+          </div>
+        )}
+        {filme.src?.includes('runtime') && (
+          <div className="bg-gold/90 backdrop-blur-2xl border border-white/20 px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+            <Shield className="w-2.5 h-2.5 text-black" />
+            <span className="text-[8px] font-black text-black tracking-widest uppercase">Licenciado</span>
           </div>
         )}
         {filme.isSaga && (
@@ -511,14 +517,16 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [m1, m2, t1, t2, a1, a2, k1, k2, tok1, tok2, tok3, heroData] = await Promise.allSettled([
-          getMovies("movie"), searchMovies("Filmes Lançamentos Dublados"),
-          getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
-          getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
-          getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
-          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"),
-          searchMovies("Kamen Rider Black Ultraman Cybercop"),
-          searchMovies("Lion Man National Kid Spectreman"),
+        const [m1, m2, t1, t2, a1, a2, k1, k2, r1, heroData] = await Promise.allSettled([
+          getMoviesByGenre("movie", 28), // Ação
+          searchMovies("Filmes Dublados 2024"),
+          getMoviesByGenre("tv", 10759), // Ação e Aventura
+          searchMovies("Séries Dubladas"),
+          getMoviesByGenre("tv", 16),    // Animes
+          searchMovies("Anime Dublado"),
+          getMoviesByGenre("movie", 10751), // Kids
+          searchMovies("Desenho Animado Dublado"),
+          searchMovies("Runtime TV Filmes Dublados"),
           getMovieDetails(872585, "movie")
         ]);
 
@@ -545,12 +553,6 @@ function LordFlixSupreme() {
           ];
           return formatTMDBData(data, type).slice(0, 20); // GARANTE OS 20 CARDS
         };
-
-        const tokusatsuData = [
-          ...(tok1.status === 'fulfilled' ? tok1.value : []),
-          ...(tok2.status === 'fulfilled' ? tok2.value : []),
-          ...(tok3.status === 'fulfilled' ? tok3.value : [])
-        ];
 
         if (heroData.status === 'fulfilled' && heroData.value) {
           const h = heroData.value;
@@ -579,8 +581,8 @@ function LordFlixSupreme() {
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
           
-          // Runtime Category (Live Channels)
-          const runtimeMovies: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => ({
+          // Runtime Category (Live Channels + Conteúdo Dublado)
+          const runtimeLive: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => ({
             id: c.id as any,
             titulo: c.name.toUpperCase(),
             nota: "10.0",
@@ -592,13 +594,14 @@ function LordFlixSupreme() {
             src: c.stream,
             media_type: 'live'
           }));
-          update("runtime", runtimeMovies);
+          const runtimeMovies = [
+            ...runtimeLive,
+            ...(r1.status === 'fulfilled' ? formatTMDBData(r1.value, "runtime") : [])
+          ];
+          update("runtime", runtimeMovies.slice(0, 20));
           
-          const finalTokusatsu = [
-            ...vaultMovies,
-            ...formatTMDBData(tokusatsuData, "tokusatsu").filter(f => !vaultMovies.some(v => v.id === f.id))
-          ].slice(0, 20);
-          update("tokusatsu", finalTokusatsu);
+          // Tokusatsu Section (Vault Only for Precision)
+          update("tokusatsu", vaultMovies.slice(0, 20));
           
           return next;
         });

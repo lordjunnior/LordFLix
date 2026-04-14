@@ -106,5 +106,23 @@ export const LIVE_CHANNELS = [
     stream: 'https://runtime-brazil-crimen.amagi.tv/playlist.m3u8',
     quality: 'HD Dublado',
     color: '#4b5563'
+  },
+  {
+    id: 'runtime-documentarios',
+    name: 'Runtime Doc',
+    category: 'documentarios',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-documentales.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#10b981'
+  },
+  {
+    id: 'runtime-series',
+    name: 'Runtime Séries',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-series.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#a855f7'
   }
 ];

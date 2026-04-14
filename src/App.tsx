@@ -312,8 +312,8 @@ function LordFlixSupreme() {
     duracao: "4K ULTRA HD",
     diretor: "Lord Junnior",
     resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
-    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop", 
-    bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop", 
+    bg: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
     media_type: 'movie'
   });
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -524,8 +524,8 @@ function LordFlixSupreme() {
           duracao: "4K ULTRA HD",
           diretor: "Lord Junnior",
           resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
-          img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop", 
-          bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+          img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop", 
+          bg: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
           media_type: 'movie'
         };
 
@@ -1101,7 +1101,7 @@ function LordFlixSupreme() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
                 src={filmeDestaque.bg} 
-                alt="Destaque Sci-Fi LordFlix" 
+                alt="Destaque LordFlix Supreme - Cinema de Elite" 
                 className="w-full h-full object-cover object-center md:object-top animate-subtle-zoom"
                 referrerPolicy="no-referrer"
                 // @ts-ignore - fetchPriority is supported in modern browsers/React

@@ -462,21 +462,25 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, animes, kids, tokusatsu] = await Promise.allSettled([
+        const [movies, tv, animes, kids, tokusatsu1, tokusatsu2] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
           getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
           getMoviesByGenre("movie", 10751), // Kids/Family
-          searchMovies("Tokusatsu Jaspion Jiraiya Kamen Rider Ultraman Super Sentai Metal Hero") // Targeted Tokusatsu Search
+          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"), // Classic Tokusatsu
+          searchMovies("Kamen Rider Ultraman Super Sentai Metal Hero") // Modern/Franchise Tokusatsu
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
         const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
         const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
         const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
-        const formattedTokusatsu = tokusatsu.status === 'fulfilled' 
-          ? formatTMDBData(tokusatsu.value).map(f => ({ ...f, type: 'tokusatsu' })) 
-          : [];
+        
+        const rawTokusatsu = [
+          ...(tokusatsu1.status === 'fulfilled' ? tokusatsu1.value : []),
+          ...(tokusatsu2.status === 'fulfilled' ? tokusatsu2.value : [])
+        ];
+        const formattedTokusatsu = formatTMDBData(rawTokusatsu).map(f => ({ ...f, type: 'tokusatsu' }));
 
         setCategorias(prev => {
           const newCats = [...prev];
@@ -664,7 +668,18 @@ function LordFlixSupreme() {
       { 
         nome: "TOKUSATSU: AS LENDAS DO JAPÃO", 
         type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => (f as any).type === 'tokusatsu' || f.titulo.toLowerCase().includes('jaspion') || f.titulo.toLowerCase().includes('jiraiya') || f.titulo.toLowerCase().includes('jiban') || f.titulo.toLowerCase().includes('changeman') || f.titulo.toLowerCase().includes('flashman') || f.titulo.toLowerCase().includes('kamen rider') || f.titulo.toLowerCase().includes('ultraman')).slice(0, 20)) 
+        filmes: groupSagas(allMovies.filter(f => 
+          (f as any).type === 'tokusatsu' || 
+          f.titulo.toLowerCase().includes('jaspion') || 
+          f.titulo.toLowerCase().includes('jiraiya') || 
+          f.titulo.toLowerCase().includes('jiban') || 
+          f.titulo.toLowerCase().includes('changeman') || 
+          f.titulo.toLowerCase().includes('flashman') || 
+          f.titulo.toLowerCase().includes('kamen rider') || 
+          f.titulo.toLowerCase().includes('ultraman') ||
+          f.titulo.toLowerCase().includes('metal hero') ||
+          f.titulo.toLowerCase().includes('super sentai')
+        ).slice(0, 20)) 
       },
       { 
         nome: "TV ao Vivo", 
@@ -695,7 +710,7 @@ function LordFlixSupreme() {
       }
     ];
 
-    return intelligentCategories.filter(c => c.filmes.length > 0);
+    return intelligentCategories.filter(c => c.filmes.length > 0 || c.type === 'tokusatsu');
   }, [categorias, busca, perfil, is90sMode, priorizarDublados, history, view, watchlist]);
 
   const handleAssistir = async (filme: any) => {

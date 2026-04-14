@@ -521,6 +521,22 @@ function LordFlixSupreme() {
           getMovieDetails(872585, "movie")
         ]);
 
+        // Fetch specific details for Vault items to get real images
+        const vaultDetails = await Promise.allSettled(
+          TOKUSATSU_VAULT.map(v => getMovieDetails(v.id, v.media_type as any))
+        );
+
+        const vaultMovies = vaultDetails
+          .map((res, idx) => {
+            if (res.status === 'fulfilled' && res.value) {
+              const data = formatTMDBData([res.value], "tokusatsu")[0];
+              const vaultItem = TOKUSATSU_VAULT[idx];
+              return { ...data, src: vaultItem.src, titulo: vaultItem.titulo };
+            }
+            return null;
+          })
+          .filter(Boolean) as Movie[];
+
         const merge = (r1: any, r2: any, type?: string) => {
           const data = [
             ...(r1.status === 'fulfilled' ? r1.value : []),
@@ -563,8 +579,8 @@ function LordFlixSupreme() {
           update("kids", merge(k1, k2, "kids"));
           
           const finalTokusatsu = [
-            ...TOKUSATSU_VAULT,
-            ...formatTMDBData(tokusatsuData, "tokusatsu").filter(f => !TOKUSATSU_VAULT.some(v => v.tmdbId === f.id))
+            ...vaultMovies,
+            ...formatTMDBData(tokusatsuData, "tokusatsu").filter(f => !vaultMovies.some(v => v.id === f.id))
           ].slice(0, 20);
           update("tokusatsu", finalTokusatsu);
           

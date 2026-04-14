@@ -8,7 +8,7 @@ import ReactPlayer from 'react-player';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { getSeasonDetails } from '../lib/tmdb';
+import { getSeasonDetails, getMovieDetails } from '../lib/tmdb';
 import { 
   Play, 
   Pause, 
@@ -69,6 +69,22 @@ export const LordPlayer = ({
   const [episode, setEpisode] = useState(1);
   const [seasonData, setSeasonData] = useState<any>(null);
   const [loadingSeason, setLoadingSeason] = useState(false);
+  const [fullMovieData, setFullMovieData] = useState<any>(movieData);
+
+  // Fetch Full Movie Details for TV shows
+  useEffect(() => {
+    const fetchFullDetails = async () => {
+      if (media_type === 'tv' && movieId && !fullMovieData.number_of_seasons) {
+        try {
+          const data = await getMovieDetails(Number(movieId), 'tv');
+          setFullMovieData(data);
+        } catch (error) {
+          console.error("Erro ao carregar detalhes completos:", error);
+        }
+      }
+    };
+    fetchFullDetails();
+  }, [movieId, media_type]);
 
   const providers = [
     { 
@@ -695,7 +711,7 @@ export const LordPlayer = ({
 
               {/* SEASON TABS */}
               <div className="px-8 py-6 flex items-center gap-4 overflow-x-auto no-scrollbar border-b border-white/5">
-                {Array.from({ length: movieData.number_of_seasons || 10 }, (_, i) => i + 1).map(s => (
+                {Array.from({ length: fullMovieData.number_of_seasons || 1 }, (_, i) => i + 1).map(s => (
                   <button
                     key={s}
                     onClick={() => setSeason(s)}

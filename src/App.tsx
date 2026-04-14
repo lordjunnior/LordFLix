@@ -334,8 +334,8 @@ function LordFlixSupreme() {
     duracao: "3h 0min",
     diretor: "Christopher Nolan",
     resumo: "O físico J. Robert Oppenheimer trabalha com uma equipe de cientistas durante o Projeto Manhattan, levando ao desenvolvimento da bomba atômica.",
-    img: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg", 
-    bg: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg",
+    img: "https://image.tmdb.org/t/p/original/fm610mBFrDSR39S649pQ9C6Hws9.jpg", 
+    bg: "https://image.tmdb.org/t/p/original/fm610mBFrDSR39S649pQ9C6Hws9.jpg",
     media_type: 'movie'
   });
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -491,95 +491,57 @@ function LordFlixSupreme() {
     };
   }, [user]);
 
-  // --- 3. TMDB DATA LOADING ---
+  // --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS) ---
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies1, movies2, tv1, tv2, animes1, animes2, kids1, kids2, tokusatsu1, tokusatsu2, tokusatsu3, oppenheimer] = await Promise.allSettled([
-          getMovies("movie"),
-          searchMovies("Filmes Dublados"), // Extra movies
-          getMovies("tv"),
-          searchMovies("Series Dubladas"), // Extra series
-          getMoviesByGenre("tv", 16), // Animes Page 1
-          searchMovies("Anime Dublado"), // Extra animes
-          getMoviesByGenre("movie", 10751), // Kids Page 1
-          searchMovies("Desenhos Dublados"), // Extra kids
-          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman National Kid"),
-          searchMovies("Kamen Rider Black Ultraman Cybercop Winspector Solbrain"),
-          searchMovies("Tokusatsu Dublado Maskman Goggle V Dynaman"),
-          getMovieDetails(872585, "movie")
+        const [m1, m2, t1, t2, a1, a2, k1, k2, tok1, tok2, tok3] = await Promise.allSettled([
+          getMovies("movie"), searchMovies("Filmes Lançamentos Dublados"),
+          getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
+          getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
+          getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
+          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"),
+          searchMovies("Kamen Rider Black Ultraman Cybercop"),
+          searchMovies("Lion Man National Kid Spectreman")
         ]);
 
-        const formattedMovies = [
-          ...(movies1.status === 'fulfilled' ? formatTMDBData(movies1.value) : []),
-          ...(movies2.status === 'fulfilled' ? formatTMDBData(movies2.value) : [])
+        const merge = (r1: any, r2: any) => {
+          const data = [
+            ...(r1.status === 'fulfilled' ? r1.value : []),
+            ...(r2.status === 'fulfilled' ? r2.value : [])
+          ];
+          return formatTMDBData(data).slice(0, 20); // GARANTE OS 20 CARDS
+        };
+
+        const tokusatsuData = [
+          ...(tok1.status === 'fulfilled' ? tok1.value : []),
+          ...(tok2.status === 'fulfilled' ? tok2.value : []),
+          ...(tok3.status === 'fulfilled' ? tok3.value : [])
         ];
-        const formattedTv = [
-          ...(tv1.status === 'fulfilled' ? formatTMDBData(tv1.value) : []),
-          ...(tv2.status === 'fulfilled' ? formatTMDBData(tv2.value) : [])
-        ];
-        const formattedAnimes = [
-          ...(animes1.status === 'fulfilled' ? formatTMDBData(animes1.value) : []),
-          ...(animes2.status === 'fulfilled' ? formatTMDBData(animes2.value) : [])
-        ];
-        const formattedKids = [
-          ...(kids1.status === 'fulfilled' ? formatTMDBData(kids1.value) : []),
-          ...(kids2.status === 'fulfilled' ? formatTMDBData(kids2.value) : [])
-        ];
-        
-        const rawTokusatsu = [
-          ...(tokusatsu1.status === 'fulfilled' ? tokusatsu1.value : []),
-          ...(tokusatsu2.status === 'fulfilled' ? tokusatsu2.value : []),
-          ...(tokusatsu3.status === 'fulfilled' ? tokusatsu3.value : [])
-        ];
-        const formattedTokusatsu = formatTMDBData(rawTokusatsu).map(f => ({ ...f, type: 'tokusatsu' }));
 
         setCategorias(prev => {
-          const newCats = [...prev];
-          const updateCat = (type: string, data: any[]) => {
-            const idx = newCats.findIndex(c => c.type === type);
-            if (idx !== -1 && data.length > 0) {
-              // Sort by popularity to ensure "most searched/watched" feel
-              const sortedData = [...data].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-              newCats[idx] = { ...newCats[idx], filmes: sortedData };
-            }
+          const next = [...prev];
+          const update = (type: string, data: any[]) => {
+            const i = next.findIndex(c => c.type === type);
+            if (i !== -1) next[i] = { ...next[i], filmes: data };
           };
 
-          updateCat("movie", formattedMovies);
-          updateCat("tv", formattedTv);
-          updateCat("animes", formattedAnimes);
-          updateCat("kids", formattedKids);
-          updateCat("tokusatsu", formattedTokusatsu);
-          
-          return newCats;
+          update("movie", merge(m1, m2));
+          update("tv", merge(t1, t2));
+          update("animes", merge(a1, a2));
+          update("kids", merge(k1, k2));
+          update("tokusatsu", formatTMDBData(tokusatsuData).slice(0, 20));
+          return next;
         });
-        
-        // --- DEFINIÇÃO DO HERO SUPREMO (Oppenheimer) ---
-        if (oppenheimer.status === 'fulfilled' && oppenheimer.value) {
-          const details = oppenheimer.value;
-          setFilmeDestaque({
-            id: details.id,
-            titulo: details.title.toUpperCase(),
-            nota: details.vote_average.toFixed(1),
-            idade: "16",
-            ano: details.release_date.split('-')[0],
-            duracao: `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}min`,
-            diretor: "Christopher Nolan",
-            resumo: details.overview,
-            img: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
-            bg: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
-            media_type: 'movie'
-          });
-        }
+
       } catch (error) {
-        console.error("Erro crítico ao carregar dados do TMDB:", error);
+        console.error("Erro na LordEngine:", error);
       } finally {
         setLoading(false);
         setCarregado(true);
       }
     }
-
     loadData();
   }, []);
 
@@ -1146,12 +1108,15 @@ function LordFlixSupreme() {
               <motion.img 
                 key={filmeDestaque.id}
                 initial={{ scale: 1, opacity: 0 }}
-                animate={{ scale: 1.1, opacity: 0.7 }}
+                animate={{ scale: 1.1, opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
+                transition={{ 
+                  scale: { duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" },
+                  opacity: { duration: 1.5 }
+                }}
                 src={filmeDestaque.bg} 
                 alt="Destaque LordFlix Supreme - Cinema de Elite" 
-                className="w-full h-full object-cover object-center md:object-top animate-subtle-zoom"
+                className="w-full h-full object-cover object-center md:object-top"
                 referrerPolicy="no-referrer"
                 // @ts-ignore - fetchPriority is supported in modern browsers/React
                 fetchPriority="high"

@@ -120,11 +120,12 @@ export const LordPlayer = ({
 
   const getEmbedUrl = () => {
     if (src.includes('akamaihd.net')) return src; // Live streams
+    if (src.includes('youtube.com') || src.includes('youtu.be')) return src; // YouTube
     const provider = providers.find(p => p.id === currentProvider) || providers[0];
     return provider.url(movieId, media_type, season, episode);
   };
 
-  const isEmbed = !src.includes('akamaihd.net');
+  const isEmbed = !src.includes('akamaihd.net') && !src.includes('youtube.com') && !src.includes('youtu.be');
 
   // Fetch Season Details
   useEffect(() => {

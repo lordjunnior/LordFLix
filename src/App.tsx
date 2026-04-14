@@ -15,6 +15,7 @@ import LiveTV from './components/LiveTV';
 import BackgroundStream from './components/BackgroundStream';
 import { LIVE_CHANNELS } from './constants/channels';
 import { AdPlayer } from './components/AdPlayer';
+import { TOKUSATSU_VAULT } from './constants/tokusatsu';
 import { getMovies, searchMovies, getVideos, getMovieDetails, getSeasonDetails, getMoviesByGenre } from './lib/tmdb';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
@@ -236,6 +237,12 @@ const MoviePoster = ({ filme, onClick, type, handleAssistir, toggleWatchlist, wa
       
       {/* ELITE BADGES */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 items-end z-20">
+        {filme.src?.includes('youtube.com') && (
+          <div className="bg-red-600/90 backdrop-blur-2xl border border-white/20 px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+            <Globe className="w-2.5 h-2.5 text-white" />
+            <span className="text-[8px] font-black text-white tracking-widest uppercase">Oficial</span>
+          </div>
+        )}
         {filme.isSaga && (
           <div className="bg-retro-orange/90 backdrop-blur-2xl border border-white/20 px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
             <Crown className="w-2.5 h-2.5 text-black" />
@@ -554,7 +561,13 @@ function LordFlixSupreme() {
           update("tv", merge(t1, t2, "tv"));
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
-          update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
+          
+          const finalTokusatsu = [
+            ...TOKUSATSU_VAULT,
+            ...formatTMDBData(tokusatsuData, "tokusatsu").filter(f => !TOKUSATSU_VAULT.some(v => v.tmdbId === f.id))
+          ].slice(0, 20);
+          update("tokusatsu", finalTokusatsu);
+          
           return next;
         });
 

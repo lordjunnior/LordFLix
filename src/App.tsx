@@ -498,7 +498,7 @@ function LordFlixSupreme() {
     };
   }, [user]);
 
-  // --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS) ---
+// --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS + JBOX SYNC) ---
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -508,9 +508,10 @@ function LordFlixSupreme() {
           getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
           getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
           getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
-          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"),
-          searchMovies("Kamen Rider Black Ultraman Cybercop"),
-          searchMovies("Lion Man National Kid Spectreman"),
+          // BUSCA CIRÚRGICA JBOX: Nomes exatos para a API não errar
+          searchMovies("O Fantástico Jaspion Jiraiya Changeman Flashman Jiban"),
+          searchMovies("Kamen Rider Black Sun Winspector Solbrain Lion Man"),
+          searchMovies("National Kid Cybercop Ultraman Blazar Spectreman"),
           getMovieDetails(872585, "movie")
         ]);
 
@@ -528,6 +529,7 @@ function LordFlixSupreme() {
           ...(tok3.status === 'fulfilled' ? tok3.value : [])
         ];
 
+        // FIX DE IMAGENS: Garante que o Hero Section carregue a foto
         if (heroData.status === 'fulfilled' && heroData.value) {
           const h = heroData.value;
           setFilmeDestaque({
@@ -542,6 +544,31 @@ function LordFlixSupreme() {
             media_type: 'movie'
           });
         }
+
+        setCategorias(prev => {
+          const next = [...prev];
+          const update = (type: string, data: any[]) => {
+            const i = next.findIndex(c => c.type === type);
+            if (i !== -1) next[i] = { ...next[i], filmes: data };
+          };
+
+          update("movie", merge(m1, m2));
+          update("tv", merge(t1, t2));
+          update("animes", merge(a1, a2));
+          update("kids", merge(k1, k2));
+          update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
+          return next;
+        });
+
+      } catch (error) {
+        console.error("Erro na LordEngine:", error);
+      } finally {
+        setLoading(false);
+        setCarregado(true);
+      }
+    }
+    loadData();
+  }, []);
 
         setCategorias(prev => {
           const next = [...prev];

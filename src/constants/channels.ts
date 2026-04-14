@@ -53,4 +53,58 @@ export const LIVE_CHANNELS = [
     quality: '1080p / 4K Supreme',
     color: '#3b82f6'
   },
+  {
+    id: 'runtime-filmes',
+    name: 'Runtime Filmes',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#facc15'
+  },
+  {
+    id: 'runtime-acao',
+    name: 'Runtime Ação',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-accion.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#ef4444'
+  },
+  {
+    id: 'runtime-terror',
+    name: 'Runtime Terror',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-terror.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#000000'
+  },
+  {
+    id: 'runtime-comedia',
+    name: 'Runtime Comédia',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-comedia.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#3b82f6'
+  },
+  {
+    id: 'runtime-romance',
+    name: 'Runtime Romance',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-romance.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#ec4899'
+  },
+  {
+    id: 'runtime-crimen',
+    name: 'Runtime Crime',
+    category: 'cinema',
+    logo: 'https://www.runtime.tv/wp-content/uploads/2021/04/Runtime-Logo-White.png',
+    stream: 'https://runtime-brazil-crimen.amagi.tv/playlist.m3u8',
+    quality: 'HD Dublado',
+    color: '#4b5563'
+  }
 ];

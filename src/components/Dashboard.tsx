@@ -26,14 +26,14 @@ export const MediaDashboard = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.5)]"></span>
-              <span className="text-[10px] text-white font-black tracking-[0.3em] uppercase italic">São Paulo Node-01</span>
+              <span className="text-[10px] text-white font-black tracking-[0.3em] uppercase italic">Servidor São Paulo-01</span>
             </div>
             <div className="h-4 w-px bg-white/10"></div>
             <span className="text-[9px] text-silver/40 font-black uppercase tracking-[0.2em]">HEVC Main 10</span>
           </div>
         </div>
         <div className="px-4 py-1 border border-white/10 rounded-full">
-          <span className="text-[8px] text-silver/60 font-black tracking-widest uppercase">Nominal</span>
+          <span className="text-[8px] text-silver/60 font-black tracking-widest uppercase">Normal</span>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ export const MediaDashboard = () => {
           <p className="text-xl font-mono font-black text-cyan-500">24<span className="text-[10px] ml-1">ms</span></p>
         </div>
         <div className="space-y-1">
-          <p className="text-[8px] font-black text-silver/20 uppercase tracking-widest">Bitrate</p>
+          <p className="text-[8px] font-black text-silver/20 uppercase tracking-widest">Taxa de Bits</p>
           <p className="text-xl font-mono font-black text-white">45.8<span className="text-[10px] ml-1">Mbps</span></p>
         </div>
         <div className="space-y-1">

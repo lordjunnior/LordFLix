@@ -134,7 +134,7 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
           </motion.div>
           <div className="flex items-center justify-center gap-4">
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/10" />
-            <p className="text-[10px] uppercase tracking-[0.8em] text-silver/30 font-black">Sovereign Entertainment</p>
+            <p className="text-[10px] uppercase tracking-[0.8em] text-silver/30 font-black">Entretenimento Soberano</p>
             <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/10" />
           </div>
         </div>
@@ -258,12 +258,12 @@ export const LordLogin = ({ onLogin }: { onLogin: () => void }) => {
             <div className="w-px h-8 bg-white/5" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-[10px] font-black text-white">256-BIT</span>
-              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Encryption</span>
+              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Criptografia</span>
             </div>
             <div className="w-px h-8 bg-white/5" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-[10px] font-black text-white">ULTRA</span>
-              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Bitrate</span>
+              <span className="text-[8px] font-bold text-silver/20 uppercase tracking-widest">Taxa de Bits</span>
             </div>
           </div>
           <p className="text-[9px] text-silver/10 uppercase tracking-[0.5em] font-black text-center max-w-xs leading-loose">

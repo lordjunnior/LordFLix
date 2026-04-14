@@ -101,7 +101,7 @@ const CATEGORIAS_INICIAIS: Categoria[] = [
   { nome: "Continue assistindo", type: "history", filmes: [] },
   { nome: "Em alta agora", type: "trending", filmes: [] },
   { nome: "Filmes", type: "movie", filmes: [] },
-  { nome: "Series", type: "tv", filmes: [] },
+  { nome: "Séries", type: "tv", filmes: [] },
   { nome: "TV ao Vivo", type: "live", filmes: [
     { 
       id: 301, 
@@ -136,7 +136,8 @@ const CATEGORIAS_INICIAIS: Categoria[] = [
   ]},
   { nome: "Animes", type: "animes", filmes: [] },
   { nome: "Heróis Lendários", type: "tokusatsu", filmes: [] },
-  { nome: "Kids", type: "kids", filmes: [] }
+  { nome: "Kids", type: "kids", filmes: [] },
+  { nome: "Runtime TV (Dublado)", type: "runtime", filmes: [] }
 ];
 
 const GENRE_MAP: { [key: number]: string } = {
@@ -146,18 +147,18 @@ const GENRE_MAP: { [key: number]: string } = {
   12: "Aventura",
   35: "Comédia",
   10751: "Família",
-  10765: "Sci-Fi & Fantasy",
+  10765: "Sci-Fi & Fantasia",
   878: "Ficção Científica",
   18: "Drama",
   99: "Documentário",
   80: "Crime",
   9648: "Mistério",
   10762: "Kids",
-  10763: "News",
-  10764: "Reality",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics"
+  10763: "Notícias",
+  10764: "Reality Show",
+  10766: "Novelas",
+  10767: "Talk Show",
+  10768: "Guerra & Política"
 };
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.filter(i => i.poster_path).map(item => ({
@@ -577,6 +578,21 @@ function LordFlixSupreme() {
           update("tv", merge(t1, t2, "tv"));
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
+          
+          // Runtime Category (Live Channels)
+          const runtimeMovies: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => ({
+            id: c.id as any,
+            titulo: c.name.toUpperCase(),
+            nota: "10.0",
+            ano: "LIVE",
+            genero: "Canal ao Vivo",
+            resumo: `Assista ${c.name} ao vivo e dublado. Conteúdo 100% legalizado via Runtime TV Brasil.`,
+            img: c.logo,
+            bg: c.logo,
+            src: c.stream,
+            media_type: 'live'
+          }));
+          update("runtime", runtimeMovies);
           
           const finalTokusatsu = [
             ...vaultMovies,

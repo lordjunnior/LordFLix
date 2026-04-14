@@ -97,6 +97,12 @@ export const LordPlayer = ({
           : `https://vidsrc.cc/v2/embed/movie/${id}?lang=pt&autoplay=1&quality=1080` 
     },
     { 
+      id: 'runtime', 
+      name: 'Sinal Runtime', 
+      fullName: 'Runtime TV (Oficial Dublado)',
+      url: (id: string, type: string) => `https://www.runtime.tv/` // Fallback to main site as we can't deep link easily without their API
+    },
+    { 
       id: 'vidsrc', 
       name: 'Sinal 1', 
       fullName: 'Vidsrc (Elite)',

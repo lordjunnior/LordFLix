@@ -13,8 +13,8 @@ export async function getMovies(type: "movie" | "tv" | "trending") {
   }
 
   const url = type === "trending" 
-    ? `${BASE_URL}/trending/all/week?language=pt-BR`
-    : `${BASE_URL}/${type}/popular?language=pt-BR`;
+    ? `${BASE_URL}/trending/all/week?language=pt-BR&region=BR`
+    : `${BASE_URL}/${type}/popular?language=pt-BR&region=BR`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) {
@@ -27,7 +27,7 @@ export async function getMovies(type: "movie" | "tv" | "trending") {
 export async function searchMovies(query: string) {
   if (!TMDB_TOKEN || !query) return [];
 
-  const url = `${BASE_URL}/search/multi?query=${encodeURIComponent(query)}&language=pt-BR`;
+  const url = `${BASE_URL}/search/multi?query=${encodeURIComponent(query)}&language=pt-BR&region=BR`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) {
@@ -79,7 +79,7 @@ export async function getSeasonDetails(id: number, seasonNumber: number) {
 export async function getMoviesByGenre(type: "movie" | "tv", genreId: number) {
   if (!TMDB_TOKEN) return [];
 
-  const url = `${BASE_URL}/discover/${type}?with_genres=${genreId}&language=pt-BR&sort_by=popularity.desc`;
+  const url = `${BASE_URL}/discover/${type}?with_genres=${genreId}&language=pt-BR&region=BR&sort_by=popularity.desc`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) {

@@ -159,7 +159,7 @@ const GENRE_MAP: { [key: number]: string } = {
   10768: "War & Politics"
 };
 
-const formatTMDBData = (data: any[]): Movie[] => data.filter(i => i.poster_path).map(item => ({
+const formatTMDBData = (data: any[], type?: string): Movie[] => data.filter(i => i.poster_path).map(item => ({
   id: item.id,
   titulo: (item.title || item.name || "").toUpperCase(),
   nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
@@ -173,7 +173,8 @@ const formatTMDBData = (data: any[]): Movie[] => data.filter(i => i.poster_path)
   trailer: "",
   media_type: item.media_type || (item.title ? "movie" : "tv"),
   popularity: item.popularity,
-  genero: item.genre_ids?.map((id: number) => GENRE_MAP[id]).filter(Boolean).join(", ") || ""
+  genero: item.genre_ids?.map((id: number) => GENRE_MAP[id]).filter(Boolean).join(", ") || "",
+  type: type || item.media_type || (item.title ? "movie" : "tv")
 }));
 
 // --- COMPONENTE DE CAPA ELITE (PNL + SEO) ---
@@ -340,8 +341,8 @@ function LordFlixSupreme() {
     duracao: "3h 0min",
     diretor: "Christopher Nolan",
     resumo: "O físico J. Robert Oppenheimer trabalha com uma equipe de cientistas durante o Projeto Manhattan, levando ao desenvolvimento da bomba atômica.",
-    img: "https://image.tmdb.org/t/p/original/fm610mBFrDSR39S649pQ9C6Hws9.jpg", 
-    bg: "https://image.tmdb.org/t/p/original/fm610mBFrDSR39S649pQ9C6Hws9.jpg",
+    img: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg", 
+    bg: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg",
     media_type: 'movie'
   });
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -502,22 +503,23 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [m1, m2, t1, t2, a1, a2, k1, k2, tok1, tok2, tok3] = await Promise.allSettled([
+        const [m1, m2, t1, t2, a1, a2, k1, k2, tok1, tok2, tok3, heroData] = await Promise.allSettled([
           getMovies("movie"), searchMovies("Filmes Lançamentos Dublados"),
           getMovies("tv"), searchMovies("Series de Sucesso Dubladas"),
           getMoviesByGenre("tv", 16), searchMovies("Animes Clássicos Dublados"),
           getMoviesByGenre("movie", 10751), searchMovies("Desenhos Infantis Dublados"),
           searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"),
           searchMovies("Kamen Rider Black Ultraman Cybercop"),
-          searchMovies("Lion Man National Kid Spectreman")
+          searchMovies("Lion Man National Kid Spectreman"),
+          getMovieDetails(872585, "movie")
         ]);
 
-        const merge = (r1: any, r2: any) => {
+        const merge = (r1: any, r2: any, type?: string) => {
           const data = [
             ...(r1.status === 'fulfilled' ? r1.value : []),
             ...(r2.status === 'fulfilled' ? r2.value : [])
           ];
-          return formatTMDBData(data).slice(0, 20); // GARANTE OS 20 CARDS
+          return formatTMDBData(data, type).slice(0, 20); // GARANTE OS 20 CARDS
         };
 
         const tokusatsuData = [
@@ -526,6 +528,21 @@ function LordFlixSupreme() {
           ...(tok3.status === 'fulfilled' ? tok3.value : [])
         ];
 
+        if (heroData.status === 'fulfilled' && heroData.value) {
+          const h = heroData.value;
+          setFilmeDestaque({
+            id: h.id,
+            titulo: h.title.toUpperCase(),
+            nota: h.vote_average.toFixed(1),
+            idade: "14",
+            ano: h.release_date.split("-")[0],
+            resumo: h.overview,
+            img: `https://image.tmdb.org/t/p/w500${h.poster_path}`,
+            bg: `https://image.tmdb.org/t/p/original${h.backdrop_path || h.poster_path}`,
+            media_type: 'movie'
+          });
+        }
+
         setCategorias(prev => {
           const next = [...prev];
           const update = (type: string, data: any[]) => {
@@ -533,11 +550,11 @@ function LordFlixSupreme() {
             if (i !== -1) next[i] = { ...next[i], filmes: data };
           };
 
-          update("movie", merge(m1, m2));
-          update("tv", merge(t1, t2));
-          update("animes", merge(a1, a2));
-          update("kids", merge(k1, k2));
-          update("tokusatsu", formatTMDBData(tokusatsuData).slice(0, 20));
+          update("movie", merge(m1, m2, "movie"));
+          update("tv", merge(t1, t2, "tv"));
+          update("animes", merge(a1, a2, "animes"));
+          update("kids", merge(k1, k2, "kids"));
+          update("tokusatsu", formatTMDBData(tokusatsuData, "tokusatsu").slice(0, 20));
           return next;
         });
 

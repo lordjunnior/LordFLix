@@ -138,12 +138,33 @@ const CATEGORIAS_INICIAIS: Categoria[] = [
   { nome: "Kids", type: "kids", filmes: [] }
 ];
 
+const GENRE_MAP: { [key: number]: string } = {
+  16: "Animação",
+  10759: "Ação e Aventura",
+  28: "Ação",
+  12: "Aventura",
+  35: "Comédia",
+  10751: "Família",
+  10765: "Sci-Fi & Fantasy",
+  878: "Ficção Científica",
+  18: "Drama",
+  99: "Documentário",
+  80: "Crime",
+  9648: "Mistério",
+  10762: "Kids",
+  10763: "News",
+  10764: "Reality",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics"
+};
+
 const formatTMDBData = (data: any[]): Movie[] => data.filter(i => i.poster_path).map(item => ({
   id: item.id,
-  titulo: item.title || item.name,
+  titulo: (item.title || item.name || "").toUpperCase(),
   nota: item.vote_average ? item.vote_average.toFixed(1) : "0.0",
   idade: "14", 
-  kids: false,
+  kids: item.genre_ids?.includes(10751) || item.genre_ids?.includes(10762),
   ano: (item.release_date || item.first_air_date || "").split("-")[0],
   resumo: item.overview,
   img: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
@@ -151,7 +172,8 @@ const formatTMDBData = (data: any[]): Movie[] => data.filter(i => i.poster_path)
   src: "",
   trailer: "",
   media_type: item.media_type || (item.title ? "movie" : "tv"),
-  popularity: item.popularity
+  popularity: item.popularity,
+  genero: item.genre_ids?.map((id: number) => GENRE_MAP[id]).filter(Boolean).join(", ") || ""
 }));
 
 // --- COMPONENTE DE CAPA ELITE (PNL + SEO) ---
@@ -474,21 +496,37 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, animes, kids, tokusatsu1, tokusatsu2, tokusatsu3, oppenheimer] = await Promise.allSettled([
+        const [movies1, movies2, tv1, tv2, animes1, animes2, kids1, kids2, tokusatsu1, tokusatsu2, tokusatsu3, oppenheimer] = await Promise.allSettled([
           getMovies("movie"),
+          searchMovies("Filmes Dublados"), // Extra movies
           getMovies("tv"),
-          getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
-          getMoviesByGenre("movie", 10751), // Kids/Family
-          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"), // Classic Tokusatsu
-          searchMovies("Kamen Rider Ultraman Super Sentai"), // Modern/Franchise Tokusatsu
-          searchMovies("Tokusatsu"), // Generic search for more results
-          getMovieDetails(872585, "movie") // Oppenheimer for Hero
+          searchMovies("Series Dubladas"), // Extra series
+          getMoviesByGenre("tv", 16), // Animes Page 1
+          searchMovies("Anime Dublado"), // Extra animes
+          getMoviesByGenre("movie", 10751), // Kids Page 1
+          searchMovies("Desenhos Dublados"), // Extra kids
+          searchMovies("Jaspion Jiraiya Jiban Changeman Flashman National Kid"),
+          searchMovies("Kamen Rider Black Ultraman Cybercop Winspector Solbrain"),
+          searchMovies("Tokusatsu Dublado Maskman Goggle V Dynaman"),
+          getMovieDetails(872585, "movie")
         ]);
 
-        const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
-        const formattedTv = tv.status === 'fulfilled' ? formatTMDBData(tv.value) : [];
-        const formattedAnimes = animes.status === 'fulfilled' ? formatTMDBData(animes.value) : [];
-        const formattedKids = kids.status === 'fulfilled' ? formatTMDBData(kids.value) : [];
+        const formattedMovies = [
+          ...(movies1.status === 'fulfilled' ? formatTMDBData(movies1.value) : []),
+          ...(movies2.status === 'fulfilled' ? formatTMDBData(movies2.value) : [])
+        ];
+        const formattedTv = [
+          ...(tv1.status === 'fulfilled' ? formatTMDBData(tv1.value) : []),
+          ...(tv2.status === 'fulfilled' ? formatTMDBData(tv2.value) : [])
+        ];
+        const formattedAnimes = [
+          ...(animes1.status === 'fulfilled' ? formatTMDBData(animes1.value) : []),
+          ...(animes2.status === 'fulfilled' ? formatTMDBData(animes2.value) : [])
+        ];
+        const formattedKids = [
+          ...(kids1.status === 'fulfilled' ? formatTMDBData(kids1.value) : []),
+          ...(kids2.status === 'fulfilled' ? formatTMDBData(kids2.value) : [])
+        ];
         
         const rawTokusatsu = [
           ...(tokusatsu1.status === 'fulfilled' ? tokusatsu1.value : []),
@@ -711,7 +749,10 @@ function LordFlixSupreme() {
           f.titulo.toLowerCase().includes('tokusatsu') ||
           f.titulo.toLowerCase().includes('lion man') ||
           f.titulo.toLowerCase().includes('cybercop') ||
-          f.titulo.toLowerCase().includes('winspector')
+          f.titulo.toLowerCase().includes('winspector') ||
+          f.titulo.toLowerCase().includes('spectreman') ||
+          f.titulo.toLowerCase().includes('sharivan') ||
+          f.titulo.toLowerCase().includes('shaider')
         )).slice(0, 20) 
       },
       { 

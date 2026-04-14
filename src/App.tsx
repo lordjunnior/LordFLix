@@ -304,16 +304,16 @@ function LordFlixSupreme() {
   const [viewCategory, setViewCategory] = useState<any | null>(null);
   const [erroSistema, setErroSistema] = useState(false);
   const [filmeDestaque, setFilmeDestaque] = useState<any>({
-    id: 'supreme-exclusive',
-    titulo: "LORDFLIX SUPREME",
-    nota: "10.0",
-    idade: "18",
-    ano: "2024",
-    duracao: "4K ULTRA HD",
-    diretor: "Lord Junnior",
-    resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
-    img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop", 
-    bg: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
+    id: 872585,
+    titulo: "OPPENHEIMER",
+    nota: "8.9",
+    idade: "16",
+    ano: "2023",
+    duracao: "3h 0min",
+    diretor: "Christopher Nolan",
+    resumo: "O físico J. Robert Oppenheimer trabalha com uma equipe de cientistas durante o Projeto Manhattan, levando ao desenvolvimento da bomba atômica.",
+    img: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg", 
+    bg: "https://image.tmdb.org/t/p/original/nb3xI8S2nI6SSTTU4vjnSKymZpD.jpg",
     media_type: 'movie'
   });
   const [filmeSelecionado, setFilmeSelecionado] = useState<any>(null);
@@ -474,13 +474,15 @@ function LordFlixSupreme() {
     async function loadData() {
       setLoading(true);
       try {
-        const [movies, tv, animes, kids, tokusatsu1, tokusatsu2] = await Promise.allSettled([
+        const [movies, tv, animes, kids, tokusatsu1, tokusatsu2, tokusatsu3, oppenheimer] = await Promise.allSettled([
           getMovies("movie"),
           getMovies("tv"),
           getMoviesByGenre("tv", 16), // Animes (Genre 16 is Animation)
           getMoviesByGenre("movie", 10751), // Kids/Family
           searchMovies("Jaspion Jiraiya Jiban Changeman Flashman"), // Classic Tokusatsu
-          searchMovies("Kamen Rider Ultraman Super Sentai Metal Hero") // Modern/Franchise Tokusatsu
+          searchMovies("Kamen Rider Ultraman Super Sentai"), // Modern/Franchise Tokusatsu
+          searchMovies("Tokusatsu"), // Generic search for more results
+          getMovieDetails(872585, "movie") // Oppenheimer for Hero
         ]);
 
         const formattedMovies = movies.status === 'fulfilled' ? formatTMDBData(movies.value) : [];
@@ -490,7 +492,8 @@ function LordFlixSupreme() {
         
         const rawTokusatsu = [
           ...(tokusatsu1.status === 'fulfilled' ? tokusatsu1.value : []),
-          ...(tokusatsu2.status === 'fulfilled' ? tokusatsu2.value : [])
+          ...(tokusatsu2.status === 'fulfilled' ? tokusatsu2.value : []),
+          ...(tokusatsu3.status === 'fulfilled' ? tokusatsu3.value : [])
         ];
         const formattedTokusatsu = formatTMDBData(rawTokusatsu).map(f => ({ ...f, type: 'tokusatsu' }));
 
@@ -501,7 +504,7 @@ function LordFlixSupreme() {
             if (idx !== -1 && data.length > 0) {
               // Sort by popularity to ensure "most searched/watched" feel
               const sortedData = [...data].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-              newCats[idx] = { ...newCats[idx], filmes: sortedData.slice(0, 20) };
+              newCats[idx] = { ...newCats[idx], filmes: sortedData };
             }
           };
 
@@ -514,22 +517,23 @@ function LordFlixSupreme() {
           return newCats;
         });
         
-        // --- DEFINIÇÃO DO HERO SUPREMO (Identidade da Página) ---
-        const supremeHero = {
-          id: 'supreme-exclusive',
-          titulo: "LORDFLIX SUPREME",
-          nota: "10.0",
-          idade: "18",
-          ano: "2024",
-          duracao: "4K ULTRA HD",
-          diretor: "Lord Junnior",
-          resumo: "A experiência definitiva em streaming. Tecnologia de ponta, nostalgia pura e o catálogo mais exclusivo do planeta. Sinta o poder do cinema de elite em cada pixel.",
-          img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop", 
-          bg: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
-          media_type: 'movie'
-        };
-
-        setFilmeDestaque(supremeHero);
+        // --- DEFINIÇÃO DO HERO SUPREMO (Oppenheimer) ---
+        if (oppenheimer.status === 'fulfilled' && oppenheimer.value) {
+          const details = oppenheimer.value;
+          setFilmeDestaque({
+            id: details.id,
+            titulo: details.title.toUpperCase(),
+            nota: details.vote_average.toFixed(1),
+            idade: "16",
+            ano: details.release_date.split('-')[0],
+            duracao: `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}min`,
+            diretor: "Christopher Nolan",
+            resumo: details.overview,
+            img: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
+            bg: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
+            media_type: 'movie'
+          });
+        }
       } catch (error) {
         console.error("Erro crítico ao carregar dados do TMDB:", error);
       } finally {
@@ -597,7 +601,7 @@ function LordFlixSupreme() {
 
   // --- LÓGICA DE FILTRO E AGRUPAMENTO ---
   const categoriasFiltradas = useMemo(() => {
-    const allMovies = categorias.flatMap(c => c.filmes);
+    const allMovies = Array.from(new Map(categorias.flatMap(c => c.filmes).map(m => [m.id, m])).values());
     
     const groupSagas = (filmes: Movie[]): Movie[] => {
       const sagas: { [key: string]: Movie[] } = {};
@@ -677,18 +681,18 @@ function LordFlixSupreme() {
       { 
         nome: "Em alta agora", 
         type: "trending", 
-        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5).slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5)).slice(0, 20) 
       },
       // PRINCIPAL
       { 
         nome: "Filmes", 
         type: "movie", 
-        filmes: groupSagas(allMovies.filter(f => f.media_type === 'movie').slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'movie')).slice(0, 20) 
       },
       { 
         nome: "Series", 
         type: "tv", 
-        filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv').slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv')).slice(0, 20) 
       },
       { 
         nome: "TOKUSATSU: AS LENDAS DO JAPÃO", 
@@ -703,8 +707,12 @@ function LordFlixSupreme() {
           f.titulo.toLowerCase().includes('kamen rider') || 
           f.titulo.toLowerCase().includes('ultraman') ||
           f.titulo.toLowerCase().includes('metal hero') ||
-          f.titulo.toLowerCase().includes('super sentai')
-        ).slice(0, 20)) 
+          f.titulo.toLowerCase().includes('super sentai') ||
+          f.titulo.toLowerCase().includes('tokusatsu') ||
+          f.titulo.toLowerCase().includes('lion man') ||
+          f.titulo.toLowerCase().includes('cybercop') ||
+          f.titulo.toLowerCase().includes('winspector')
+        )).slice(0, 20) 
       },
       { 
         nome: "TV ao Vivo", 
@@ -715,23 +723,23 @@ function LordFlixSupreme() {
       { 
         nome: "Animes", 
         type: "animes", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('animação') || f.genero?.toLowerCase().includes('anime')).slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('animação') || f.genero?.toLowerCase().includes('anime'))).slice(0, 20) 
       },
       { 
         nome: "Kids", 
         type: "kids", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('família') || f.genero?.toLowerCase().includes('infantil')).slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('família') || f.genero?.toLowerCase().includes('infantil'))).slice(0, 20) 
       },
       // OTHERS
       { 
         nome: "Classicos", 
         type: "classic", 
-        filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010).slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.ano && parseInt(f.ano) < 2010)).slice(0, 20) 
       },
       { 
         nome: "Acao", 
         type: "action", 
-        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura')).slice(0, 15)) 
+        filmes: groupSagas(allMovies.filter(f => f.genero?.toLowerCase().includes('ação') || f.genero?.toLowerCase().includes('aventura'))).slice(0, 20) 
       }
     ];
 

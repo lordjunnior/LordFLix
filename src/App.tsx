@@ -591,34 +591,34 @@ function LordFlixSupreme() {
           update("tv", merge(t1, t2, "tv"));
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
-          update("tokusatsu", tokusatsuVault);
-          update("runtime", merge(r1, { status: 'rejected' } as any, "runtime"));
-          
-          if (trend.status === 'fulfilled') {
-            update("trending", formatTMDBData(trend.value.filter((it: any) => it.backdrop_path)).slice(0, 20));
-          }
-          return next;
-        });
+         update("tokusatsu", tokusatsuVault);
+        update("runtime", merge(r1, { status: 'rejected' } as any, "runtime"));
 
-        if (heroData.status === 'fulfilled' && heroData.value) {
-          const h = heroData.value;
-          setFilmeDestaque({
-            id: h.id, titulo: h.title.toUpperCase(), nota: h.vote_average.toFixed(1),
-            idade: "14", ano: h.release_date.split("-")[0], resumo: h.overview,
-            img: `https://image.tmdb.org/t/p/w500${h.poster_path}`,
-            bg: `https://image.tmdb.org/t/p/original${h.backdrop_path || h.poster_path}`,
-            media_type: 'movie'
-          });
+        if (trend.status === 'fulfilled') {
+          update("trending", formatTMDBData(trend.value.filter((it: any) => it.backdrop_path)).slice(0, 20));
         }
-      } catch (error) {
-        console.error("Erro na LordEngine:", error);
-      } finally {
-        setLoading(false);
-        setCarregado(true);
+        return next;
+      });
+
+      if (heroData.status === 'fulfilled' && heroData.value) {
+        const h = heroData.value;
+        setFilmeDestaque({
+          id: h.id, titulo: h.title.toUpperCase(), nota: h.vote_average.toFixed(1),
+          idade: "14", ano: h.release_date.split("-")[0], resumo: h.overview,
+          img: `https://image.tmdb.org/t/p/w500${h.poster_path}`,
+          bg: `https://image.tmdb.org/t/p/original${h.backdrop_path || h.poster_path}`,
+          media_type: 'movie'
+        });
       }
+    } catch (error) {
+      console.error("Erro na LordEngine:", error);
+    } finally {
+      setLoading(false);
+      setCarregado(true);
     }
-    loadData();
-  }, []);
+  }
+  loadData();
+}, []);
           update("movie", merge(m1, m2, "movie"));
           update("tv", merge(t1, t2, "tv"));
           update("animes", merge(a1, a2, "animes"));

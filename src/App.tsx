@@ -162,11 +162,11 @@ const GENRE_MAP: { [key: number]: string } = {
 };
 
 const OFFICIAL_POSTERS: { [key: number]: string } = {
-  43505: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyNjEtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43506: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43508: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43509: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  43505: "https://m.media-amazon.com/images/I/51X6A6X6EPL._AC_.jpg", // JASPION
+  43506: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // JIRAIYA
+  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
+  43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
+  43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN
   32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
   43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
   43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
@@ -175,8 +175,12 @@ const OFFICIAL_POSTERS: { [key: number]: string } = {
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
   const poster = OFFICIAL_POSTERS[item.id] || (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null);
-  const backdrop = (item.backdrop_path || item.poster_path) ? `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}` : null;
+  const backdrop = item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : (item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : null);
   
+  const fallbackImg = type === 'animes' || type === 'kids' 
+    ? "https://images.unsplash.com/photo-1578632738980-230ce1d58cbf?q=80&w=2070&auto=format&fit=crop"
+    : "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop";
+
   return {
     id: item.id,
     titulo: (item.title || item.name || "").toUpperCase(),
@@ -185,8 +189,8 @@ const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item =>
     kids: item.genre_ids?.includes(10751) || item.genre_ids?.includes(10762),
     ano: (item.release_date || item.first_air_date || "").split("-")[0],
     resumo: item.overview,
-    img: poster || "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-    bg: backdrop || poster || "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
+    img: poster || fallbackImg,
+    bg: backdrop || poster || fallbackImg,
     src: "",
     trailer: "",
     media_type: item.media_type || (item.title ? "movie" : "tv"),
@@ -612,45 +616,60 @@ function LordFlixSupreme() {
           update("animes", merge(a1, a2, "animes"));
           update("kids", merge(k1, k2, "kids"));
           
-          // Trending - SEM CAPAS CINZAS
+          // Trending - SEM BURACOS E COM BACKDROP OBRIGATÓRIO
           if (trend.status === 'fulfilled') {
-            const trendData = formatTMDBData(trend.value).filter(f => 
-              f.img && 
-              !f.img.includes('unsplash') && 
-              f.resumo && 
-              f.resumo.length > 10
-            );
+            const trendData = trend.value
+              .filter((item: any) => item.backdrop_path && item.poster_path) // FILTRO RÍGIDO DE IMAGEM
+              .map((item: any) => formatTMDBData([item])[0])
+              .filter(f => 
+                f.img && 
+                !f.img.includes('unsplash') && 
+                f.bg && 
+                !f.bg.includes('unsplash') &&
+                f.resumo && 
+                f.resumo.length > 20
+              );
             update("trending", trendData.slice(0, 20));
           }
 
-          // TV ao Vivo - GRADE COMPLETA LORD + RUNTIME
-          const allLive: Movie[] = LIVE_CHANNELS.map(c => ({
-            id: c.id as any,
-            titulo: c.name.toUpperCase(),
-            nota: "10.0",
-            ano: "LIVE",
-            genero: "Canal ao Vivo",
-            resumo: `Assista ${c.name} ao vivo e dublado. Sinal Supreme 4K.`,
-            img: c.logo,
-            bg: c.logo,
-            src: c.stream,
-            media_type: 'live'
-          }));
+          // TV ao Vivo - GRADE COMPLETA LORD + RUNTIME (COM FALLBACK DE LOGO)
+          const allLive: Movie[] = LIVE_CHANNELS.map(c => {
+            const isRuntime = c.id.startsWith('runtime');
+            const fallbackLogo = isRuntime 
+              ? "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop" // Cinema/TV fallback
+              : c.logo;
+
+            return {
+              id: c.id as any,
+              titulo: c.name.toUpperCase(),
+              nota: "10.0",
+              ano: "LIVE",
+              genero: "Canal ao Vivo",
+              resumo: `Assista ${c.name} ao vivo e dublado. Sinal Supreme 4K.`,
+              img: c.logo || fallbackLogo,
+              bg: c.logo || fallbackLogo,
+              src: c.stream,
+              media_type: 'live'
+            };
+          });
           update("live", allLive);
           
           // Runtime Category (Live Channels + Conteúdo Dublado)
-          const runtimeLive: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => ({
-            id: c.id as any,
-            titulo: c.name.toUpperCase(),
-            nota: "10.0",
-            ano: "LIVE",
-            genero: "Canal ao Vivo",
-            resumo: `Assista ${c.name} ao vivo e dublado. Conteúdo 100% legalizado via Runtime TV Brasil.`,
-            img: c.logo,
-            bg: c.logo,
-            src: c.stream,
-            media_type: 'live'
-          }));
+          const runtimeLive: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => {
+            const fallbackLogo = "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop";
+            return {
+              id: c.id as any,
+              titulo: c.name.toUpperCase(),
+              nota: "10.0",
+              ano: "LIVE",
+              genero: "Canal ao Vivo",
+              resumo: `Assista ${c.name} ao vivo e dublado. Conteúdo 100% legalizado via Runtime TV Brasil.`,
+              img: c.logo || fallbackLogo,
+              bg: c.logo || fallbackLogo,
+              src: c.stream,
+              media_type: 'live'
+            };
+          });
           const runtimeMovies = [
             ...runtimeLive,
             ...(r1.status === 'fulfilled' ? formatTMDBData(r1.value, "runtime").map(m => ({ ...m, src: 'runtime' })) : [])

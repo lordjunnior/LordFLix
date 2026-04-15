@@ -74,7 +74,7 @@ export const LordPlayer = ({
   // Fetch Full Movie Details for TV shows
   useEffect(() => {
     const fetchFullDetails = async () => {
-      if (media_type === 'tv' && movieId && !fullMovieData.number_of_seasons) {
+      if (media_type === 'tv' && movieId && !fullMovieData.number_of_seasons && !isNaN(Number(movieId))) {
         try {
           const data = await getMovieDetails(Number(movieId), 'tv');
           setFullMovieData(data);
@@ -92,7 +92,7 @@ export const LordPlayer = ({
       name: 'Sinal Dublado', 
       fullName: 'Vidsrc BR (Dublado)',
       url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
+        type === 'tv' && !isNaN(Number(id))
           ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?lang=pt&autoplay=1&quality=1080` 
           : `https://vidsrc.cc/v2/embed/movie/${id}?lang=pt&autoplay=1&quality=1080` 
     },
@@ -107,7 +107,7 @@ export const LordPlayer = ({
       name: 'Sinal 1', 
       fullName: 'Vidsrc (Elite)',
       url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
+        type === 'tv' && !isNaN(Number(id))
           ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}?autoplay=1&quality=1080` 
           : `https://vidsrc.cc/v2/embed/movie/${id}?autoplay=1&quality=1080` 
     },
@@ -116,7 +116,7 @@ export const LordPlayer = ({
       name: 'Sinal 2', 
       fullName: 'Vidsrc.to (Premium)',
       url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
+        type === 'tv' && !isNaN(Number(id))
           ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}?autoplay=1&sub_lang=pt` 
           : `https://vidsrc.to/embed/movie/${id}?autoplay=1&sub_lang=pt` 
     },
@@ -125,7 +125,7 @@ export const LordPlayer = ({
       name: 'Sinal 3', 
       fullName: 'Embed.su (Global)',
       url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
+        type === 'tv' && !isNaN(Number(id))
           ? `https://embed.su/embed/tv/${id}/${s}/${e}?autoplay=1` 
           : `https://embed.su/embed/movie/${id}?autoplay=1` 
     },
@@ -134,7 +134,7 @@ export const LordPlayer = ({
       name: 'Sinal 4', 
       fullName: 'SuperEmbed (Multi)',
       url: (id: string, type: string, s: number, e: number) => 
-        type === 'tv' 
+        type === 'tv' && !isNaN(Number(id))
           ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}&autoplay=1` 
           : `https://multiembed.mov/?video_id=${id}&tmdb=1&autoplay=1` 
     },
@@ -143,16 +143,17 @@ export const LordPlayer = ({
   const getEmbedUrl = () => {
     if (src.includes('akamaihd.net')) return src; // Live streams
     if (src.includes('youtube.com') || src.includes('youtu.be')) return src; // YouTube
+    if (isNaN(Number(movieId))) return src; // Fallback to src if ID is not numeric
     const provider = providers.find(p => p.id === currentProvider) || providers[0];
     return provider.url(movieId, media_type, season, episode);
   };
 
-  const isEmbed = !src.includes('akamaihd.net') && !src.includes('youtube.com') && !src.includes('youtu.be');
+  const isEmbed = !src.includes('akamaihd.net') && !src.includes('youtube.com') && !src.includes('youtu.be') && !isNaN(Number(movieId));
 
   // Fetch Season Details
   useEffect(() => {
     const fetchSeason = async () => {
-      if (media_type === 'tv' && movieId) {
+      if (media_type === 'tv' && movieId && !isNaN(Number(movieId))) {
         setLoadingSeason(true);
         try {
           const data = await getSeasonDetails(Number(movieId), season);

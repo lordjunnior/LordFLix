@@ -560,10 +560,11 @@ function LordFlixSupreme() {
           ano: "OFICIAL",
           genero: "Tokusatsu Clássico",
           resumo: "O Fantástico Jaspion enfrenta as forças de Satan Goss nesta série lendária dublada.",
-          img: "/capa-jaspion-supreme.jpg", // SUA CAPA NA PASTA PUBLIC
-          bg: "/capa-jaspion-supreme.jpg",
+          img: OFFICIAL_POSTERS[43505], 
+          bg: OFFICIAL_POSTERS[43505],
           src: `https://www.youtube.com/watch?v=48-X6vS_XUo&list=PL60SfTrykhMwuIbgWhdMMB0yPQuoVWqmi&index=${i + 1}`, // Link dinâmico da playlist
-          media_type: 'live' as const
+          media_type: 'tv' as const,
+          type: 'tokusatsu'
         }));
 
         const jiraiyaEpisodes = Array.from({ length: 15 }).map((_, i) => ({
@@ -573,10 +574,11 @@ function LordFlixSupreme() {
           ano: "OFICIAL",
           genero: "Ninja Olimpíada",
           resumo: "Toha Yamashi protege a Pako com a armadura de Jiraiya em episódios oficiais dublados.",
-          img: "/capa-jiraiya-supreme.jpg", // SUA CAPA NA PASTA PUBLIC
-          bg: "/capa-jiraiya-supreme.jpg",
+          img: OFFICIAL_POSTERS[43506], 
+          bg: OFFICIAL_POSTERS[43506],
           src: `https://www.youtube.com/watch?v=Z7n4_v_y9_M&list=PL60SfTrykhMx2I8m_v7_6A8LST4D5v6&index=${i + 1}`, // Link oficial dinâmico
-          media_type: 'live' as const
+          media_type: 'tv' as const,
+          type: 'tokusatsu'
         }));
 
         const tokusatsuVault = [...jaspionEpisodes, ...jiraiyaEpisodes];
@@ -650,7 +652,7 @@ function LordFlixSupreme() {
             const isRuntime = c.id.startsWith('runtime');
             const fallbackLogo = isRuntime 
               ? "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop" // Cinema/TV fallback
-              : c.logo;
+              : "https://images.unsplash.com/photo-1533750349088-cd871a92f312?q=80&w=2070&auto=format&fit=crop"; // Generic Live fallback
 
             return {
               id: c.id as any,
@@ -841,7 +843,7 @@ function LordFlixSupreme() {
       { 
         nome: "Em alta agora", 
         type: "trending", 
-        filmes: groupSagas(allMovies.filter(f => parseFloat(f.nota) > 8.5)).slice(0, 20) 
+        filmes: categorias.find(c => c.type === 'trending')?.filmes || []
       },
       // PRINCIPAL
       { 
@@ -1541,64 +1543,8 @@ function LordFlixSupreme() {
           </div>
         )}
 
-        {/* LORD VISION LIVE (SEÇÃO DE ELITE) */}
-        <section className="px-8 md:px-20 relative overflow-hidden py-24">
-          {/* BACKGROUND GLOW */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
-          
-          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 relative z-10">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-2 bg-red-600 px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white italic">Live Now</span>
-                </div>
-                <span className="text-cyan-500 font-black tracking-[0.4em] text-[10px] uppercase">LordFlix Broadcast</span>
-              </div>
-              <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-white leading-none">LordFlix <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Live TV</span></h2>
-              <p className="text-zinc-400 text-lg md:text-xl font-medium mt-8 leading-relaxed">A revolução da TV ao vivo. Transmissão via satélite com latência zero e qualidade 4K Ultra HD. Sinta a imersão total.</p>
-            </div>
-            <button 
-              onClick={() => setShowLiveTV(true)}
-              className="group relative bg-white text-black px-12 py-5 rounded-full font-black text-xs uppercase tracking-[0.4em] hover:bg-cyan-500 transition-all active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] overflow-hidden"
-            >
-              <span className="relative z-10">Sintonizar Agora</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            </button>
-          </div>
+        {/* LORD VISION LIVE (SEÇÃO DE ELITE) - REMOVIDO PARA EVITAR DUPLICIDADE */}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
-            {[
-              { title: 'Lord Sports Premium', category: 'Esportes', img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2069&auto=format&fit=crop' },
-              { title: 'Lord Cinema Elite', category: 'Cinema', img: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop' },
-              { title: 'Lord News 24h', category: 'Notícias', img: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2070&auto=format&fit=crop' }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -15, scale: 1.02 }}
-                onClick={() => setShowLiveTV(true)}
-                className="group relative aspect-video rounded-[40px] overflow-hidden border-2 border-white/5 hover:border-cyan-500/50 transition-all duration-700 cursor-pointer shadow-2xl bg-zinc-900"
-              >
-                <img src={item.img} alt={item.title} className="w-full h-full object-cover opacity-40 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                
-                <div className="absolute top-6 right-6">
-                  <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-full">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">1080p / 4K Ultra HD</span>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-8 left-8 right-8">
-                  <span className="text-cyan-500 font-black text-[9px] uppercase tracking-[0.3em] mb-2 block">{item.category}</span>
-                  <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{item.title}</h3>
-                </div>
-
-                {/* SHINE EFFECT */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </motion.div>
-            ))}
-          </div>
-        </section>
 
         {/* DASHBOARD DE MONITORAMENTO (AUTORIDADE) - Removido a pedido do usuário */}
         {/* BOTTOM NAVIGATION BAR (MOBILE APP-LIKE) */}

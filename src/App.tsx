@@ -164,13 +164,22 @@ const GENRE_MAP: { [key: number]: string } = {
 const OFFICIAL_POSTERS: { [key: number]: string } = {
   43505: "https://m.media-amazon.com/images/I/51X6A6X6EPL._AC_.jpg", // JASPION
   43506: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // JIRAIYA
-  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
+  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
   43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
   43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN
-  32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
-  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg",
+  32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // KAMEN RIDER
+  43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // WINSPECTOR
+  43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // SOLBRAIN
+  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // NATIONAL KID
+  34971: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // ULTRAMAN
+  43514: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // LION MAN
+  43515: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // CYBERCOP
+  43516: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // METALDER
+  43517: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // SHARIVAN
+  43518: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GAVAN
+  43519: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // MASKMAN
+  43520: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GOGGLE FIVE
+  43521: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // DYNAMAN
 };
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
@@ -581,7 +590,23 @@ function LordFlixSupreme() {
           type: 'tokusatsu'
         }));
 
-        const tokusatsuVault = [...jaspionEpisodes, ...jiraiyaEpisodes];
+        const tokusatsuVault = [
+          ...jaspionEpisodes,
+          ...jiraiyaEpisodes,
+          ...TOKUSATSU_VAULT.filter(v => v.id !== 43505 && v.id !== 43506).map(item => ({
+            id: item.id,
+            titulo: item.titulo.toUpperCase(),
+            nota: "10.0",
+            ano: "OFICIAL",
+            genero: "Tokusatsu Clássico",
+            resumo: `Assista ${item.titulo} completo e dublado. Ação clássica dos anos 80/90.`,
+            img: OFFICIAL_POSTERS[item.id] || "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop",
+            bg: OFFICIAL_POSTERS[item.id] || "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop",
+            src: item.src,
+            media_type: item.media_type as any,
+            type: 'tokusatsu'
+          }))
+        ];
 
         const merge = (r1: any, r2: any, type?: string) => {
           const data = [
@@ -639,8 +664,10 @@ function LordFlixSupreme() {
               .filter(f => 
                 f.img && 
                 !f.img.includes('unsplash') && 
+                !f.img.includes('placeholder') &&
                 f.bg && 
                 !f.bg.includes('unsplash') &&
+                !f.bg.includes('placeholder') &&
                 f.resumo && 
                 f.resumo.length > 20
               );
@@ -669,30 +696,8 @@ function LordFlixSupreme() {
           });
           update("live", allLive);
           
-          // Runtime Category (Live Channels + Conteúdo Dublado)
-          const runtimeLive: Movie[] = LIVE_CHANNELS.filter(c => c.id.startsWith('runtime')).map(c => {
-            const fallbackLogo = "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop";
-            return {
-              id: c.id as any,
-              titulo: c.name.toUpperCase(),
-              nota: "10.0",
-              ano: "LIVE",
-              genero: "Canal ao Vivo",
-              resumo: `Assista ${c.name} ao vivo e dublado. Conteúdo 100% legalizado via Runtime TV Brasil.`,
-              img: c.logo || fallbackLogo,
-              bg: c.logo || fallbackLogo,
-              src: c.stream,
-              media_type: 'live'
-            };
-          });
-          const runtimeMovies = [
-            ...runtimeLive,
-            ...(r1.status === 'fulfilled' ? formatTMDBData(r1.value, "runtime").map(m => ({ ...m, src: 'runtime' })) : [])
-          ];
-          update("runtime", runtimeMovies.slice(0, 20));
-          
           // Tokusatsu Section (Vault Only for Precision)
-          update("tokusatsu", tokusatsuVault); // INJETA O VAULT MANUAL INSTANTÂNEO
+          update("tokusatsu", tokusatsuVault); // ⚔️ MANTENHA APENAS A INJEÇÃO DO VAULT MANUAL QUE VOCÊ CRIOU
           
           return next;
         });
@@ -859,34 +864,7 @@ function LordFlixSupreme() {
       { 
         nome: "Heróis Lendários", 
         type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => 
-          (f as any).type === 'tokusatsu' || 
-          f.titulo.toLowerCase().includes('jaspion') || 
-          f.titulo.toLowerCase().includes('jiraiya') || 
-          f.titulo.toLowerCase().includes('jiban') || 
-          f.titulo.toLowerCase().includes('changeman') || 
-          f.titulo.toLowerCase().includes('flashman') || 
-          f.titulo.toLowerCase().includes('kamen rider') || 
-          f.titulo.toLowerCase().includes('ultraman') ||
-          f.titulo.toLowerCase().includes('metal hero') ||
-          f.titulo.toLowerCase().includes('super sentai') ||
-          f.titulo.toLowerCase().includes('tokusatsu') ||
-          f.titulo.toLowerCase().includes('lion man') ||
-          f.titulo.toLowerCase().includes('cybercop') ||
-          f.titulo.toLowerCase().includes('winspector') ||
-          f.titulo.toLowerCase().includes('spectreman') ||
-          f.titulo.toLowerCase().includes('sharivan') ||
-          f.titulo.toLowerCase().includes('shaider') ||
-          f.titulo.toLowerCase().includes('gavan') ||
-          f.titulo.toLowerCase().includes('spielvan') ||
-          f.titulo.toLowerCase().includes('metalder') ||
-          f.titulo.toLowerCase().includes('maskman') ||
-          f.titulo.toLowerCase().includes('goggle five') ||
-          f.titulo.toLowerCase().includes('solbrain') ||
-          f.titulo.toLowerCase().includes('machine man') ||
-          f.titulo.toLowerCase().includes('ultraseven') ||
-          f.titulo.toLowerCase().includes('patrine')
-        )).slice(0, 20) 
+        filmes: groupSagas(allMovies.filter(f => (f as any).type === 'tokusatsu')).slice(0, 20) 
       },
       { 
         nome: "TV ao Vivo", 

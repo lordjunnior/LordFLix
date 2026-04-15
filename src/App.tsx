@@ -162,8 +162,8 @@ const GENRE_MAP: { [key: number]: string } = {
 };
 
 const OFFICIAL_POSTERS: { [key: number]: string } = {
-  43505: "https://m.media-amazon.com/images/I/51X6A6X6EPL._AC_.jpg", // JASPION
-  43506: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // JIRAIYA
+  43505: "/jaspion_supreme.jpg", // JASPION
+  43506: "/jiraiya_supreme.jpg", // JIRAIYA
   43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
   43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
   43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN

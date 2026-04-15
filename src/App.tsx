@@ -533,104 +533,61 @@ function LordFlixSupreme() {
     };
   }, [user]);
 
-  // --- 3. MOTOR SUPREME: INJEÇÃO MANUAL (JBOX + PLAYLISTS) ---
+  // --- 3. MOTOR DE BUSCA TURBO (PT-BR + 20 CARDS) ---
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
         const [m1, m2, t1, t2, a1, a2, k1, k2, r1, trend, heroData] = await Promise.allSettled([
-          getMoviesByGenre("movie", 28), searchMovies("Filmes Dublados"),
-          getMoviesByGenre("tv", 10759), searchMovies("Séries Dubladas"),
-          getMoviesByGenre("tv", 16), searchMovies("Anime Dublado"),
-          getMoviesByGenre("movie", 10751), searchMovies("Desenho Animado"),
-          searchMovies("Runtime TV"),
+          getMoviesByGenre("movie", 28), // Ação
+          searchMovies("Filmes Dublados 2024"),
+          getMoviesByGenre("tv", 10759), // Ação e Aventura
+          searchMovies("Séries Dubladas"),
+          getMoviesByGenre("tv", 16),    // Animes
+          searchMovies("Anime Dublado"),
+          getMoviesByGenre("movie", 10751), // Kids
+          searchMovies("Desenho Animado Dublado"),
+          searchMovies("Runtime TV Filmes Dublados"),
           getMovies("trending"),
           getMovieDetails(872585, "movie")
         ]);
 
-        // ⚔️ VAULT INSTANTÂNEO COM SUAS CAPAS (Sem busca externa para evitar timeout)
-        const tokusatsuVault: Movie[] = [
-          ...Array.from({ length: 12 }).map((_, i) => ({
-            id: `jaspion-ep-${i + 1}`,
-            titulo: `JASPION | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
-            nota: "10.0",
-            ano: "OFICIAL",
-            genero: "Tokusatsu Dublado",
-            resumo: "O Fantástico Jaspion enfrenta as forças de Satan Goss com a dublagem clássica.",
-            img: "/capa-jaspion-supreme.jpg",
-            bg: "/capa-jaspion-supreme.jpg",
-            src: `https://www.youtube.com/watch?v=VIDEO_ID&list=PL60SfTrykhMwuIbgWhdMMB0yPQuoVWqmi`,
-            media_type: 'live' as const
-          })),
-          ...Array.from({ length: 12 }).map((_, i) => ({
-            id: `jiraiya-ep-${i + 1}`,
-            titulo: `JIRAIYA | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
-            nota: "10.0",
-            ano: "OFICIAL",
-            genero: "Ninja Olimpíada",
-            resumo: "Toha Yamashi protege a Pako com a armadura de Jiraiya em sinal oficial.",
-            img: "/capa-jiraiya-supreme.jpg",
-            bg: "/capa-jiraiya-supreme.jpg",
-            src: `https://www.youtube.com/watch?v=VIDEO_ID&list=PL60SfTrykhMx2I8m_v7_6A8LST4D5v6`,
-            media_type: 'live' as const
-          }))
-        ];
+        // 🛡️ VAULT MANUAL COM SUAS CAPAS (Pasta public)
+        const jaspionEpisodes = Array.from({ length: 15 }).map((_, i) => ({
+          id: `jaspion-ep-${i + 1}`,
+          titulo: `JASPION | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
+          nota: "10.0",
+          ano: "OFICIAL",
+          genero: "Tokusatsu Clássico",
+          resumo: "O Fantástico Jaspion enfrenta as forças de Satan Goss nesta série lendária dublada.",
+          img: "/capa-jaspion-supreme.jpg", // SUA CAPA NA PASTA PUBLIC
+          bg: "/capa-jaspion-supreme.jpg",
+          src: `https://www.youtube.com/watch?v=48-X6vS_XUo&list=PL60SfTrykhMwuIbgWhdMMB0yPQuoVWqmi&index=${i + 1}`, // Link dinâmico da playlist
+          media_type: 'live' as const
+        }));
 
-        setCategorias(prev => {
-          const next = [...prev];
-          const update = (type: string, data: any[]) => {
-            const i = next.findIndex(c => c.type === type);
-            if (i !== -1) next[i] = { ...next[i], filmes: data };
-            return next;
-          };
-          const merge = (r1: any, r2: any, type?: string) => {
-            const data = [...(r1.status === 'fulfilled' ? r1.value : []), ...(r2.status === 'fulfilled' ? r2.value : [])];
-            return formatTMDBData(data, type).slice(0, 20);
-          };
-          update("movie", merge(m1, m2, "movie"));
-          update("tv", merge(t1, t2, "tv"));
-          update("animes", merge(a1, a2, "animes"));
-          update("kids", merge(k1, k2, "kids"));
-         update("tokusatsu", tokusatsuVault);
-        update("runtime", merge(r1, { status: 'rejected' } as any, "runtime"));
+        const jiraiyaEpisodes = Array.from({ length: 15 }).map((_, i) => ({
+          id: `jiraiya-ep-${i + 1}`,
+          titulo: `JIRAIYA | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
+          nota: "10.0",
+          ano: "OFICIAL",
+          genero: "Ninja Olimpíada",
+          resumo: "Toha Yamashi protege a Pako com a armadura de Jiraiya em episódios oficiais dublados.",
+          img: "/capa-jiraiya-supreme.jpg", // SUA CAPA NA PASTA PUBLIC
+          bg: "/capa-jiraiya-supreme.jpg",
+          src: `https://www.youtube.com/watch?v=Z7n4_v_y9_M&list=PL60SfTrykhMx2I8m_v7_6A8LST4D5v6&index=${i + 1}`, // Link oficial dinâmico
+          media_type: 'live' as const
+        }));
 
-        if (trend.status === 'fulfilled') {
-          update("trending", formatTMDBData(trend.value.filter((it: any) => it.backdrop_path)).slice(0, 20));
-        }
-        return next;
-      });
+        const tokusatsuVault = [...jaspionEpisodes, ...jiraiyaEpisodes];
 
-      if (heroData.status === 'fulfilled' && heroData.value) {
-        const h = heroData.value;
-        setFilmeDestaque({
-          id: h.id, titulo: h.title.toUpperCase(), nota: h.vote_average.toFixed(1),
-          idade: "14", ano: h.release_date.split("-")[0], resumo: h.overview,
-          img: `https://image.tmdb.org/t/p/w500${h.poster_path}`,
-          bg: `https://image.tmdb.org/t/p/original${h.backdrop_path || h.poster_path}`,
-          media_type: 'movie'
-        });
-      }
-    } catch (error) {
-      console.error("Erro na LordEngine:", error);
-    } finally {
-      setLoading(false);
-      setCarregado(true);
-    }
-  }
-  loadData();
-}, []);
-          update("movie", merge(m1, m2, "movie"));
-          update("tv", merge(t1, t2, "tv"));
-          update("animes", merge(a1, a2, "animes"));
-          update("kids", merge(k1, k2, "kids"));
-          update("tokusatsu", tokusatsuVault); // ENTRA NA HORA, SEM DELAY
-          update("runtime", merge(r1, { status: 'rejected' }, "runtime"));
-          
-          if (trend.status === 'fulfilled') {
-            update("trending", formatTMDBData(trend.value.filter((it: any) => it.backdrop_path)).slice(0, 20));
-          }
-          return next;
-        });
+        const merge = (r1: any, r2: any, type?: string) => {
+          const data = [
+            ...(r1.status === 'fulfilled' ? r1.value : []),
+            ...(r2.status === 'fulfilled' ? r2.value : [])
+          ];
+          return formatTMDBData(data, type).slice(0, 20); // GARANTE OS 20 CARDS
+        };
 
         if (heroData.status === 'fulfilled' && heroData.value) {
           const h = heroData.value;
@@ -646,15 +603,7 @@ function LordFlixSupreme() {
             media_type: 'movie'
           });
         }
-      } catch (error) {
-        console.error("Erro na LordEngine:", error);
-      } finally {
-        setLoading(false);
-        setCarregado(true);
-      }
-    }
-    loadData();
-  }, []);
+
         setCategorias(prev => {
           const next = [...prev];
           const update = (type: string, data: any[]) => {
@@ -741,13 +690,13 @@ function LordFlixSupreme() {
           update("runtime", runtimeMovies.slice(0, 20));
           
           // Tokusatsu Section (Vault Only for Precision)
-          update("tokusatsu", vaultMovies.slice(0, 20));
+          update("tokusatsu", tokusatsuVault); // INJETA O VAULT MANUAL INSTANTÂNEO
           
           return next;
         });
 
       } catch (error) {
-        console.error("Erro na LordEngine:", error);
+        console.error("Erro Crítico LordEngine:", error);
       } finally {
         setLoading(false);
         setCarregado(true);

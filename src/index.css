@@ -26,6 +26,8 @@
   --color-cat-intellectual: #3b82f6;
   --color-cat-emotional: #ec4899;
   --color-cat-philosophical: #6366f1;
+  --color-accent-primary: #22d3ee;
+  --color-dark-bg: #050505;
 }
 
 @layer utilities {
@@ -52,6 +54,36 @@
 
   .drop-shadow-neon {
     filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.8));
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: minmax(100px, auto);
+    gap: 1.5rem;
+  }
+
+  .bento-large {
+    grid-column: span 4;
+    grid-row: span 4;
+  }
+
+  .bento-small {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .giant-number {
+    font-size: 15rem;
+    font-weight: 900;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.05);
+    position: absolute;
+    bottom: -2rem;
+    left: -2rem;
+    z-index: 0;
+    pointer-events: none;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -264,4 +296,40 @@
 
 .bottom-sheet.active {
   @apply translate-y-0;
+}
+
+/* Elite Typography */
+.font-black-italic {
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.05em;
+}
+
+/* Progress indicator */
+.progress-bar-container {
+  @apply absolute bottom-0 left-0 right-0 h-1 bg-white/10;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-cyan-500 shadow-[0_0_10px_#22d3ee];
+}
+
+@keyframes pulse-red {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-pulse-red {
+  animation: pulse-red 2s infinite ease-in-out;
+}
+
+/* Scanlines Refined */
+.scanlines {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+  opacity: 0.15;
 }

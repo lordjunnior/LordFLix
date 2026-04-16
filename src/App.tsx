@@ -162,24 +162,19 @@ const GENRE_MAP: { [key: number]: string } = {
 };
 
 const OFFICIAL_POSTERS: { [key: number]: string } = {
-  43505: "/jaspion_supreme.jpg", // JASPION
-  43506: "/jiraiya_supreme.jpg", // JIRAIYA
-  43507: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // JIBAN
-  43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
-  43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN
-  32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // KAMEN RIDER
-  43511: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // WINSPECTOR
-  43512: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // SOLBRAIN
-  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // NATIONAL KID
-  34971: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // ULTRAMAN
-  43514: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // LION MAN
-  43515: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // CYBERCOP
-  43516: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // METALDER
-  43517: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // SHARIVAN
-  43518: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // GAVAN
-  43519: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // MASKMAN
-  43520: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GOGGLE FIVE
-  43521: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // DYNAMAN
+  43505: "https://i.ytimg.com/vi/48-X6vS_XUo/maxresdefault.jpg",   // JASPION
+  43506: "https://i.ytimg.com/vi/Z7n4_v_y9_M/maxresdefault.jpg",   // JIRAIYA
+  43507: "https://i.ytimg.com/vi/kC5qA-W0_mU/maxresdefault.jpg",   // JIBAN
+  43508: "https://i.ytimg.com/vi/vF0lB8G0K8M/maxresdefault.jpg",   // CHANGEMAN
+  43509: "https://i.ytimg.com/vi/6zK7y6D8v9o/maxresdefault.jpg",   // FLASHMAN
+  32658: "https://i.ytimg.com/vi/7v4vV6uY7YI/maxresdefault.jpg",   // KAMEN RIDER BLACK
+  43511: "https://i.ytimg.com/vi/D0V4NlO0G6o/maxresdefault.jpg",   // WINSPECTOR
+  43512: "https://i.ytimg.com/vi/S7F0xI3S_8U/maxresdefault.jpg",   // SOLBRAIN
+  43510: "https://i.ytimg.com/vi/p8uX5N8-pYQ/maxresdefault.jpg",   // NATIONAL KID
+  34971: "https://i.ytimg.com/vi/8U-N7p-8_qQ/maxresdefault.jpg",   // ULTRAMAN
+  43514: "https://i.ytimg.com/vi/L6oY9G0J8U8/maxresdefault.jpg",   // LION MAN
+  43516: "https://i.ytimg.com/vi/2NfC4P6X5N8/maxresdefault.jpg",   // METALDER
+  43517: "https://i.ytimg.com/vi/H5V9m7NfR5M/maxresdefault.jpg",   // SHARIVAN
 };
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
@@ -2061,7 +2056,7 @@ function LordFlixSupreme() {
         </button>
         <button 
           onClick={() => { setView('movies'); setShowLiveTV(false); }}
-          className={`flex flex-col items-center gap-1 ${view === 'movies' && !showLiveTV ? 'text-cyan-500' : 'text-silver/40'}`}
+          className={`flex flex-col items-center gap-1 ${view === 'movies' ? 'text-cyan-500' : 'text-silver/40'}`}
         >
           <Film className="w-6 h-6" />
           <span className="text-[8px] font-black uppercase tracking-widest">Filmes</span>

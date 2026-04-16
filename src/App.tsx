@@ -164,22 +164,22 @@ const GENRE_MAP: { [key: number]: string } = {
 const OFFICIAL_POSTERS: { [key: number]: string } = {
   43505: "/jaspion_supreme.jpg", // JASPION
   43506: "/jiraiya_supreme.jpg", // JIRAIYA
-  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
+  43507: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // JIBAN
   43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
   43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN
   32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // KAMEN RIDER
-  43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // WINSPECTOR
-  43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // SOLBRAIN
-  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // NATIONAL KID
+  43511: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // WINSPECTOR
+  43512: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // SOLBRAIN
+  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // NATIONAL KID
   34971: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // ULTRAMAN
   43514: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // LION MAN
-  43515: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // CYBERCOP
-  43516: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // METALDER
+  43515: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // CYBERCOP
+  43516: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // METALDER
   43517: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // SHARIVAN
-  43518: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GAVAN
-  43519: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // MASKMAN
+  43518: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // GAVAN
+  43519: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // MASKMAN
   43520: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GOGGLE FIVE
-  43521: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // DYNAMAN
+  43521: "https://m.media-amazon.com/images/I/81S6U-y8mLL._AC_SL1500_.jpg", // DYNAMAN
 };
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
@@ -590,9 +590,12 @@ function LordFlixSupreme() {
           type: 'tokusatsu'
         }));
 
+        const nostalgiaVault = [
+          ...jaspionEpisodes.slice(0, 5),
+          ...jiraiyaEpisodes.slice(0, 5)
+        ];
+
         const tokusatsuVault = [
-          ...jaspionEpisodes,
-          ...jiraiyaEpisodes,
           ...TOKUSATSU_VAULT.filter(v => v.id !== 43505 && v.id !== 43506).map(item => ({
             id: item.id,
             titulo: item.titulo.toUpperCase(),
@@ -697,7 +700,8 @@ function LordFlixSupreme() {
           update("live", allLive);
           
           // Tokusatsu Section (Vault Only for Precision)
-          update("tokusatsu", tokusatsuVault); // ⚔️ MANTENHA APENAS A INJEÇÃO DO VAULT MANUAL QUE VOCÊ CRIOU
+          update("nostalgia", nostalgiaVault);
+        update("tokusatsu", tokusatsuVault); // ⚔️ MANTENHA APENAS A INJEÇÃO DO VAULT MANUAL QUE VOCÊ CRIOU
           
           return next;
         });
@@ -862,9 +866,14 @@ function LordFlixSupreme() {
         filmes: groupSagas(allMovies.filter(f => f.media_type === 'tv')).slice(0, 20) 
       },
       { 
+        nome: "Baú da Nostalgia 📼", 
+        type: "nostalgia", 
+        filmes: categorias.find(c => c.type === 'nostalgia')?.filmes || []
+      },
+      { 
         nome: "Heróis Lendários", 
         type: "tokusatsu", 
-        filmes: groupSagas(allMovies.filter(f => (f as any).type === 'tokusatsu')).slice(0, 20) 
+        filmes: categorias.find(c => c.type === 'tokusatsu')?.filmes || []
       },
       { 
         nome: "TV ao Vivo", 
@@ -1421,22 +1430,30 @@ function LordFlixSupreme() {
               const isAnime = cat.type === 'animes';
               const isKids = cat.type === 'kids';
               const isTokusatsu = cat.type === 'tokusatsu';
+              const isNostalgia = cat.type === 'nostalgia';
 
               return (
                 <section 
                   key={idx} 
                   id={`cat-${cat.type}`} 
-                  className={`px-4 md:px-20 transition-all duration-700 cat-${cat.type} ${isKids ? 'py-12 bg-white/5 rounded-[60px] mx-4 md:mx-10' : ''}`}
+                  className={`px-4 md:px-20 transition-all duration-700 cat-${cat.type} ${isKids ? 'py-12 bg-white/5 rounded-[60px] mx-4 md:mx-10' : ''} ${isTokusatsu ? 'relative overflow-hidden py-16' : ''}`}
                 >
-                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-16 gap-6">
+                  {isTokusatsu && (
+                    <div className="absolute inset-0 pointer-events-none z-0 opacity-20">
+                      <div className="absolute inset-0 bg-gradient-to-b from-retro-orange/20 to-transparent"></div>
+                      <div className="scanlines"></div>
+                    </div>
+                  )}
+                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-16 gap-6 relative z-10">
                     <div className="flex items-center gap-4 md:gap-10">
-                      <div className={`h-12 md:h-24 w-2 rounded-full shadow-lg ${isKids ? 'bg-pink-500 shadow-pink-500/50' : 'bg-cyan-500 shadow-cyan-500/60'}`} />
+                      <div className={`h-12 md:h-24 w-2 rounded-full shadow-lg ${isKids ? 'bg-pink-500 shadow-pink-500/50' : isTokusatsu ? 'bg-retro-orange shadow-retro-orange/60' : 'bg-cyan-500 shadow-cyan-500/60'}`} />
                       <div>
-                        <h2 className={`text-3xl md:text-8xl font-black uppercase italic tracking-tighter leading-none ${isKids ? 'text-pink-500' : 'text-white'}`}>
+                        <h2 className={`text-3xl md:text-8xl font-black uppercase italic tracking-tighter leading-none ${isKids ? 'text-pink-500' : isTokusatsu ? 'text-retro-orange' : 'text-white'}`}>
                           {cat.nome}
                         </h2>
                         <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] mt-4">
-                          {isTokusatsu ? 'Reviva os maiores tokusatsu dos anos 90' : 
+                          {isTokusatsu ? 'Heróis dos Anos 80-90 • Clássicos da TV' : 
+                           isNostalgia ? 'Relíquias que marcaram gerações 📼' :
                            isKids ? 'Diversão garantida para toda a família' : 
                            'Catálogo LordFlix Supreme'}
                         </p>
@@ -1480,9 +1497,9 @@ function LordFlixSupreme() {
                         ))}
                       </div>
                     </div>
-                  ) : isTV ? (
-                    // CAROUSEL FOR SERIES (Horizontal Scroll)
-                    <div className="flex gap-6 overflow-x-auto pb-10 scroll-horizontal snap-x">
+                  ) : (isTV || isNostalgia) ? (
+                    // CAROUSEL FOR SERIES AND NOSTALGIA (Horizontal Scroll)
+                    <div className="flex gap-6 overflow-x-auto pb-10 scroll-horizontal snap-x relative z-10">
                       {cat.filmes.map((filme: any) => (
                         <div key={filme.id} className="min-w-[200px] md:min-w-[300px] snap-start">
                           <MoviePoster 
@@ -1497,9 +1514,10 @@ function LordFlixSupreme() {
                     </div>
                   ) : (
                     // GRID FOR OTHERS (With variations)
-                    <div className={`grid gap-4 md:gap-10 ${
+                    <div className={`grid gap-4 md:gap-10 relative z-10 ${
                       isAnime ? 'grid-cols-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10' : 
                       isKids ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' :
+                      isTokusatsu ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6' :
                       'grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
                     }`}>
                       {(cat.filmes || []).slice(0, isAnime ? 20 : 12).map((filme: any) => (
@@ -1531,7 +1549,7 @@ function LordFlixSupreme() {
             <Home className="w-6 h-6" />
             <span className="text-[8px] font-black uppercase tracking-widest">Home</span>
           </button>
-          <button onClick={() => setView('movies')} className={`flex flex-col items-center gap-1 ${view === 'movies' ? 'text-cyan-500' : 'text-zinc-500'}`}>
+        <button onClick={() => setView('movies')} className={`flex flex-col items-center gap-1 ${view === 'movies' ? 'text-cyan-500' : 'text-zinc-500'}`}>
             <Film className="w-6 h-6" />
             <span className="text-[8px] font-black uppercase tracking-widest">Filmes</span>
           </button>
@@ -2042,8 +2060,8 @@ function LordFlixSupreme() {
           <span className="text-[8px] font-black uppercase tracking-widest">Home</span>
         </button>
         <button 
-          onClick={() => { setView('home'); setShowLiveTV(false); }}
-          className={`flex flex-col items-center gap-1 ${view === 'home' && !showLiveTV ? 'text-silver/40' : 'text-silver/40'}`}
+          onClick={() => { setView('movies'); setShowLiveTV(false); }}
+          className={`flex flex-col items-center gap-1 ${view === 'movies' && !showLiveTV ? 'text-cyan-500' : 'text-silver/40'}`}
         >
           <Film className="w-6 h-6" />
           <span className="text-[8px] font-black uppercase tracking-widest">Filmes</span>
@@ -2067,6 +2085,16 @@ function LordFlixSupreme() {
       <style dangerouslySetInnerHTML={{ __html: `
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .scanlines {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+          background-size: 100% 4px, 3px 100%;
+          pointer-events: none;
+        }
       `}} />
     </div>
   );

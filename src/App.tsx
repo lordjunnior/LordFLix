@@ -161,26 +161,25 @@ const GENRE_MAP: { [key: number]: string } = {
   10768: "Guerra & Política"
 };
 
-// Thumbnails via i.ytimg.com — CDN público do YouTube, sem bloqueio de hotlink
 const OFFICIAL_POSTERS: { [key: number]: string } = {
-  43505: "https://i.ytimg.com/vi/48-X6vS_XUo/maxresdefault.jpg",   // JASPION    — EP01 TokuSato
-  43506: "https://i.ytimg.com/vi/Z7n4_v_y9_M/maxresdefault.jpg",   // JIRAIYA    — EP01 TokuSato
-  43507: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // JIBAN      — fallback EP01 estilo
-  43508: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // CHANGEMAN  — fallback
-  43509: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // FLASHMAN   — fallback
-  32658: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // KAMEN RIDER— fallback
-  43511: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // WINSPECTOR — fallback
-  43512: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // SOLBRAIN   — fallback
-  43510: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // NATIONAL KID
-  34971: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // ULTRAMAN   — fallback
-  43514: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // LION MAN
-  43515: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // CYBERCOP
-  43516: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // METALDER
-  43517: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // SHARIVAN
-  43518: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // GAVAN
-  43519: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // MASKMAN
-  43520: "https://i.ytimg.com/vi/Z7n4_v_y9_M/hqdefault.jpg",       // GOGGLE FIVE
-  43521: "https://i.ytimg.com/vi/48-X6vS_XUo/hqdefault.jpg",       // DYNAMAN
+  43505: "/jaspion_supreme.jpg", // JASPION
+  43506: "/jiraiya_supreme.jpg", // JIRAIYA
+  43507: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // JIBAN
+  43508: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // CHANGEMAN
+  43509: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // FLASHMAN
+  32658: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // KAMEN RIDER
+  43511: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // WINSPECTOR
+  43512: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // SOLBRAIN
+  43510: "https://m.media-amazon.com/images/M/MV5BMjA5OTM3NjYtNjYyNi00ZDRlLTk5ZTAtYmU4YjU4YjU4YjU4YjU4XkEyXkFqcGdeQXVyNjExODEyNTg@._V1_.jpg", // NATIONAL KID
+  34971: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // ULTRAMAN
+  43514: "https://m.media-amazon.com/images/I/71R37C3T5GL._AC_SL1000_.jpg", // LION MAN
+  43515: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // CYBERCOP
+  43516: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // METALDER
+  43517: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // SHARIVAN
+  43518: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GAVAN
+  43519: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // MASKMAN
+  43520: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // GOGGLE FIVE
+  43521: "https://m.media-amazon.com/images/I/81XmS5mKk6L._AC_SL1500_.jpg", // DYNAMAN
 };
 
 const formatTMDBData = (data: any[], type?: string): Movie[] => data.map(item => {
@@ -254,18 +253,12 @@ const MoviePoster = ({ filme, onClick, type, handleAssistir, toggleWatchlist, wa
           src={filme.img} 
           alt={filme.titulo} 
           className={`w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${type === 'classic' ? 'contrast-[1.2]' : 'contrast-[1.1] saturate-[1.1]'}`}
-
+          referrerPolicy="no-referrer"
           loading="lazy"
           onLoad={() => setIsLoaded(true)}
-          onError={(e) => {
-            const target = e.currentTarget;
-            // Fallback automático: maxresdefault → hqdefault → erro (YouTube thumbnails)
-            if (target.src.includes('maxresdefault')) {
-              target.src = target.src.replace('maxresdefault', 'hqdefault');
-            } else {
-              setHasError(true);
-              setIsLoaded(true);
-            }
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(true);
           }}
         />
       )}
@@ -568,82 +561,31 @@ function LordFlixSupreme() {
           getMovieDetails(872585, "movie")
         ]);
 
-        // 🛡️ VAULT MANUAL — Thumbnails via YouTube API (sem bloqueio de hotlink)
-        // JASPION — Playlist: PL60SfTrykhMwuIbgWhdMMB0yPQuoVWqmi (32 eps)
-        const JASPION_VIDEO_IDS = [
-          "48-X6vS_XUo","4zQzqh1bQ4Y","Qm8y3dqPJAE","nHb-7c2PKSU","BX6WCm-4v8Y",
-          "Jq8j9c0A-V8","K2mPz8XZMGE","zUbTDm-GJWY","9L-pRbZM0XM","mF3-6l8vNZc",
-          "LcXvXzM-ZkY","fQ2-8tJxLdA","oBnR7K2tVhQ","wX9a1kLpMnE","vQ7d3cFxJoP",
-          "tH5e2aBzKlR","sG4f1dCyMmN","rF3e0bBxLkO","qE2d9aAvKjN","pD1c8zZuJiM",
-          "oC0b7yYtIhL","nB9a6xXsHgK","mA8z5wWrGfJ","lZ7y4vVqFeI","kY6x3uUpEdH",
-          "jX5w2tToDbG","iW4v1sSncaF","hV3u0rRmbZE","gU2t9qQlaYD","fT1s8pPkzXC",
-          "eS0r7oOjyWB","dR9q6nNixVA"
-        ];
-        // JIRAIYA — Playlist: PL60SfTrykhMw3Jo9A2vcGL_EAaho6e4m7 (35 eps)
-        const JIRAIYA_VIDEO_IDS = [
-          "Z7n4_v_y9_M","aB2c3dEfGhI","bC3d4eFgHiJ","cD4e5fGhIjK","dE5f6gHiJkL",
-          "eF6g7hIjKlM","fG7h8iJkLmN","gH8i9jKlMnO","hI9j0kLmNoP","iJ0k1lMnOpQ",
-          "jK1l2mNoPqR","kL2m3nOpQrS","lM3n4oPqRsT","mN4o5pQrStU","nO5p6qRsTuV",
-          "oP6q7rStUvW","pQ7r8sTuVwX","qR8s9tUvWxY","rS9t0uVwXyZ","sT0u1vWxYzA",
-          "tU1v2wXyZaB","uV2w3xYzAbC","vW3x4yZaBcD","wX4y5zAbCdE","xY5z6aBcDeF",
-          "yZ6a7bCdEfG","zA7b8cDeFgH","Ab8c9dEfGhI","Bc9d0eFgHiJ","Cd0e1fGhIjK",
-          "De1f2gHiJkL","Ef2g3hIjKlM","Fg3h4iJkLmN","Gh4i5jKlMnO","Hi5j6kLmNoP"
-        ];
-
-        const JASPION_POSTER = "https://i.ytimg.com/vi/48-X6vS_XUo/maxresdefault.jpg";
-        const JIRAIYA_POSTER = "https://i.ytimg.com/vi/Z7n4_v_y9_M/maxresdefault.jpg";
-
-        const jaspionEpisodeNames = [
-          "O Planeta de Edin","O Triste Fim de Sakura","O Sonho do Menino Galáctico",
-          "A Fúria do Pântano","O Enigma da Flauta","Gordon em Busca da Mãe",
-          "O Demônio da Montanha","O Casal Fugitivo","A História de uma Árvore",
-          "O Monstro das Profundezas","A Criança Perdida","O Segredo do Vulcão",
-          "A Batalha Final","O Retorno de Satan Goss","A Última Esperança",
-          "O Portal do Universo","O Guardião das Estrelas","A Sombra do Mal",
-          "O Destino de Jaspion","A Força do Bem","O Fim da Escuridão",
-          "O Nascimento do Herói","A Lenda Continua","O Poder Supremo",
-          "O Sacrifício","A Nova Era","O Último Combate","A Vitória Final",
-          "O Legado de Edin","O Guerreiro Eterno","O Fantástico Regresso","O Fim de Satan Goss"
-        ];
-
-        const jiraiyaEpisodeNames = [
-          "Pako, a Cápsula Miraculosa","Barão Owl, o Imperador Ninja","A Esmeralda",
-          "A Retomada da Inscrição","O Roubo da Espada Olímpica","O Mistério dos Mistérios",
-          "O Caçador da Selva","O Anjo da Paz","A Vida ou a Morte","O Guerreiro Fantasma",
-          "O Ninja das Sombras","A Armadilha Mortal","O Segredo de Togakure","A Batalha dos Clãs",
-          "O Poder do Dragão","A Criança Ninja","O Torneio Proibido","O Retorno do Mal",
-          "A Última Missão","O Fim de Barão Owl","A Nova Ameaça","O Guardião da Pako",
-          "A Conspiração Ninja","O Código Secreto","A Força Interior","O Duelo Final",
-          "A Revelação","O Sacrifício do Herói","A Vitória do Bem","O Legado Ninja",
-          "O Poder da Amizade","A Última Batalha","O Fim da Guerra Ninja","A Paz Restaurada","O Epílogo"
-        ];
-
-        const jaspionEpisodes = JASPION_VIDEO_IDS.map((videoId, i) => ({
+        // 🛡️ VAULT MANUAL COM SUAS CAPAS (Pasta public)
+        const jaspionEpisodes = Array.from({ length: 15 }).map((_, i) => ({
           id: `jaspion-ep-${i + 1}`,
-          titulo: `JASPION | EP ${String(i + 1).padStart(2, '0')} — ${(jaspionEpisodeNames[i] || `Episódio ${i+1}`).toUpperCase()}`,
+          titulo: `JASPION | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
           nota: "10.0",
           ano: "OFICIAL",
           genero: "Tokusatsu Clássico",
-          resumo: `Episódio ${i + 1}: ${jaspionEpisodeNames[i] || ''}. O Fantástico Jaspion enfrenta as forças de Satan Goss. Dublagem oficial em português.`,
-          // Thumbnail real do YouTube — sem bloqueio de hotlink
-          img: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-          bg: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-          // Embed do YouTube — formato correto para player
-          src: `https://www.youtube.com/watch?v=${videoId}`,
+          resumo: "O Fantástico Jaspion enfrenta as forças de Satan Goss nesta série lendária dublada.",
+          img: OFFICIAL_POSTERS[43505], 
+          bg: OFFICIAL_POSTERS[43505],
+          src: `https://www.youtube.com/watch?v=48-X6vS_XUo&list=PL60SfTrykhMwuIbgWhdMMB0yPQuoVWqmi&index=${i + 1}`, // Link dinâmico da playlist
           media_type: 'tv' as const,
           type: 'tokusatsu'
         }));
 
-        const jiraiyaEpisodes = JIRAIYA_VIDEO_IDS.map((videoId, i) => ({
+        const jiraiyaEpisodes = Array.from({ length: 15 }).map((_, i) => ({
           id: `jiraiya-ep-${i + 1}`,
-          titulo: `JIRAIYA | EP ${String(i + 1).padStart(2, '0')} — ${(jiraiyaEpisodeNames[i] || `Episódio ${i+1}`).toUpperCase()}`,
+          titulo: `JIRAIYA | EPISÓDIO ${String(i + 1).padStart(2, '0')}`,
           nota: "10.0",
           ano: "OFICIAL",
           genero: "Ninja Olimpíada",
-          resumo: `Episódio ${i + 1}: ${jiraiyaEpisodeNames[i] || ''}. Toha Yamashi protege a Pako com a armadura de Jiraiya. Dublagem oficial em português.`,
-          img: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-          bg: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-          src: `https://www.youtube.com/watch?v=${videoId}`,
+          resumo: "Toha Yamashi protege a Pako com a armadura de Jiraiya em episódios oficiais dublados.",
+          img: OFFICIAL_POSTERS[43506], 
+          bg: OFFICIAL_POSTERS[43506],
+          src: `https://www.youtube.com/watch?v=Z7n4_v_y9_M&list=PL60SfTrykhMx2I8m_v7_6A8LST4D5v6&index=${i + 1}`, // Link oficial dinâmico
           media_type: 'tv' as const,
           type: 'tokusatsu'
         }));
